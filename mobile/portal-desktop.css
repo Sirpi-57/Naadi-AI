@@ -1,0 +1,1460 @@
+/* ════════════════════════════════════════════════════════════════
+   NAADI AI — PORTAL DESKTOP ADAPTATION LAYER (portal-desktop.css)
+   ─────────────────────────────────────────────────────────────────
+   Loaded AFTER styles-mobile.css + portal.css + teacher.css. Every
+   rule lives inside @media (min-width: 1024px), so on phones and in
+   the Capacitor build this file is inert. The mobile sheets remain
+   the single source of truth for tokens and components — this layer
+   ONLY re-arranges layout for a pointer + wide-viewport context and
+   adds hover affordances. Same contract as styles-desktop.css on
+   the student app.
+
+   What it does, per area:
+     1. SHELL     — the bottom tab bar (.m-tabbar) becomes the fixed
+                    navy left sidebar; the top bar and main column
+                    shift right of it. Badges move to the row end.
+                    Zero JS layout changes: goTab() keeps toggling
+                    the same .active / .hidden classes.
+     2. HOME      — the teacher's swipe deck becomes a 3-up card
+                    grid (dots hidden); pending approvals + class
+                    tiles shelve into a two-column cockpit. The
+                    PARENT deck deliberately KEEPS its swipe track:
+                    swiping is how a parent selects a child, so
+                    converting it would break selection. Teacher
+                    rules are scoped under body.is-teacher.
+     3. CLASS     — the analytics column becomes a 2-col grid; the
+                    KPI header spans; charts get desktop heights.
+     4. STUDENTS  — search + filter chips fuse into one toolbar
+                    row; roster rows get hover; 880px column.
+     5. CONCEPTS  — the heatmap gets a taller viewport, a wider
+                    sticky name column and cell hover; the analysis
+                    sections below it pair into two columns.
+     6. SHEETS    — the drill-down/review sheet centres its content
+                    on a 760px reading column with a sticky
+                    Prev/Next nav; the class switcher becomes a
+                    centred dialog instead of a bottom sheet.
+     7. PROFILE   — teacher profile shelves into two columns.
+     8. PARENT    — PASS 2 (appended below): the parent portal's
+                    real desktop treatment — deck grid with
+                    click-to-select, two-column tab bodies.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* ── 0. Desktop tokens ──────────────────────────────────────── */
+    :root {
+        --dsk-sidebar-w: 248px;
+        /* wide analytics screens (Home, Class, Concepts) */
+        --dsk-content: 1120px;
+        /* browsing surfaces: roster, profile, parent stopgap */
+        --dsk-browse: 880px;
+        /* reading surfaces: drill-down / review sheets */
+        --dsk-read: 760px;
+    }
+
+    /* Desktop browsers report env(safe-area-inset-*) = 0, so every
+       calc(... + var(--safe-*)) in the mobile sheets collapses
+       cleanly. Nothing to override. */
+
+    /* ── 0b. Pointer niceties ───────────────────────────────────── */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--s300);
+        border-radius: 8px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--s400);
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
+
+    ::selection {
+        background: var(--g100);
+        color: var(--s900);
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+        outline: 2px solid var(--g400);
+        outline-offset: 2px;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       1. SHELL — tab bar → sidebar
+       ════════════════════════════════════════════════════════════ */
+
+    .m-tabbar {
+        top: 0;
+        bottom: 0;
+        right: auto;
+        left: 0;
+        width: var(--dsk-sidebar-w);
+        height: auto;
+        flex-direction: column;
+        align-items: stretch;
+        background: var(--s900);
+        border-top: none;
+        border-right: 1px solid rgba(255, 255, 255, .06);
+        padding: 0 0 16px;
+        box-shadow: none;
+    }
+
+    /* Brand block at the top of the sidebar. The markup is built by
+       renderTabbar() with .dsk-only, which styles-mobile.css hides —
+       it only ever renders at this width. */
+    .pt-side-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 20px 20px 22px;
+        border-bottom: 1px solid rgba(255, 255, 255, .08);
+        margin-bottom: 14px;
+    }
+
+    .pt-side-brand .pt-logo {
+        border: 1px solid var(--s700);
+    }
+
+    .pt-side-brand b {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 1.05rem;
+        letter-spacing: .2px;
+        color: #fff;
+    }
+
+    .pt-side-brand b span {
+        color: var(--g400);
+    }
+
+    /* Nav items: icon-over-label columns → icon-beside-label rows. */
+    .mnav-item {
+        flex: 0 0 auto;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 12px;
+        margin: 2px 12px;
+        padding: 11px 14px;
+        padding-top: 11px;
+        /* cancel the mobile 6px icon offset */
+        border-radius: 10px;
+        font-size: .9rem;
+        font-weight: 500;
+        color: var(--s400);
+        transition: background .2s, color .2s;
+    }
+
+    .mnav-item i {
+        width: 20px;
+        text-align: center;
+        font-size: .95rem;
+    }
+
+    .mnav-item span {
+        font-size: .9rem;
+    }
+
+    .mnav-item:hover {
+        background: rgba(255, 255, 255, .06);
+        color: #fff;
+    }
+
+    .mnav-item:hover i {
+        color: #fff;
+    }
+
+    .mnav-item.active {
+        background: rgba(93, 146, 207, .16);
+        color: var(--g400);
+    }
+
+    .mnav-item.active i {
+        color: var(--g400);
+    }
+
+    .mnav-item:focus-visible {
+        outline: 2px solid var(--g400);
+        outline-offset: -2px;
+    }
+
+    /* Badge: tuned for the mobile icon column; sit it at the row end. */
+    .mnav-badge {
+        position: static;
+        transform: none;
+        margin-left: auto;
+    }
+
+    /* ── Top bar: spans to the right of the sidebar ── */
+    .pt-topbar {
+        margin-left: var(--dsk-sidebar-w);
+        padding: 14px 28px;
+        gap: 14px;
+    }
+
+    .pt-icon-btn,
+    .pt-chip-btn {
+        transition: background .16s, color .16s, border-color .16s;
+    }
+
+    .pt-icon-btn:hover {
+        background: var(--s100);
+        color: var(--s800);
+    }
+
+    .pt-chip-btn:hover {
+        background: var(--s100);
+        border-color: var(--s300);
+    }
+
+    /* ── Main column ── */
+    .portal-body {
+        /* no bottom bar to clear any more */
+        padding-bottom: 0;
+    }
+
+    .pt-main {
+        margin: 0 0 0 var(--dsk-sidebar-w);
+        max-width: none;
+    }
+
+    /* Every screen becomes a centred column inside the content area.
+       Default 880px is the parent stopgap AND the right width for
+       roster + profile; the teacher analytics screens widen below. */
+    .pt-screen {
+        max-width: var(--dsk-browse);
+        margin: 0 auto;
+        padding: 20px 28px 56px;
+    }
+
+    body.is-teacher #screen-home,
+    body.is-teacher #screen-class,
+    body.is-teacher #screen-concepts,
+    body.is-teacher #screen-students,
+    /* Doubts is a two-pane chat: a 320px thread list plus the
+       conversation. At the 880px browse width the conversation gets
+       ~530px and sits in a centred column with a third of a laptop
+       screen empty beside it — while the messages themselves are
+       capped at 62%, so the text ends up around 330px wide. It was
+       simply never added to this list. */
+    body.is-teacher #screen-doubts {
+        max-width: var(--dsk-content);
+    }
+
+    /* The chat should use the height it is given. 190px was a safe
+       over-estimate of the top bar plus padding; on a 768px-tall laptop
+       viewport that leaves a visible band of empty page under the pane. */
+    body.is-teacher #screen-doubts {
+        padding-bottom: 24px;
+    }
+
+    body.is-teacher #screen-doubts .dbt {
+        height: calc(100vh - 150px);
+    }
+
+    /* Sections carried their own 14px side margins on phones; the
+       screen's 28px padding owns the gutter now. */
+    .pt-sec {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .pt-label {
+        margin-left: 2px;
+        margin-right: 2px;
+    }
+
+    /* Chart canvases can afford desk heights (Chart.js is responsive,
+       it just refills the box). */
+    .pt-chart {
+        height: 240px;
+    }
+
+    .pt-chart.tall {
+        height: 280px;
+    }
+
+    /* Tappable tiles get pointer feedback. */
+    .pt-tile {
+        transition: border-color .16s, background .16s, transform .12s;
+    }
+
+    button.pt-tile {
+        cursor: pointer;
+        font-family: var(--font-body);
+    }
+
+    button.pt-tile:hover {
+        border-color: var(--g200);
+        background: #fff;
+        transform: translateY(-1px);
+    }
+
+    .pt-btn {
+        transition: filter .16s, transform .12s;
+    }
+
+    .pt-btn:hover:not(:disabled) {
+        filter: brightness(1.05);
+    }
+
+    .tc-mini-btn {
+        transition: filter .16s, background .16s, border-color .16s;
+    }
+
+    .tc-mini-btn.ok:hover {
+        filter: brightness(1.06);
+    }
+
+    .tc-mini-btn.no:hover {
+        background: var(--red-bg);
+        border-color: var(--red);
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       2. HOME — teacher deck: swipe track → 3-up grid
+       ════════════════════════════════════════════════════════════ */
+
+    body.is-teacher .pt-deck {
+        padding: 4px 0 0;
+    }
+
+    body.is-teacher .pt-deck-track {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        overflow: visible;
+        scroll-snap-type: none;
+        padding: 0;
+    }
+
+    body.is-teacher .pt-card {
+        flex: none;
+        width: auto;
+        scroll-snap-align: none;
+    }
+
+    /* Student cards + view-all are clickable → lift on hover. The
+       class card isn't, so it stays still. */
+    body.is-teacher .pt-card[onclick] {
+        cursor: pointer;
+        transition: transform .14s, box-shadow .14s, border-color .14s;
+    }
+
+    body.is-teacher .pt-card[onclick]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(15, 23, 42, .16);
+    }
+
+    body.is-teacher .pt-card.view-all:hover {
+        border-color: var(--s400);
+        color: var(--s800);
+    }
+
+    /* Dots exist to mirror swipe position; there is no swipe. */
+    body.is-teacher .pt-dots {
+        display: none;
+    }
+
+    /* Body: two-column cockpit. auto-fit adapts to however many
+       sections the day produced (pending is conditional). Pending
+       approvals always span — approvals deserve the full stage. */
+    body.is-teacher #pt-home-body {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+        gap: 20px;
+        align-items: start;
+        margin-top: 20px;
+    }
+
+    body.is-teacher #pt-home-body>.pt-sec {
+        margin: 0;
+    }
+
+    body.is-teacher #pt-home-body>.tc-pending {
+        grid-column: 1 / -1;
+    }
+
+    body.is-teacher #pt-home-body>.pt-skel {
+        grid-column: 1 / -1;
+        padding: 0;
+    }
+
+    .tc-pend-row {
+        transition: background .14s;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       3. CLASS — analytics column → 2-col grid
+       ════════════════════════════════════════════════════════════ */
+
+    body.is-teacher #pt-class-body {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        align-items: start;
+        padding-top: 8px;
+    }
+
+    body.is-teacher #pt-class-body>.pt-sec {
+        margin: 0;
+        min-width: 0;
+    }
+
+    /* KPI header spans; the charts pair up beneath it. */
+    body.is-teacher #pt-class-body>.pt-sec:first-child {
+        grid-column: 1 / -1;
+    }
+
+    body.is-teacher #pt-class-body>.pt-skel {
+        grid-column: 1 / -1;
+        padding: 0;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       4. STUDENTS — toolbar row + roster hover
+       ════════════════════════════════════════════════════════════ */
+
+    .tc-toolbar {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 8px 0 0;
+    }
+
+    .tc-search {
+        width: 280px;
+        flex: 0 0 280px;
+        min-height: 40px;
+        transition: border-color .16s;
+    }
+
+    .tc-search:hover:not(:focus) {
+        border-color: var(--s300);
+    }
+
+    .tc-chips {
+        flex: 1;
+        min-width: 0;
+        flex-wrap: wrap;
+        overflow: visible;
+        padding: 3px 0 2px;
+    }
+
+    .tc-filter {
+        transition: background .16s, border-color .16s, color .16s;
+    }
+
+    .tc-filter:hover:not(.on) {
+        border-color: var(--s300);
+        background: var(--s50);
+    }
+
+    .tc-srow {
+        transition: background .14s;
+    }
+
+    .tc-srow:hover {
+        background: var(--s50);
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       5. CONCEPTS — the heatmap gets the room it deserves
+       ════════════════════════════════════════════════════════════ */
+
+    body.is-teacher #pt-concepts-body {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        align-items: start;
+        padding-top: 8px;
+    }
+
+    body.is-teacher #pt-concepts-body>.pt-sec {
+        margin: 0;
+        min-width: 0;
+    }
+
+    /* Heatmap spans the full stage; analysis pairs up beneath. */
+    body.is-teacher #pt-concepts-body>.pt-sec:first-child {
+        grid-column: 1 / -1;
+    }
+
+    body.is-teacher #pt-concepts-body>.pt-skel {
+        grid-column: 1 / -1;
+        padding: 0;
+    }
+
+    .tc-heat-wrap {
+        max-height: 72vh;
+    }
+
+    /* Names were squeezed to 104px for a phone; give them air. */
+    .tc-heat-cell {
+        transition: filter .1s;
+    }
+
+    .tc-heat-cell:not(.empty):hover {
+        filter: brightness(1.12);
+        outline: 2px solid var(--s900);
+        outline-offset: -2px;
+    }
+
+    .tc-reteach {
+        transition: background .14s;
+    }
+
+    .tc-reteach:hover {
+        background: var(--s50);
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       6. SHEETS — drill-down reading column + switcher dialog
+       ════════════════════════════════════════════════════════════ */
+
+    .pt-sheet-bar {
+        padding: 12px 20px;
+    }
+
+    /* Centre everything the sheet renders (drill sections, review
+       questions, segmented control) on a reading column without
+       touching any child's markup. */
+    .pt-sheet-body {
+        padding-left: max(20px, calc(50% - 380px));
+        padding-right: max(20px, calc(50% - 380px));
+        padding-bottom: 56px;
+    }
+
+    .pt-sheet-body .pt-sec,
+    .pt-sheet-body .pt-q {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .pt-seg {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* Prev/Next stays in reach while reading a long drill-down. */
+    .tc-drill-nav {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        margin: 0 0 4px;
+        border: 1px solid var(--s200);
+        border-top: 0;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .tc-drill-nav button {
+        transition: background .16s, border-color .16s, color .16s;
+    }
+
+    .tc-drill-nav button:hover:not(:disabled) {
+        background: var(--s50);
+        border-color: var(--s300);
+        color: var(--s800);
+    }
+
+    .tc-reveal {
+        transition: background .16s, border-color .16s;
+    }
+
+    .tc-reveal:hover {
+        background: var(--g50);
+        border-color: var(--g200);
+    }
+
+    /* Class switcher: bottom sheet → centred dialog. */
+    .tc-switch-backdrop {
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+    }
+
+    .tc-switch-sheet {
+        max-width: 440px;
+        border-radius: 20px;
+        padding: 20px 22px 22px;
+        box-shadow: 0 24px 64px rgba(15, 23, 42, .35);
+        animation: pt-dsk-pop .18s ease-out;
+    }
+
+    .tc-switch-row {
+        transition: background .14s;
+    }
+
+    .tc-switch-row:hover {
+        background: var(--s50);
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       7. PROFILE — teacher settings shelve into two columns
+       ════════════════════════════════════════════════════════════ */
+
+    body.is-teacher #pt-profile-body {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        align-items: start;
+        padding-top: 8px;
+    }
+
+    body.is-teacher #pt-profile-body>.pt-sec {
+        margin: 0;
+        min-width: 0;
+    }
+
+    /* Identity card spans; classes + settings pair beneath. */
+    body.is-teacher #pt-profile-body>.pt-sec:first-child {
+        grid-column: 1 / -1;
+    }
+
+    body.is-teacher #pt-profile-body>.pt-skel {
+        grid-column: 1 / -1;
+        padding: 0;
+    }
+
+}
+
+/* Keyframes are valid inside media queries, but hoisting them out
+   keeps them available if the dialog ever renders at other widths
+   with this class. Harmless on mobile: nothing references it there. */
+@keyframes pt-dsk-pop {
+    from {
+        transform: translateY(10px) scale(.98);
+        opacity: 0;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DESKTOP PASS 2 — PARENT PORTAL
+   Same contract as pass 1: inert below 1024px, layout + hover only.
+   Replaces the 880px stopgap for the parent's four data tabs.
+   Pairs with two guarded additions in portal.js: clickChild(i)
+   (matchMedia-gated, a no-op on phones) and an .on class the switch
+   handler toggles on deck cards (.on has no styles on mobile).
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* ── 8. Parent screens widen to the analytics stage ─────────── */
+    body:not(.is-teacher) #screen-home,
+    body:not(.is-teacher) #screen-learning,
+    body:not(.is-teacher) #screen-tests,
+    body:not(.is-teacher) #screen-insights {
+        max-width: var(--dsk-content);
+    }
+
+    /* Profile keeps the 880px browse column — it's settings, not
+       analytics — and shelves into two columns below. */
+
+
+    /* ── 9. Parent deck: swipe track → click-to-select grid ─────── */
+
+    /* Swiping selected the child on a phone. There is no swipe on a
+       desk, so the track becomes a grid and clickChild() (gated to
+       this width in portal.js) takes over selection. The scroll
+       listener never fires again — a grid doesn't scroll. */
+    body:not(.is-teacher) .pt-deck {
+        padding: 4px 0 0;
+    }
+
+    body:not(.is-teacher) .pt-deck-track {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+        overflow: visible;
+        scroll-snap-type: none;
+        padding: 0;
+    }
+
+    body:not(.is-teacher) .pt-card {
+        flex: none;
+        width: auto;
+        scroll-snap-align: none;
+    }
+
+    /* Position dots mirror swipe position; there is no swipe. */
+    body:not(.is-teacher) .pt-dots {
+        display: none;
+    }
+
+    /* Selection affordances — only when there is a choice to make.
+       A single child's card stays a quiet summary, not a button. */
+    body:not(.is-teacher) .pt-deck-track:not(.single) .pt-card {
+        cursor: pointer;
+        transition: transform .14s, box-shadow .14s, border-color .14s;
+    }
+
+    body:not(.is-teacher) .pt-deck-track:not(.single) .pt-card:hover:not(.on) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(15, 23, 42, .16);
+    }
+
+    /* The selected child: a calm halo, no layout shift. */
+    body:not(.is-teacher) .pt-deck-track:not(.single) .pt-card.on {
+        border-color: var(--g400);
+        box-shadow: 0 0 0 3px var(--g100);
+    }
+
+    body:not(.is-teacher) .pt-deck-track:not(.single) .pt-card.locked.on {
+        border-color: var(--s400);
+        box-shadow: 0 0 0 3px var(--s200);
+    }
+
+
+    /* ── 10. Parent tab bodies: single column → two-column grid ── */
+
+    body:not(.is-teacher) #pt-home-body,
+    body:not(.is-teacher) #pt-learning-body,
+    body:not(.is-teacher) #pt-tests-body,
+    body:not(.is-teacher) #pt-insights-body,
+    body:not(.is-teacher) #pt-profile-body {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        align-items: start;
+        padding-top: 8px;
+    }
+
+    /* Home body sits under the deck; give it a little more air. */
+    body:not(.is-teacher) #pt-home-body {
+        padding-top: 20px;
+    }
+
+    body:not(.is-teacher) #pt-home-body>.pt-sec,
+    body:not(.is-teacher) #pt-learning-body>.pt-sec,
+    body:not(.is-teacher) #pt-tests-body>.pt-sec,
+    body:not(.is-teacher) #pt-insights-body>.pt-sec,
+    body:not(.is-teacher) #pt-profile-body>.pt-sec {
+        margin: 0;
+        min-width: 0;
+    }
+
+    /* Loading skeletons, error/empty states, and section labels
+       (Insights' "NEET readiness" divider) span the full stage. */
+    body:not(.is-teacher) #pt-home-body>.pt-skel,
+    body:not(.is-teacher) #pt-learning-body>.pt-skel,
+    body:not(.is-teacher) #pt-tests-body>.pt-skel,
+    body:not(.is-teacher) #pt-insights-body>.pt-skel,
+    body:not(.is-teacher) #pt-profile-body>.pt-skel,
+    body:not(.is-teacher) #pt-home-body>.pt-empty,
+    body:not(.is-teacher) #pt-learning-body>.pt-empty,
+    body:not(.is-teacher) #pt-tests-body>.pt-empty,
+    body:not(.is-teacher) #pt-insights-body>.pt-empty,
+    body:not(.is-teacher) #pt-profile-body>.pt-empty,
+    body:not(.is-teacher) #pt-insights-body>.pt-label {
+        grid-column: 1 / -1;
+    }
+
+    body:not(.is-teacher) .pt-skel {
+        padding: 0;
+    }
+
+    body:not(.is-teacher) #pt-insights-body>.pt-label {
+        margin: 8px 2px 0;
+    }
+
+    /* "Needs attention" deserves the full stage when it appears.
+       (:has is universal by now; without it this is simply a normal
+       cell — nothing breaks.) */
+    body:not(.is-teacher) #pt-home-body>.pt-sec:has(.pt-alert) {
+        grid-column: 1 / -1;
+    }
+
+    /* Parent identity card spans; Children / Teacher / Notifications
+       / About pair beneath it — the teacher profile's grammar. */
+    body:not(.is-teacher) #pt-profile-body>.pt-sec:first-child {
+        grid-column: 1 / -1;
+    }
+
+
+    /* ── 11. Parent pointer feedback ────────────────────────────── */
+
+    /* Clickable list rows (test history opens the review sheet). */
+    button.pt-row,
+    .pt-row[onclick] {
+        transition: background .14s;
+    }
+
+    button.pt-row:hover,
+    .pt-row[onclick]:hover {
+        background: var(--s50);
+    }
+
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DESKTOP PASS 3 — TEACHER REBUILD
+   ─────────────────────────────────────────────────────────────────
+   Two tiers, because the portal previously had exactly one breakpoint
+   at 1024px and nothing between. An iPad in portrait is 768px wide, so
+   a teacher on the most common school tablet was being served a phone
+   layout stretched across the full width. That gap is closed here.
+
+     TIER A  768–1023px   tablet: wider gutters, two-up sections,
+                          horizontal deck kept (it is still touch)
+     TIER B  ≥1024px      pointer: everything below, on top of PASS 1
+
+   Desktop is NOT a scaled phone. The teacher screens get layouts that
+   only make sense with a pointer and a wide viewport:
+     · Class → Tests becomes a real table, not a list of cards
+     · the student sheet becomes a two-column workspace with a sticky
+       identity rail, so a teacher can read tests while the contact
+       and alert stay on screen
+     · the notes timeline sits beside the composer instead of under it
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── TIER A · TABLET (768–1023px) ───────────────────────────────── */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+
+    .pt-main {
+        max-width: 940px;
+        margin: 0 auto;
+    }
+
+    .pt-screen {
+        padding: 16px 24px calc(28px + var(--tabbar-h));
+    }
+
+    /* Deck stays swipeable — this is still a touch device — but two
+       cards fit, so the cards stop being phone-width on a tablet. */
+    body.is-teacher .pt-deck-track>.pt-card {
+        flex: 0 0 46%;
+        width: 46%;
+    }
+
+    /* Sections that are lists pair up; charts stay full width so the
+       x-axis labels keep their room. */
+    body.is-teacher #pt-home-body,
+    body.is-teacher #pt-profile-body {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        align-items: start;
+    }
+
+    body.is-teacher #pt-home-body>.pt-sec,
+    body.is-teacher #pt-profile-body>.pt-sec {
+        margin: 0;
+        min-width: 0;
+    }
+
+    body.is-teacher #pt-home-body>.tc-pending,
+    body.is-teacher #pt-profile-body>.pt-sec:first-child {
+        grid-column: 1 / -1;
+    }
+
+    /* Two-up strengths/weaknesses genuinely fits here. */
+    .tc-two-up {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .tc-two-up>div+div {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+    }
+
+    .tc-heat-controls {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .pt-chart {
+        height: 220px;
+    }
+
+}
+
+
+/* ── TIER B · POINTER (≥1024px) ─────────────────────────────────── */
+@media (min-width: 1024px) {
+
+    /* ════════════════════════════════════════════════════════════
+       Segmented controls
+       ════════════════════════════════════════════════════════════ */
+
+    .tc-seg {
+        overflow: visible;
+        width: fit-content;
+        max-width: 100%;
+    }
+
+    .tc-seg-btn {
+        flex: 0 0 auto;
+        min-height: 32px;
+        transition: background .16s, color .16s;
+    }
+
+    .tc-seg-btn:hover:not(.on) {
+        color: var(--s800);
+        background: rgba(255, 255, 255, .6);
+    }
+
+    .tc-drill-seg {
+        padding: 0;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       CLASS — overview cockpit vs. tests table
+       The container is the same element, so the layout is keyed on
+       the data-seg hook teacher.js sets when it paints.
+       ════════════════════════════════════════════════════════════ */
+
+    body.is-teacher #pt-class-body[data-seg="overview"] {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        align-items: start;
+        padding-top: 8px;
+    }
+
+    body.is-teacher #pt-class-body[data-seg="overview"]>.pt-sec {
+        margin: 0;
+        min-width: 0;
+    }
+
+    /* Head spans. Coverage is long, so it spans too rather than
+       forcing a 2000px column beside a 300px chart. */
+    body.is-teacher #pt-class-body[data-seg="overview"]>.tc-class-head,
+    body.is-teacher #pt-class-body[data-seg="overview"]>.pt-skel {
+        grid-column: 1 / -1;
+    }
+
+    /* Tests is a table, not a cockpit: one wide column. */
+    body.is-teacher #pt-class-body[data-seg="tests"] {
+        display: block;
+        max-width: var(--dsk-content);
+        padding-top: 8px;
+    }
+
+    /* Test rows become a grid so the numbers align down the page —
+       a list of cards reads fine on a phone and looks unfinished on
+       a 1440px monitor. */
+    .tc-test-row {
+        display: grid;
+        grid-template-columns: minmax(0, 2.4fr) minmax(120px, 1fr) 90px;
+        align-items: center;
+        gap: 20px;
+        padding: 13px 12px;
+        border-radius: 10px;
+        border-bottom: 1px solid var(--s100);
+        transition: background .14s;
+    }
+
+    .tc-test-row:hover {
+        background: var(--s50);
+    }
+
+    .tc-test-row .tc-spread {
+        margin-top: 0;
+        grid-column: 2;
+        height: 6px;
+    }
+
+    .tc-test-row .tc-test-r {
+        grid-column: 3;
+    }
+
+    .tc-refresh {
+        transition: background .16s, color .16s, border-color .16s;
+    }
+
+    .tc-refresh:hover {
+        background: var(--s50);
+        color: var(--s800);
+        border-color: var(--s300);
+    }
+
+    .tc-never-chip {
+        transition: border-color .14s, background .14s;
+    }
+
+    .tc-never-chip:hover {
+        border-color: var(--g200);
+        background: var(--g50);
+    }
+
+    .tc-subj-n {
+        flex-basis: 110px;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       STUDENTS — sort popover, marker hovers
+       ════════════════════════════════════════════════════════════ */
+
+    /* The sort menu is a bottom sheet on a phone; with a pointer it
+       should be a small centred dialog, not a drawer from the edge. */
+    .tc-menu-backdrop {
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, .35);
+    }
+
+    .tc-menu {
+        width: 320px;
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 24px 64px rgba(15, 23, 42, .3);
+        animation: pt-dsk-pop .16s ease-out;
+    }
+
+    .tc-menu-row {
+        min-height: 38px;
+        transition: background .14s;
+    }
+
+    .tc-menu-row:hover:not(.on) {
+        background: var(--s50);
+    }
+
+    .tc-sort {
+        max-width: none;
+        transition: border-color .16s, background .16s;
+    }
+
+    .tc-sort:hover {
+        border-color: var(--s300);
+        background: var(--s50);
+    }
+
+    .tc-search-wrap {
+        flex: 0 0 300px;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       HOME — follow-ups and snooze
+       ════════════════════════════════════════════════════════════ */
+
+    body.is-teacher #pt-home-body>.tc-followups {
+        grid-column: 1 / -1;
+    }
+
+    .tc-fu-row,
+    .tc-fu-done,
+    .tc-snooze {
+        transition: background .14s, color .14s, border-color .14s;
+    }
+
+    .tc-fu-main:hover {
+        background: var(--s50);
+    }
+
+    .tc-fu-done:hover {
+        background: var(--green-600);
+        border-color: var(--green-600);
+        color: #fff;
+    }
+
+    /* Snooze is a hover-reveal on a pointer. It stays permanently
+       visible on touch, where there is no hover to reveal it with. */
+    .tc-snooze {
+        opacity: 0;
+    }
+
+    body.is-teacher .pt-card:hover .tc-snooze,
+    .tc-snooze:focus-visible {
+        opacity: 1;
+    }
+
+    .tc-snooze:hover {
+        background: var(--s100);
+        color: var(--s700);
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       STUDENT SHEET — two-column workspace
+
+       PASS 1 centred the sheet on a 760px reading column. That is
+       right for a review, and wrong for the student workspace: a
+       teacher wants the identity, alert and contact to stay put
+       while they read down the tests. So the overview and notes
+       segments become a two-column layout with a sticky left rail,
+       and the review segment keeps the reading column.
+       ════════════════════════════════════════════════════════════ */
+
+    .pt-sheet-body[data-seg="overview"],
+    .pt-sheet-body[data-seg="tests"],
+    .pt-sheet-body[data-seg="notes"],
+    .pt-sheet-body[data-seg="testdetail"] {
+        padding-left: max(24px, calc(50% - 560px));
+        padding-right: max(24px, calc(50% - 560px));
+    }
+
+    .pt-sheet-body[data-seg="overview"] {
+        display: grid;
+        grid-template-columns: 320px minmax(0, 1fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+    /* Nav + segmented control span the top of both columns. */
+    .pt-sheet-body[data-seg="overview"]>.tc-drill-nav,
+    .pt-sheet-body[data-seg="overview"]>.tc-drill-seg {
+        grid-column: 1 / -1;
+    }
+
+    /* Identity card anchors the left rail and stays visible while the
+       right column scrolls. Targeted by class, not :nth-of-type — the
+       nav above it is conditional, and nth-of-type counts elements
+       rather than classes, so index-based selectors would drift. */
+    .pt-sheet-body[data-seg="overview"]>.tc-drill-id {
+        grid-column: 1;
+        position: sticky;
+        top: 70px;
+        margin: 0;
+    }
+
+    .pt-sheet-body[data-seg="overview"]>.pt-sec:not(.tc-drill-id) {
+        grid-column: 2;
+        margin: 0 0 18px;
+    }
+
+    .pt-sheet-body[data-seg="tests"],
+    .pt-sheet-body[data-seg="notes"],
+    .pt-sheet-body[data-seg="testdetail"] {
+        display: block;
+    }
+
+    .pt-sheet-body[data-seg="tests"] .pt-sec,
+    .pt-sheet-body[data-seg="notes"] .pt-sec,
+    .pt-sheet-body[data-seg="testdetail"] .pt-sec {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* Strengths beside weaknesses — the comparison is the point, and
+       stacking them buries it. */
+    .tc-two-up {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .tc-two-up>div+div {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+        border-left: 1px solid var(--s100);
+        padding-left: 24px;
+    }
+
+    .pt-sheet-body[data-seg="overview"] .tc-two-up {
+        grid-template-columns: 1fr;
+    }
+
+    .pt-sheet-body[data-seg="overview"] .tc-two-up>div+div {
+        border-left: 0;
+        padding-left: 0;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid var(--s100);
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       NOTES — composer beside the timeline
+       ════════════════════════════════════════════════════════════ */
+
+    .pt-sheet-body[data-seg="notes"] {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+    .pt-sheet-body[data-seg="notes"]>.tc-drill-nav,
+    .pt-sheet-body[data-seg="notes"]>.tc-drill-seg {
+        grid-column: 1 / -1;
+    }
+
+    .pt-sheet-body[data-seg="notes"]>.tc-note-composer {
+        grid-column: 1;
+        position: sticky;
+        top: 70px;
+        margin: 0;
+    }
+
+    .pt-sheet-body[data-seg="notes"]>.pt-sec:not(.tc-note-composer) {
+        grid-column: 2;
+        margin: 0 0 18px;
+    }
+
+    .tc-note {
+        min-height: 130px;
+    }
+
+    .tc-note-date {
+        transition: border-color .16s;
+    }
+
+    .tc-note-date:hover {
+        border-color: var(--s300);
+    }
+
+    .tc-tl-text {
+        font-size: .82rem;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       CONCEPTS — heatmap controls, strengths, failed questions
+       ════════════════════════════════════════════════════════════ */
+
+    .tc-heat-controls {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .tc-fq {
+        padding: 13px 12px;
+        border-radius: 10px;
+        transition: background .14s;
+    }
+
+    .tc-fq-t {
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+
+    .tc-reteach.static:hover {
+        background: transparent;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       PROFILE — access log
+       ════════════════════════════════════════════════════════════ */
+
+    body.is-teacher #pt-profile-body>#tc-audit-sec {
+        grid-column: 1 / -1;
+    }
+
+    .tc-audit-row {
+        padding: 11px 10px;
+        border-radius: 8px;
+        transition: background .14s;
+    }
+
+    .tc-audit-row:hover {
+        background: var(--s50);
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       Focus visibility on every new interactive surface
+       ════════════════════════════════════════════════════════════ */
+
+    .tc-seg-btn:focus-visible,
+    .tc-kpi:focus-visible,
+    .tc-test-row:focus-visible,
+    .tc-never-chip:focus-visible,
+    .tc-sort:focus-visible,
+    .tc-menu-row:focus-visible,
+    .tc-fu-main:focus-visible,
+    .tc-fu-done:focus-visible,
+    .tc-refresh:focus-visible {
+        outline: 2px solid var(--g400);
+        outline-offset: 2px;
+    }
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   DESKTOP PASS 4 — the three metrics
+   Layout only. Same contract: inert below the breakpoint.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+
+    .tc-hy {
+        width: 200px;
+        min-width: 200px;
+        max-width: 200px;
+    }
+
+    .tc-cov-ch {
+        grid-template-columns: minmax(0, 1fr) 110px 56px 48px;
+    }
+}
+
+
+@media (min-width: 1024px) {
+
+    /* Pulse spans the cockpit — it is the headline, not a card. */
+    body.is-teacher #pt-home-body>.tc-pulse,
+    body.is-teacher #pt-class-body[data-seg="overview"]>.tc-pulse,
+    body.is-teacher #pt-home-body>.tc-regressions,
+    body.is-teacher #pt-home-body>.tc-reteach-now {
+        grid-column: 1 / -1;
+    }
+
+    .tc-pulse {
+        padding: 18px 0;
+    }
+
+    .tc-pulse-v {
+        font-size: 1.7rem;
+    }
+
+    .tc-pulse-k {
+        font-size: .7rem;
+    }
+
+    .tc-pulse-s {
+        font-size: .66rem;
+    }
+
+    .tc-metrics {
+        gap: 14px;
+    }
+
+    .tc-m-v {
+        font-size: 1.7rem;
+    }
+
+    /* Coverage is a wide single column — a tree split across two columns
+       reads as two unrelated trees. */
+    body.is-teacher #pt-class-body[data-seg="coverage"] {
+        display: block;
+        max-width: var(--dsk-content);
+        padding-top: 8px;
+    }
+
+    .tc-cov-ch {
+        grid-template-columns: minmax(0, 1fr) 160px 64px 56px;
+        padding: 7px 8px;
+        border-radius: 8px;
+        transition: background .14s;
+    }
+
+    .tc-cov-ch:hover {
+        background: var(--s50);
+    }
+
+    .tc-cov-head:hover .tc-cov-name {
+        color: var(--g600);
+    }
+
+    /* The grid gets the whole stage and real room for names. */
+    .tc-hy {
+        width: 240px;
+        min-width: 240px;
+        max-width: 240px;
+    }
+
+    .tc-hy-n {
+        font-size: .76rem;
+    }
+
+    .tc-hy.clickable:hover .tc-hy-n {
+        color: var(--g600);
+    }
+
+    .tc-hx {
+        width: 34px;
+        min-width: 34px;
+    }
+
+    .tc-hx:hover span {
+        color: var(--g600);
+    }
+
+    .tc-hc {
+        width: 34px;
+        min-width: 34px;
+        height: 34px;
+        transition: filter .1s;
+    }
+
+    .tc-hc span {
+        line-height: 34px;
+        font-size: .64rem;
+    }
+
+    .tc-hc:not(.empty):hover {
+        filter: brightness(1.12);
+        outline: 2px solid var(--s900);
+        outline-offset: -2px;
+    }
+
+    .tc-heat-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    /* Roster gains real columns with a pointer. */
+    .tc-rhead,
+    .tc-srow.grid {
+        grid-template-columns: 42px minmax(0, 1fr) 90px 80px 80px;
+        gap: 14px;
+    }
+
+    .tc-subj-head,
+    .tc-subj-row.two {
+        grid-template-columns: 120px 1fr 1fr 70px;
+        gap: 16px;
+    }
+
+    .tc-exp-head {
+        padding: 13px 10px;
+        border-radius: 10px;
+        transition: background .14s;
+    }
+
+    .tc-exp-head:hover {
+        background: var(--s50);
+    }
+
+    .tc-paper-stats {
+        grid-template-columns: repeat(3, 1fr);
+        padding: 14px;
+    }
+
+    .tc-dist-row {
+        grid-template-columns: 26px 1fr 36px;
+    }
+
+    .tc-flag,
+    .tc-caret {
+        transition: background .14s, transform .16s;
+    }
+
+    .tc-hx:focus-visible,
+    .tc-cov-head:focus-visible,
+    .tc-exp-head:focus-visible {
+        outline: 2px solid var(--g400);
+        outline-offset: 2px;
+    }
+}

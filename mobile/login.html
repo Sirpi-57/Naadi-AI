@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en" data-bars="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Login - NAADI AI</title>
+
+    <!-- Inline favicon (pulse mark) kills the /favicon.ico 404 in console -->
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%232f6cb3'/%3E%3Cpolyline points='2,13 7,13 9,7 12,17 15,10 17,13 22,13' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles-mobile.css">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <style>
+        /* ══════════════════════════════════════════════════════════════
+           LOGIN v2 — scoped styles. Everything lives under .lg2 so the
+           shared .auth-* rules in styles-mobile.css (used by signup.html
+           and forgot-password.html) are left completely untouched.
+           ══════════════════════════════════════════════════════════════ */
+
+        .lg2 {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            background: #0B1220;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            font-family: var(--font-body);
+        }
+
+        /* ── HERO (full-width photo banner) ───────────────────────────── */
+        .lg2-hero {
+            position: relative;
+            flex-shrink: 0;
+            min-height: 262px;
+            padding-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+            overflow: hidden;
+            /* fallback shown if the photo is missing */
+            background:
+                radial-gradient(120% 90% at 78% 0%, #1b3a63 0%, #0f2547 42%, #0B1220 80%);
+        }
+
+        .lg2-hero-grid {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            opacity: .5;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+            background-size: 28px 28px;
+            animation: lg2Drift 26s linear infinite;
+        }
+
+        @keyframes lg2Drift {
+            to {
+                transform: translate(28px, 28px);
+            }
+        }
+
+        .lg2-pulse {
+            position: absolute;
+            top: 46%;
+            left: 0;
+            width: 100%;
+            z-index: 0;
+            opacity: .5;
+            pointer-events: none;
+        }
+
+        /* Full-bleed doctor photo fills the whole hero band.
+           If the file is missing, onerror hides it and the gradient
+           fallback (grid + pulse) shows through. */
+        .lg2-hero-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 22%;
+            z-index: 0;
+        }
+
+        /* Scrim keeps brand + heading legible over any photo.
+           Extra darkening top-left (behind the logo) and bottom
+           (behind the heading) so text always wins over faces. */
+        .lg2-hero-scrim {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                radial-gradient(120% 80% at 0% 0%, rgba(11, 18, 32, .78) 0%, rgba(11, 18, 32, 0) 42%),
+                linear-gradient(180deg,
+                    rgba(11, 18, 32, .40) 0%,
+                    rgba(11, 18, 32, .02) 26%,
+                    rgba(11, 18, 32, .12) 44%,
+                    rgba(11, 18, 32, .78) 74%,
+                    #0B1220 100%);
+        }
+
+        .lg2-brand {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 24px 0 0 24px;
+            text-decoration: none;
+        }
+
+        .lg2-brand-wordmark {
+            position: relative;
+            display: inline-block;
+        }
+
+        .lg2-brand-text {
+            display: block;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.22rem;
+            color: #fff;
+            letter-spacing: .2px;
+            line-height: 1;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, .55);
+        }
+
+        .lg2-brand-text span {
+            color: #7db3ec;
+        }
+
+        /* Pulse underline — flat white line with an ECG spike between
+           the two words. Absolutely positioned so it spans exactly the
+           text width (never longer); stroke stays crisp via non-scaling-stroke. */
+        .lg2-brand-underline {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -9px;
+            width: 100%;
+            height: 9px;
+            overflow: visible;
+            filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .5));
+        }
+
+        .lg2-brand-underline path {
+            fill: none;
+            stroke: #fff;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vector-effect: non-scaling-stroke;
+        }
+
+        .lg2-hero-copy {
+            position: absolute;
+            left: 24px;
+            right: 24px;
+            bottom: 20px;
+            z-index: 2;
+            max-width: 82%;
+        }
+
+        .lg2-heading {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.15;
+            letter-spacing: -.02em;
+            text-shadow: 0 2px 14px rgba(0, 0, 0, .55);
+        }
+
+        .lg2-subheading {
+            font-size: .84rem;
+            color: rgba(255, 255, 255, .72);
+            margin-top: 5px;
+            line-height: 1.4;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, .5);
+        }
+
+        /* ── FORM PANEL ───────────────────────────────────────────────── */
+        .lg2-panel {
+            position: relative;
+            z-index: 3;
+            flex: 1;
+            margin-top: -18px;
+            padding: 18px 24px calc(24px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
+            background: #0B1220;
+            border-radius: 22px 22px 0 0;
+            border-top: 1px solid rgba(255, 255, 255, .06);
+            box-shadow: 0 -12px 30px rgba(0, 0, 0, .35);
+        }
+
+        /* Segmented role control */
+        .role-slider {
+            position: relative;
+            display: flex;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 13px;
+            padding: 4px;
+            margin: 0 0 16px;
+        }
+
+        .role-slider-thumb {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            width: calc((100% - 8px) / 3);
+            background: linear-gradient(135deg, #2f6cb3, #4d84c4);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(47, 108, 179, .4);
+            transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+            will-change: transform;
+        }
+
+        .role-slider[data-role="parent"] .role-slider-thumb {
+            transform: translateX(100%);
+        }
+
+        .role-slider[data-role="teacher"] .role-slider-thumb {
+            transform: translateX(200%);
+        }
+
+        .role-opt {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            min-width: 0;
+            border: 0;
+            background: none;
+            padding: 10px 2px;
+            min-height: 44px;
+            font-family: var(--font-body);
+            font-size: .78rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .5);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            white-space: nowrap;
+            transition: color .2s;
+        }
+
+        .role-opt i {
+            font-size: .8rem;
+            flex-shrink: 0;
+        }
+
+        .role-opt.active {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .role-opt:focus-visible {
+            outline: 2px solid #5d92cf;
+            outline-offset: 2px;
+            border-radius: 10px;
+        }
+
+        /* Form fields */
+        .lg2 .form-group {
+            margin-bottom: 13px;
+        }
+
+        .lg2 .form-label {
+            display: block;
+            font-size: .72rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .5);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 8px;
+        }
+
+        .lg2 .form-input-wrap {
+            position: relative;
+        }
+
+        .lg2 .form-input-wrap>i:first-of-type {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, .3);
+            font-size: .9rem;
+            pointer-events: none;
+            transition: color .2s;
+        }
+
+        .lg2 .form-input-wrap:focus-within>i:first-of-type {
+            color: #5d92cf;
+        }
+
+        .lg2 .form-input {
+            width: 100%;
+            padding: 14px 46px 14px 42px;
+            /* right pad reserves room for the eye toggle → no more clipped text */
+            background: rgba(255, 255, 255, .06);
+            border: 1.5px solid rgba(255, 255, 255, .1);
+            border-radius: 12px;
+            font-size: .95rem;
+            font-family: var(--font-body);
+            color: #fff;
+            outline: none;
+            transition: border-color .2s, background .2s, box-shadow .2s;
+        }
+
+        .lg2 .form-input::placeholder {
+            color: rgba(255, 255, 255, .28);
+        }
+
+        .lg2 .form-input:focus {
+            border-color: #5d92cf;
+            background: rgba(93, 146, 207, .1);
+            box-shadow: 0 0 0 3px rgba(93, 146, 207, .15);
+        }
+
+        .lg2 .pw-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, .35);
+            font-size: .9rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 8px;
+            transition: color .2s;
+        }
+
+        .lg2 .pw-toggle:hover {
+            color: rgba(255, 255, 255, .7);
+        }
+
+        .forgot-link {
+            display: block;
+            text-align: right;
+            font-size: .8rem;
+            font-weight: 600;
+            color: #5d92cf;
+            text-decoration: none;
+            margin: 4px 0 15px;
+            transition: color .2s;
+        }
+
+        .forgot-link:hover {
+            color: #7daadb;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            border-radius: 13px;
+            border: none;
+            background: linear-gradient(135deg, #2f6cb3 0%, #1f5896 100%);
+            color: #fff;
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: .01em;
+            transition: filter .2s, transform .08s;
+            box-shadow: 0 8px 24px rgba(47, 108, 179, .45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+        }
+
+        .btn-login:hover {
+            filter: brightness(1.06);
+        }
+
+        .btn-login:disabled {
+            opacity: .8;
+            cursor: default;
+        }
+
+        .lg2-spinner {
+            width: 17px;
+            height: 17px;
+            border: 2.5px solid rgba(255, 255, 255, .35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: lg2Spin .7s linear infinite;
+        }
+
+        @keyframes lg2Spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Message boxes */
+        .lg2 .msg-box {
+            display: none;
+            margin-top: 14px;
+            padding: 11px 14px;
+            border-radius: 11px;
+            font-size: .82rem;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .lg2 .msg-box.show {
+            display: block;
+            animation: lg2FadeIn .25s ease;
+        }
+
+        @keyframes lg2FadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+        }
+
+        .lg2 .msg-box.error {
+            background: rgba(196, 61, 61, .14);
+            border: 1px solid rgba(196, 61, 61, .35);
+            color: #f4a3a3;
+        }
+
+        .lg2 .msg-box.success {
+            background: rgba(22, 163, 74, .14);
+            border: 1px solid rgba(22, 163, 74, .35);
+            color: #7ee0a3;
+        }
+
+        /* Tagline (replaces old trust line) */
+        .lg2-tagline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 12px;
+            color: rgba(255, 255, 255, .42);
+            font-size: .76rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .lg2-tagline i {
+            color: #5d92cf;
+            font-size: .78rem;
+        }
+
+        .switch-auth {
+            text-align: center;
+            margin-top: 10px;
+            font-size: .84rem;
+            color: rgba(255, 255, 255, .5);
+        }
+
+        .switch-auth a {
+            color: #7db3ec;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .switch-auth.hidden {
+            display: none;
+        }
+
+        /* Parent/Teacher: a centered, underlined "Don't have an account?"
+           link that opens the info popup (replaces the long paragraph). */
+        .no-account-link {
+            display: none;
+            width: 100%;
+            margin-top: 12px;
+            padding: 4px;
+            background: none;
+            border: none;
+            text-align: center;
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: .84rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .no-account-link span {
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .no-account-link.show {
+            display: block;
+        }
+
+        /* Info popup */
+        .lg2-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            background: rgba(0, 0, 0, .6);
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .lg2-modal-overlay.show {
+            display: flex;
+            animation: lg2FadeIn .2s ease;
+        }
+
+        .lg2-modal {
+            position: relative;
+            width: 100%;
+            max-width: 340px;
+            background: #111c30;
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 18px;
+            padding: 26px 22px 22px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .5);
+            animation: lg2ModalPop .22s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        @keyframes lg2ModalPop {
+            from {
+                transform: scale(.94);
+                opacity: 0;
+            }
+        }
+
+        .lg2-modal-x {
+            position: absolute;
+            top: 10px;
+            right: 14px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, .5);
+            font-size: 1.4rem;
+            line-height: 1;
+            padding: 4px;
+            cursor: pointer;
+        }
+
+        .lg2-modal-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2f6cb3, #5d92cf);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.2rem;
+            margin: 0 auto 14px;
+        }
+
+        .lg2-modal h3 {
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 8px;
+        }
+
+        .lg2-modal p {
+            font-size: .86rem;
+            color: rgba(255, 255, 255, .62);
+            line-height: 1.55;
+            margin: 0 0 20px;
+        }
+
+        .lg2-modal-ok {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #2f6cb3, #1f5896);
+            color: #fff;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: .92rem;
+            cursor: pointer;
+        }
+
+        /* Taller screens: let the hero breathe a bit more */
+        @media (min-height: 720px) {
+            .lg2-hero {
+                min-height: 300px;
+            }
+
+            .lg2-heading {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+    <!-- Desktop adaptation layer: inert below 1024px. Linked at the
+         END of head so it cascades after this page's inline styles. -->
+    <link rel="stylesheet" href="styles-desktop.css" media="(min-width: 1024px)">
+</head>
+
+<body class="auth-page-body">
+
+    <div class="lg2">
+
+        <!-- ── HERO ────────────────────────────────────────────────── -->
+        <div class="lg2-hero">
+            <!-- fallback layer (shows if the photo is absent) -->
+            <div class="lg2-hero-grid"></div>
+            <svg class="lg2-pulse" viewBox="0 0 320 60" preserveAspectRatio="none" aria-hidden="true">
+                <polyline points="0,30 70,30 86,30 96,8 108,52 120,20 132,40 146,30 320,30" fill="none" stroke="#5AA6F0"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+
+            <!-- Full-bleed doctor photo at mobile/assets/doctor-hero.png.
+                 If the file is missing, onerror hides it and the fallback shows. -->
+            <img class="lg2-hero-img" src="assets/doctor-hero.png" alt="" onerror="this.style.display='none'">
+
+            <div class="lg2-hero-scrim" aria-hidden="true"></div>
+
+            <a class="lg2-brand" href="#" onclick="return false;">
+                <span class="lg2-brand-wordmark">
+                    <span class="lg2-brand-text">NAADI <span>AI</span></span>
+                    <svg class="lg2-brand-underline" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true">
+                        <path d="M0,9 H54 L58,9 L60,6 L63,15 L66,2 L69,11 L72,9 H100" />
+                    </svg>
+                </span>
+            </a>
+
+            <div class="lg2-hero-copy">
+                <h1 class="lg2-heading" id="auth-heading">Welcome Back, Doctor!</h1>
+                <p class="lg2-subheading" id="auth-subheading">Login to continue your NEET prep</p>
+            </div>
+        </div>
+
+        <!-- ── FORM PANEL ──────────────────────────────────────────── -->
+        <div class="lg2-panel">
+
+            <div class="role-slider" id="role-slider" data-role="student" role="tablist" aria-label="Account type">
+                <div class="role-slider-thumb" aria-hidden="true"></div>
+                <button type="button" class="role-opt active" data-role="student" role="tab" aria-selected="true"
+                    onclick="setRole('student')">
+                    <i class="fa-solid fa-user-graduate"></i><span>Student</span>
+                </button>
+                <button type="button" class="role-opt" data-role="parent" role="tab" aria-selected="false"
+                    onclick="setRole('parent')">
+                    <i class="fa-solid fa-house-user"></i><span>Parent</span>
+                </button>
+                <button type="button" class="role-opt" data-role="teacher" role="tab" aria-selected="false"
+                    onclick="setRole('teacher')">
+                    <i class="fa-solid fa-chalkboard-user"></i><span>Teacher</span>
+                </button>
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)">
+
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <div class="form-input-wrap">
+                        <input type="email" class="form-input" id="login-email" placeholder="student@example.com"
+                            required autocomplete="email">
+                        <i class="fa-regular fa-envelope"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="form-input-wrap">
+                        <input type="password" class="form-input" id="login-password" placeholder="Your password"
+                            required autocomplete="current-password">
+                        <i class="fa-solid fa-lock"></i>
+                        <button type="button" class="pw-toggle" onclick="togglePassword()" aria-label="Show password">
+                            <i class="fa-regular fa-eye" id="pw-icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
+
+                <button type="submit" class="btn-login" id="login-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login
+                </button>
+
+            </form>
+
+            <div class="msg-box error" id="error-msg"></div>
+            <div class="msg-box success" id="success-msg"></div>
+
+            <div class="lg2-tagline">
+                <i class="fa-solid fa-heart-pulse"></i>
+                Where future doctors begin.
+            </div>
+
+            <div class="switch-auth" id="switch-auth">
+                Don't have an account? <a href="signup.html">Sign Up Free</a>
+            </div>
+
+            <button type="button" class="no-account-link" id="no-account-link" onclick="openRoleModal()">
+                <span>Don't have an account?</span>
+            </button>
+
+            <a class="ops-door" href="ops-login.html" title="NAADI team login" aria-label="Admin console login" style="display:block;text-align:center;margin-top:18px;color:inherit;opacity:.28;
+                      font-size:.72rem;text-decoration:none;transition:opacity .2s;"
+                onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='.28'">
+                <i class="fa-solid fa-shield-halved"></i>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- Info popup for parent/teacher "Don't have an account?" -->
+    <div class="lg2-modal-overlay" id="role-modal" onclick="closeRoleModal()">
+        <div class="lg2-modal" role="dialog" aria-modal="true" aria-labelledby="role-modal-title"
+            onclick="event.stopPropagation()">
+            <button class="lg2-modal-x" onclick="closeRoleModal()" aria-label="Close">&times;</button>
+            <div class="lg2-modal-icon"><i class="fa-solid fa-circle-info"></i></div>
+            <h3 id="role-modal-title">Don't have an account?</h3>
+            <p id="role-modal-body"></p>
+            <button type="button" class="lg2-modal-ok" onclick="closeRoleModal()">Got it</button>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script src="system-bars.js"></script>
+    <script>
+        // ── Role slider is cosmetic. Copy only. ──────────────────────
+        const ROLE_COPY = {
+            student: {
+                heading: 'Welcome Back, Doctor!',
+                sub: 'Login to continue your NEET prep',
+                placeholder: 'student@example.com',
+                signup: true,
+                hint: ''
+            },
+            parent: {
+                heading: 'Welcome Back',
+                sub: "Track your child's NEET preparation",
+                placeholder: 'parent@example.com',
+                signup: false,
+                modalTitle: 'Parent access',
+                hint: 'Parent accounts are created from the invite link your child sends you. Ask them to send it from their Profile screen.'
+            },
+            teacher: {
+                heading: 'Welcome Back',
+                sub: 'Open your class dashboard',
+                placeholder: 'teacher@school.edu',
+                signup: false,
+                modalTitle: 'Teacher access',
+                hint: 'Teacher accounts are set up by NAADI AI. Contact your school coordinator if you cannot sign in.'
+            }
+        };
+
+        let selectedRole = localStorage.getItem('NAADI_LOGIN_TAB') || 'student';
+
+        function setRole(role) {
+            selectedRole = role;
+            localStorage.setItem('NAADI_LOGIN_TAB', role);
+            const c = ROLE_COPY[role];
+
+            document.getElementById('role-slider').dataset.role = role;
+            document.querySelectorAll('.role-opt').forEach(b => {
+                const on = b.dataset.role === role;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-selected', String(on));
+            });
+
+            document.getElementById('auth-heading').textContent = c.heading;
+            document.getElementById('auth-subheading').textContent = c.sub;
+            document.getElementById('login-email').placeholder = c.placeholder;
+            document.getElementById('switch-auth').classList.toggle('hidden', !c.signup);
+
+            // Parent/Teacher: show the "Don't have an account?" link that opens
+            // the popup; Student: hide it (they use Sign Up Free instead).
+            const noAcc = document.getElementById('no-account-link');
+            noAcc.classList.toggle('show', !c.signup);
+            if (!c.signup) {
+                document.getElementById('role-modal-title').textContent = c.modalTitle || "Don't have an account?";
+                document.getElementById('role-modal-body').textContent = c.hint;
+            }
+            closeRoleModal(); // close if it was open while switching tabs
+        }
+
+        function openRoleModal() {
+            document.getElementById('role-modal').classList.add('show');
+        }
+        function closeRoleModal() {
+            document.getElementById('role-modal').classList.remove('show');
+        }
+
+        // ── Routing. The SERVER decides, not the slider. ─────────────
+        async function routeByRole() {
+            try {
+                const me = await apiCall('/api/portal/whoami');
+                window.location.replace(me.destination || 'app.html');
+            } catch (e) {
+                // whoami is the one call that must never strand a user.
+                // If it fails, the student app is the safe default — a
+                // parent who lands there sees an empty dashboard and can
+                // retry; a student who lands in the portal sees a 403 wall.
+                console.warn('whoami failed, defaulting to app.html', e);
+                window.location.replace('app.html');
+            }
+        }
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                routeByRole();
+            }
+        });
+
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            el.textContent = msg;
+            el.classList.add('show');
+            document.getElementById('success-msg').classList.remove('show');
+        }
+        function showSuccess(msg) {
+            const el = document.getElementById('success-msg');
+            el.textContent = msg;
+            el.classList.add('show');
+            document.getElementById('error-msg').classList.remove('show');
+        }
+        function setLoading(on) {
+            const btn = document.getElementById('login-btn');
+            btn.disabled = on;
+            btn.innerHTML = on
+                ? '<span class="lg2-spinner"></span> Logging in...'
+                : '<i class="fa-solid fa-right-to-bracket"></i> Login';
+        }
+        function togglePassword() {
+            const input = document.getElementById('login-password');
+            const icon = document.getElementById('pw-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-regular fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-regular fa-eye';
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            setLoading(true);
+            try {
+                const cred = await auth.signInWithEmailAndPassword(email, password);
+                currentUser = cred.user;
+                showSuccess('Login successful! Redirecting...');
+                await routeByRole();
+            } catch (error) {
+                setLoading(false);
+                const msgs = {
+                    'auth/user-not-found': 'No account found with this email.',
+                    'auth/wrong-password': 'Incorrect password. Please try again.',
+                    'auth/invalid-email': 'Please enter a valid email address.',
+                    'auth/too-many-requests': 'Too many attempts. Try again later.',
+                    'auth/invalid-credential': 'Invalid email or password.',
+                    'auth/network-request-failed': 'Network error. Check your internet connection.'
+                };
+                showError(msgs[error.code] || error.message);
+            }
+        }
+
+        setRole(selectedRole);
+    </script>
+
+</body>
+
+</html>

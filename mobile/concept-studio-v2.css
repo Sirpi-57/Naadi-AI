@@ -1,0 +1,3483 @@
+/* ════════════════════════════════════════════════════════════════
+   NAADI AI — CONCEPT STUDIO v3 (concept-studio-v2.css)
+   ─────────────────────────────────────────────────────────────────
+   Loaded AFTER styles-mobile.css. Everything here is prefixed `cs2-`
+   so nothing in the existing stylesheet is touched.
+
+   Visual language (unchanged from v2 — v3 enforces it harder):
+     • ONE accent: the palette gradient  --g600 → --indigo
+       (deep blue #1f5896 → deep teal #0f6f8c). No new colors.
+     • Typography does the hierarchy work: Sora for display,
+       DM Sans for body, uppercase micro-labels in --s400.
+     • Semantic color only where it carries meaning:
+       red = trap / wrong answer, gradient = progress / correct.
+     • Dark --s900 surface is reserved for "moments": the formula
+       plate, the flashcards, the lightbox.
+     • Signature element: the SPINE — a vertical gradient thread with
+       station dots that fill as you go. In v3 the spine runs at BOTH
+       levels: blocks within a chapter, sections within a block.
+
+   v3 changes: one nav grammar (.cs2-head everywhere, .cs2-back gone),
+   skeletons instead of spinners, focus rings on every control, real
+   <button> resets (every tappable is now a button), a layer footer,
+   the recap card, the lightbox, and the pinned-figure treatment.
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+    --cs-grad: linear-gradient(135deg, var(--g600) 0%, var(--indigo) 100%);
+    /* Every bar you see once you're inside a chapter is the SAME navy as
+       app.html's .m-topbar — same --s900, same white title, same --s400
+       sub, same rgba(255,255,255,.08) icon buttons. The Studio stops
+       having a private palette for its chrome and just wears the app's.
+       (This replaced a three-rung blue ladder: matching the shell beats
+       an internal depth cue nobody outside this module would recognise.)
+       Depth is still legible — the ladder just moved to the BODY, which
+       is what actually changes: light → light → light → dark flashcards. */
+    --cs-bar: var(--s900);
+    --cs-grad-soft: linear-gradient(135deg, rgba(31, 88, 150, .09), rgba(15, 111, 140, .09));
+    /* Flat equivalents — SVG fills can't take a gradient var. */
+    --cs-grad-soft-solid: #eef4fa;
+    --cs-teal-soft-solid: #e8f3f6;
+    --cs-ink: var(--s900);
+    --cs-body: var(--s600);
+    --cs-mute: var(--s400);
+    --cs-line: var(--s200);
+    --cs-card: #ffffff;
+    --cs-r: 18px;
+    --cs-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 20px -8px rgba(15, 23, 42, .08);
+    --cs-shadow-lift: 0 2px 6px rgba(15, 23, 42, .06), 0 16px 40px -12px rgba(15, 63, 111, .18);
+    --cs-ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* ── button reset ─────────────────────────────────────────────────
+   Every tappable in v3 is a real <button>: keyboard reachable, focus
+   ring, announced correctly. These rules undo the UA button styling
+   so the components below can look like the cards they replaced. */
+.cs2-subject-card,
+.cs2-chapter-row,
+.cs2-station,
+.cs2-resume,
+.cs2-opt,
+.cs2-comp,
+.cs2-rel,
+.cs2-figjump,
+.cs2-source,
+.cs2-recall .cs2-ghost-btn,
+.cs2-map-child {
+    font-family: var(--font-body);
+    text-align: left;
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+/* One focus ring for the whole module. */
+.cs2-subject-card:focus-visible,
+.cs2-chapter-row:focus-visible,
+.cs2-station:focus-visible,
+.cs2-resume:focus-visible,
+.cs2-opt:focus-visible,
+.cs2-comp:focus-visible,
+.cs2-rel:focus-visible,
+.cs2-figjump:focus-visible,
+.cs2-source:focus-visible,
+.cs2-map-child:focus-visible,
+.cs2-head-btn:focus-visible,
+.cs2-seg button:focus-visible,
+.cs2-filter button:focus-visible,
+.cs2-done-btn:focus-visible,
+.cs2-check-btn:focus-visible,
+.cs2-ghost-btn:focus-visible,
+.cs2-try-btn:focus-visible,
+.cs2-pg-nav button:focus-visible,
+.cs2-blocknav button:focus-visible,
+.cs2-layer-foot button:focus-visible,
+.cs2-fc-btn:focus-visible,
+.cs2-fc-scene:focus-visible,
+.cs2-acc .acc-head:focus-visible,
+.cs2-lb button:focus-visible {
+    outline: 2.5px solid var(--g500);
+    outline-offset: 2px;
+}
+
+.cs2-layer.dark :focus-visible,
+.cs2-lb :focus-visible {
+    outline-color: #7fb0e6;
+}
+
+/* ── shared bits ─────────────────────────────────────────────── */
+.cs2-micro {
+    font-family: var(--font-body);
+    font-size: .66rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--cs-mute);
+    display: block;
+}
+
+.cs2-grad-text {
+    background: var(--cs-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.cs2-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--s100);
+    color: var(--s600);
+    font-size: .7rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.cs2-chip.grad {
+    background: var(--cs-grad-soft);
+    color: var(--indigo);
+}
+
+.cs2-chip.star {
+    background: var(--cs-grad);
+    color: #fff;
+}
+
+.cs2-chip.year {
+    background: var(--amber-bg);
+    color: var(--amber);
+}
+
+/* Cross-links look like chips but do nothing. In v2 they were tappable
+   in appearance only — a dead affordance costs trust. Now they read as
+   what they are: labels. */
+.cs2-chip.flat {
+    background: transparent;
+    border: 1px dashed var(--cs-line);
+    color: var(--cs-mute);
+    font-weight: 500;
+    cursor: default;
+}
+
+.cs2-ghost-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1.5px solid var(--cs-line);
+    background: var(--cs-card);
+    color: var(--s600);
+    font-family: var(--font-display);
+    font-size: .8rem;
+    font-weight: 700;
+    padding: 11px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    min-height: 44px;
+}
+
+.cs2-ghost-btn:active {
+    transform: scale(.97);
+}
+
+/* ── skeletons (v3: no more spinner-and-a-word) ──────────────── */
+.cs2-skel-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cs2-skel {
+    background: linear-gradient(90deg, var(--s100) 25%, var(--s200) 37%, var(--s100) 63%);
+    background-size: 400% 100%;
+    animation: cs2-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes cs2-shimmer {
+    0% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+/* ════ PICKER (class → subject) ════ */
+.cs2-picker {
+    padding: calc(18px + var(--safe-top)) 18px calc(24px + var(--tabbar-h) + var(--safe-bottom));
+    max-width: 640px;
+    margin: 0 auto;
+    animation: cs2-fade-up .32s var(--cs-ease) both;
+}
+
+.cs2-picker-kicker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.cs2-picker h1 {
+    font-family: var(--font-display);
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: var(--cs-ink);
+    line-height: 1.15;
+}
+
+.cs2-picker-sub {
+    color: var(--cs-body);
+    font-size: .85rem;
+    line-height: 1.55;
+    margin-top: 6px;
+    max-width: 46ch;
+}
+
+/* ── resume card ──────────────────────────────────────────────
+   The picker's job on day 90 is not to introduce the product. */
+.cs2-resume {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin: 18px 0 4px;
+    padding: 13px 14px;
+    border-radius: var(--cs-r);
+    border: 1px solid transparent;
+    background:
+        linear-gradient(var(--cs-card), var(--cs-card)) padding-box,
+        var(--cs-grad) border-box;
+    box-shadow: var(--cs-shadow-lift);
+    cursor: pointer;
+    transition: transform .12s;
+    animation: cs2-fade-up .34s var(--cs-ease) both;
+}
+
+.cs2-resume:active {
+    transform: scale(.985);
+}
+
+.cs2-resume .rs-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cs2-resume .rs-name {
+    display: block;
+    font-family: var(--font-display);
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+    line-height: 1.3;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cs2-resume .rs-sub {
+    display: block;
+    font-size: .74rem;
+    color: var(--cs-mute);
+    margin-top: 2px;
+}
+
+.cs2-resume .rs-go {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--cs-grad);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    flex-shrink: 0;
+    box-shadow: 0 6px 16px -6px rgba(31, 88, 150, .55);
+}
+
+/* class segmented control */
+.cs2-seg {
+    display: inline-flex;
+    background: var(--s100);
+    border-radius: 999px;
+    padding: 4px;
+    margin: 18px 0 20px;
+    gap: 2px;
+}
+
+.cs2-seg button {
+    border: 0;
+    background: transparent;
+    padding: 9px 20px;
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--s500);
+    cursor: pointer;
+    transition: color .2s;
+    position: relative;
+    min-height: 40px;
+}
+
+.cs2-seg button.active {
+    color: #fff;
+    background: var(--cs-grad);
+    box-shadow: 0 4px 12px -4px rgba(31, 88, 150, .5);
+}
+
+/* subject cards */
+.cs2-subjects {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.cs2-subject-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: var(--cs-r);
+    padding: 16px;
+    cursor: pointer;
+    box-shadow: var(--cs-shadow);
+    transition: transform .12s, box-shadow .2s;
+    animation: cs2-fade-up .3s var(--cs-ease) both;
+}
+
+.cs2-subject-card:active {
+    transform: scale(.98);
+}
+
+.cs2-subject-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--cs-grad);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    box-shadow: 0 6px 16px -6px rgba(31, 88, 150, .55);
+}
+
+.cs2-subject-card .sc-name {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+}
+
+.cs2-subject-card .sc-meta {
+    display: block;
+    font-size: .78rem;
+    color: var(--cs-mute);
+    margin-top: 2px;
+}
+
+/* ════ CHAPTER LIST ════ */
+.cs2-listview {
+    min-height: 100vh;
+    background: var(--s50);
+    padding-bottom: calc(24px + var(--tabbar-h) + var(--safe-bottom));
+}
+
+.cs2-listbody {
+    padding: 16px;
+    max-width: 640px;
+    margin: 0 auto;
+    animation: cs2-fade-up .3s var(--cs-ease) both;
+}
+
+/* filter — the difference between a list and a wall */
+.cs2-filter {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-bottom: 12px;
+    padding-bottom: 2px;
+}
+
+.cs2-filter::-webkit-scrollbar {
+    display: none;
+}
+
+.cs2-filter button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    border: 1px solid var(--cs-line);
+    background: var(--cs-card);
+    color: var(--s500);
+    font-family: var(--font-body);
+    font-size: .76rem;
+    font-weight: 600;
+    padding: 8px 13px;
+    border-radius: 999px;
+    cursor: pointer;
+    min-height: 38px;
+    transition: background .2s, color .2s, border-color .2s;
+}
+
+.cs2-filter button .n {
+    font-size: .66rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--s100);
+    color: var(--s500);
+}
+
+.cs2-filter button.active {
+    background: var(--cs-grad);
+    border-color: transparent;
+    color: #fff;
+}
+
+.cs2-filter button.active .n {
+    background: rgba(255, 255, 255, .22);
+    color: #fff;
+}
+
+.cs2-search {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.cs2-search i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--s300);
+    font-size: .78rem;
+    pointer-events: none;
+}
+
+.cs2-search input {
+    width: 100%;
+    border: 1px solid var(--cs-line);
+    background: var(--cs-card);
+    border-radius: 12px;
+    padding: 12px 14px 12px 38px;
+    font-family: var(--font-body);
+    font-size: .85rem;
+    color: var(--cs-ink);
+    min-height: 46px;
+}
+
+.cs2-search input:focus {
+    outline: none;
+    border-color: var(--g400);
+    box-shadow: 0 0 0 3px rgba(31, 88, 150, .1);
+}
+
+/* chapter rows */
+.cs2-chapters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cs2-chapter-row {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: var(--cs-r);
+    padding: 14px;
+    cursor: pointer;
+    box-shadow: var(--cs-shadow);
+    transition: transform .12s;
+    animation: cs2-fade-up .3s var(--cs-ease) both;
+}
+
+.cs2-chapter-row:active {
+    transform: scale(.985);
+}
+
+.cs2-chapter-row.done {
+    opacity: .72;
+}
+
+.cs2-chapter-row .ch-name {
+    display: block;
+    font-family: var(--font-display);
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+    line-height: 1.3;
+}
+
+.cs2-chapter-row .meta {
+    display: block;
+    font-size: .74rem;
+    color: var(--cs-mute);
+    margin-top: 3px;
+}
+
+.cs2-chapter-row .chips {
+    display: flex;
+    gap: 5px;
+    margin-top: 7px;
+    flex-wrap: wrap;
+}
+
+/* ════ PROGRESS RING ════ */
+.cs2-ring {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.cs2-ring svg {
+    transform: rotate(-90deg);
+    display: block;
+}
+
+.cs2-ring .track {
+    stroke: var(--s100);
+}
+
+/* A 0% ring shows a dashed outline and no number. Twenty "0%" labels
+   down a fresh subject is noise at best and a scoreboard at worst. */
+.cs2-ring.empty .track {
+    stroke: var(--s200);
+    stroke-dasharray: 3 4;
+    stroke-linecap: round;
+}
+
+.cs2-ring .fill {
+    stroke-linecap: round;
+    transition: stroke-dashoffset .9s var(--cs-ease);
+}
+
+.cs2-ring .pct {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--cs-ink);
+}
+
+.cs2-ring .pct .done-ico {
+    color: var(--indigo);
+}
+
+/* ════ THE HEAD — one nav grammar for the whole journey ════
+   v2 had three: a .cs2-back pill on the picker screens, this sticky
+   bar on chapter home and the block, and a chevron-down on layers.
+   The pill is gone. */
+.cs2-head {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(248, 250, 252, .88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--cs-line);
+    padding: calc(10px + var(--safe-top)) 14px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cs2-head-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--cs-line);
+    background: #fff;
+    color: var(--s600);
+    font-size: .95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.cs2-head-btn:active {
+    transform: scale(.94);
+}
+
+.cs2-head-btn:disabled {
+    opacity: .3;
+    cursor: default;
+}
+
+.cs2-head-mid {
+    flex: 1;
+    min-width: 0;
+}
+
+.cs2-head-title {
+    font-family: var(--font-display);
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cs2-head-sub {
+    font-size: .7rem;
+    color: var(--cs-mute);
+    margin-top: 1px;
+}
+
+/* Inside a concept the bar goes blue: a depth cue you feel before you
+   read anything. Chapter list and chapter home stay light, so the three
+   levels are legible at a glance. */
+/* Inside a chapter, the bar is app.html's .m-topbar — not a lookalike.
+   The .d2 class is still emitted by the block screen as a hook, but it
+   no longer shifts the colour: chapter home, block and section all wear
+   the identical navy. */
+.cs2-head.grad,
+.cs2-head.grad.d2 {
+    background: var(--cs-bar);
+    border-bottom-color: transparent;
+    box-shadow: 0 6px 20px -12px rgba(15, 23, 42, .8);
+}
+
+.cs2-head.grad .cs2-head-title {
+    color: #fff;
+}
+
+.cs2-head.grad .cs2-head-sub {
+    color: var(--s400);
+}
+
+.cs2-head.grad .cs2-head-btn {
+    background: rgba(255, 255, 255, .08);
+    border: none;
+    color: var(--s300);
+}
+
+.cs2-head.grad .cs2-head-bar {
+    background: rgba(255, 255, 255, .24);
+}
+
+.cs2-head.grad .cs2-head-bar>i {
+    background: #fff;
+}
+
+/* The chapter-home ring lives in this bar now. It was drawn for a white
+   surface — --s100 track, blue gradient fill — which on blue is an
+   invisible arc on an invisible track. `stroke` is a presentation
+   attribute, so plain CSS beats the inline gradient without !important. */
+.cs2-head.grad .cs2-ring .track {
+    stroke: rgba(255, 255, 255, .25);
+}
+
+.cs2-head.grad .cs2-ring.empty .track {
+    stroke: rgba(255, 255, 255, .3);
+}
+
+.cs2-head.grad .cs2-ring .fill {
+    stroke: #fff;
+}
+
+.cs2-head.grad .cs2-ring .pct,
+.cs2-head.grad .cs2-ring .pct .done-ico {
+    color: #fff;
+}
+
+/* thin chapter progress bar (block overview header) */
+.cs2-head-bar {
+    height: 4px;
+    border-radius: 999px;
+    background: var(--s100);
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+.cs2-head-bar>i {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--cs-grad);
+    transition: width .7s var(--cs-ease);
+}
+
+/* ════ CHAPTER HOME ════ */
+.cs2-home {
+    min-height: 100vh;
+    background: var(--s50);
+    padding-bottom: calc(96px + var(--safe-bottom));
+}
+
+/* v2 stacked a hero ring card, a stat line, a pill row and a Continue
+   card above the list — four restatements of one number. v3: the ring
+   is in the head (which is also the continuity from the chapter row
+   you tapped), and this is the only sentence. */
+.cs2-statline {
+    padding: 16px 18px 4px;
+    font-size: .82rem;
+    color: var(--cs-body);
+    max-width: 640px;
+    margin: 0 auto;
+    animation: cs2-fade-up .3s var(--cs-ease) both;
+}
+
+.cs2-statline strong {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--cs-ink);
+}
+
+.cs2-statline .ta {
+    color: var(--indigo);
+    font-weight: 600;
+}
+
+.cs2-statline .ta i {
+    font-size: .6rem;
+}
+
+/* chapter complete banner */
+.cs2-celebrate {
+    margin: 16px;
+    border-radius: 22px;
+    padding: 26px 20px;
+    text-align: center;
+    background: var(--cs-grad);
+    color: #fff;
+    box-shadow: var(--cs-shadow-lift);
+    animation: cs2-pop .45s cubic-bezier(.34, 1.4, .64, 1) both;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cs2-celebrate .ico {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.cs2-celebrate h3 {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.cs2-celebrate p {
+    font-size: .8rem;
+    opacity: .85;
+    margin-top: 5px;
+}
+
+/* ════ BLOCK OVERVIEW ════ */
+.cs2-block {
+    min-height: 100vh;
+    background: var(--s50);
+    padding-bottom: calc(96px + var(--safe-bottom));
+}
+
+.cs2-block-hero {
+    padding: 22px 20px 6px;
+    animation: cs2-fade-up .3s var(--cs-ease) both;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.cs2-block-hero .tags {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.cs2-block-hero h1 {
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+    color: var(--cs-ink);
+}
+
+.cs2-block-hero .precision {
+    font-size: .88rem;
+    color: var(--cs-body);
+    line-height: 1.6;
+    margin-top: 9px;
+    max-width: 52ch;
+}
+
+/* The briefing's teaser. Says a number, promises the recap, spoils
+   nothing — the whole reason the briefing moved to the bottom. */
+.cs2-teaser {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin-top: 14px;
+    padding: 11px 13px;
+    border-radius: 12px;
+    background: var(--cs-grad-soft);
+    border: 1px solid rgba(15, 111, 140, .16);
+    font-size: .8rem;
+    color: var(--s700);
+    line-height: 1.5;
+}
+
+.cs2-teaser>i {
+    color: var(--indigo);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* The text is one flex item, not one per inline tag inside it. Without
+   this wrapper "I found | 6 things | NEET likes to test here" lays out as
+   three columns. */
+.cs2-teaser>span {
+    flex: 1;
+    min-width: 0;
+}
+
+.cs2-teaser strong {
+    color: var(--indigo);
+    font-weight: 700;
+}
+
+/* ════ THE SPINE ════
+   Runs at both levels now: sections within a block, and blocks within
+   a chapter. One metaphor, two screens. */
+.cs2-spine {
+    margin: 18px 16px 0;
+    position: relative;
+    padding-left: 18px;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cs2-spine::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 22px;
+    bottom: 22px;
+    width: 2px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--g600), var(--indigo));
+    opacity: .22;
+}
+
+.cs2-station {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 16px;
+    padding: 13px 14px;
+    margin-bottom: 9px;
+    cursor: pointer;
+    box-shadow: var(--cs-shadow);
+    transition: transform .12s, opacity .3s;
+    animation: cs2-fade-up .3s var(--cs-ease) both;
+}
+
+.cs2-station:active {
+    transform: scale(.985);
+}
+
+.cs2-station .dot {
+    position: absolute;
+    left: -14.5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--s50);
+    border: 2px solid var(--s300);
+    transition: all .3s;
+}
+
+.cs2-station.visited .dot,
+.cs2-station.done .dot {
+    background: var(--cs-grad);
+    border-color: transparent;
+    box-shadow: 0 0 0 3px rgba(15, 111, 140, .15);
+}
+
+.cs2-station.current .dot {
+    border-color: var(--g600);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(31, 88, 150, .18);
+    animation: cs2-pulse 2.4s ease-in-out infinite;
+}
+
+.cs2-station .st-ico {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--cs-grad-soft);
+    color: var(--indigo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .9rem;
+    flex-shrink: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    transition: background .3s, color .3s;
+}
+
+.cs2-station.st-danger .st-ico {
+    background: var(--red-bg);
+    color: var(--red);
+}
+
+.cs2-station .st-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cs2-station .st-title {
+    overflow-wrap: anywhere;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    font-family: var(--font-display);
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+    line-height: 1.3;
+}
+
+.cs2-count {
+    font-family: var(--font-body);
+    font-size: .64rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--s100);
+    color: var(--s500);
+}
+
+/* An honest read-time estimate. "How long is this going to take" is
+   the question a tired student actually asks a list. */
+.cs2-mins {
+    font-family: var(--font-body);
+    font-size: .64rem;
+    font-weight: 600;
+    color: var(--s300);
+    letter-spacing: .02em;
+}
+
+/* v2 clamped previews to ONE line with nowrap + ellipsis, so half of
+   them cut mid-word. Two lines, clamped properly. */
+.cs2-station .st-prev {
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: .74rem;
+    color: var(--cs-mute);
+    margin-top: 3px;
+    line-height: 1.45;
+}
+
+.cs2-station .st-chev {
+    color: var(--s300);
+    font-size: .75rem;
+    flex-shrink: 0;
+}
+
+.cs2-station.visited .st-chev,
+.cs2-station.done .st-chev {
+    color: var(--indigo);
+}
+
+/* the chip row on a chapter-level station */
+.st-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    margin-top: 7px;
+}
+
+.st-tags:empty {
+    display: none;
+}
+
+/* ── chapter-level stations (blocks) ── */
+.cs2-station.cs2-bst .st-ico {
+    background: var(--s100);
+    color: var(--s500);
+    font-size: .82rem;
+}
+
+/* A must-know block should be identifiable from across the room, not by
+   hunting for a 10px star. Tier is the one field the payload always
+   carries, so it does the colour work.
+
+   WHY THIS LOOKED "BOXED": the previous rule used `border-image: … 1`.
+   A slice of 1 paints the image over ALL FOUR borders, not just the
+   border-left it was written next to — and an element with a
+   border-image ignores border-radius entirely. So every must-know row
+   rendered as a hard-cornered gradient rectangle sitting inside the
+   soft, rounded list. Not a box we drew on purpose; a box the shorthand
+   drew for us.
+
+   A wash instead: the tint fades out to the left-hand rule, the corners
+   stay round, and the row still belongs to the list it's in. */
+.cs2-station.cs2-bst.tier-a {
+    border-color: var(--g100);
+    background:
+        linear-gradient(100deg,
+            rgba(31, 88, 150, .10) 0%,
+            rgba(15, 111, 140, .05) 45%,
+            rgba(255, 255, 255, 0) 82%),
+        var(--cs-card);
+    box-shadow:
+        inset 3px 0 0 -1px var(--g400),
+        var(--cs-shadow);
+}
+
+.cs2-station.cs2-bst.tier-a .st-ico {
+    background: var(--cs-grad-soft);
+    color: var(--g600);
+}
+
+.cs2-station.cs2-bst.tier-a .st-title {
+    color: var(--g700);
+}
+
+.cs2-station.cs2-bst.done {
+    opacity: .58;
+}
+
+.cs2-station.cs2-bst.done .st-ico,
+.cs2-station.cs2-bst.tier-a.done .st-ico {
+    background: var(--cs-grad);
+    color: #fff;
+}
+
+/* Done blocks drop their chips — you're not shopping for them any more. */
+.cs2-station.cs2-bst.done .st-tags {
+    display: none;
+}
+
+/* v2's "current" was a 3px ring at 8% opacity — invisible. */
+.cs2-station.cs2-bst.current {
+    border-color: transparent;
+    background:
+        linear-gradient(var(--cs-card), var(--cs-card)) padding-box,
+        var(--cs-grad) border-box;
+    box-shadow: var(--cs-shadow-lift);
+}
+
+.cs2-station.cs2-bst.current .st-ico {
+    background: var(--cs-grad);
+    color: #fff;
+    box-shadow: 0 6px 14px -6px rgba(31, 88, 150, .6);
+}
+
+.cs2-star {
+    color: var(--indigo);
+    font-size: .62rem;
+}
+
+.st-here {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--indigo);
+}
+
+.st-here.soft {
+    color: var(--s400);
+    font-weight: 600;
+}
+
+/* ════ THE RECAP ════
+   This is the old "NAADI's briefing", moved. Same six fields — but
+   after the sections instead of before them, where re-reading is
+   reinforcement rather than a spoiler and six restatements. */
+.cs2-recap {
+    margin: 24px 16px 0;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: var(--cs-shadow);
+    animation: cs2-fade-up .3s var(--cs-ease) both;
+}
+
+.cs2-recap .rc-head {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--cs-line);
+    margin-bottom: 14px;
+}
+
+.cs2-recap .rc-ava {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--cs-grad);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .9rem;
+    flex-shrink: 0;
+    box-shadow: 0 6px 16px -6px rgba(31, 88, 150, .5);
+}
+
+.cs2-recap .rc-title {
+    display: block;
+    font-family: var(--font-display);
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+    margin-top: 2px;
+    line-height: 1.3;
+}
+
+.cs2-recap .rc-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.cs2-recap .rc-item+.rc-item {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--s100);
+}
+
+.cs2-recap .rc-item>i {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: var(--cs-grad-soft);
+    color: var(--indigo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .68rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.cs2-recap .rc-item.bad>i {
+    background: var(--red-bg);
+    color: var(--red);
+}
+
+.cs2-recap .rc-it-title {
+    font-family: var(--font-display);
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+}
+
+.cs2-recap .rc-it-body {
+    font-size: .83rem;
+    color: var(--s600);
+    line-height: 1.6;
+    margin-top: 3px;
+}
+
+.cs2-recap .rc-ul {
+    margin: 4px 0 0;
+    padding-left: 16px;
+}
+
+.cs2-recap .rc-ul li {
+    margin-bottom: 3px;
+}
+
+/* ── prev / next block, in flow ──
+   v2 kept these as two more icon buttons in an already four-button
+   header on a 375px screen. They belong at the end of the block, which
+   is when you actually want them. */
+.cs2-blocknav {
+    display: flex;
+    gap: 10px;
+    margin: 22px 16px 0;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cs2-blocknav button {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px;
+    border-radius: 14px;
+    border: 1.5px solid var(--cs-line);
+    background: var(--cs-card);
+    color: var(--s600);
+    font-family: var(--font-display);
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 48px;
+}
+
+.cs2-blocknav button:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+.cs2-blocknav button:active:not(:disabled) {
+    transform: scale(.98);
+}
+
+/* sticky bottom action */
+.cs2-done-wrap {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 45;
+    padding: 10px 16px calc(12px + var(--safe-bottom));
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0), rgba(248, 250, 252, .92) 40%);
+    pointer-events: none;
+}
+
+.cs2-done-btn {
+    pointer-events: auto;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 16px;
+    border: 0;
+    border-radius: 16px;
+    background: var(--cs-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: .92rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 54px;
+    box-shadow: 0 10px 26px -8px rgba(31, 88, 150, .6);
+    transition: transform .12s, filter .2s, background .25s;
+}
+
+.cs2-done-btn:active:not(:disabled) {
+    transform: scale(.98);
+}
+
+.cs2-done-btn.done-state {
+    background: #fff;
+    color: var(--indigo);
+    border: 1.5px solid var(--g200);
+    box-shadow: var(--cs-shadow);
+}
+
+/* The soft gate: mark a block done with nothing opened and the button
+   asks once before it lies to the progress ring on your behalf. */
+.cs2-done-btn.warn-state {
+    background: var(--amber-bg);
+    color: var(--amber);
+    border: 1.5px solid var(--amber);
+    box-shadow: none;
+    font-size: .84rem;
+}
+
+.cs2-done-btn:disabled {
+    cursor: default;
+}
+
+/* ════ SECTION LAYER ════ */
+.cs2-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--s50);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(6%);
+    opacity: 0;
+    transition: transform .32s var(--cs-ease), opacity .28s, background .3s;
+}
+
+.cs2-layer.in {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.cs2-layer.out {
+    transform: translateY(6%);
+    opacity: 0;
+}
+
+.cs2-layer-head {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: calc(10px + var(--safe-top)) 14px 10px;
+    background: rgba(248, 250, 252, .9);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--cs-line);
+    transition: background .3s, border-color .3s;
+}
+
+.cs2-layer-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.cs2-layer-title .t {
+    font-family: var(--font-display);
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+}
+
+.cs2-layer-title .s {
+    font-size: .7rem;
+    color: var(--cs-mute);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cs2-layer-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 18px 18px calc(30px + var(--safe-bottom));
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* depth 3 — inside a section. :not(.dark) means these can never match the
+   flashcard layer, so there's no specificity race with the dark rules
+   further down, whatever order they land in. */
+.cs2-layer:not(.dark) .cs2-layer-head {
+    background: var(--cs-bar);
+    border-bottom-color: transparent;
+    box-shadow: 0 6px 20px -12px rgba(15, 23, 42, .8);
+}
+
+.cs2-layer:not(.dark) .cs2-layer-title .t {
+    color: #fff;
+}
+
+.cs2-layer:not(.dark) .cs2-layer-title .s {
+    color: var(--s400);
+}
+
+.cs2-layer:not(.dark) .cs2-layer-head .cs2-head-btn {
+    background: rgba(255, 255, 255, .08);
+    border: none;
+    color: var(--s300);
+}
+
+/* in-place swap between sections — the "Next:" CTA turning a page */
+.cs2-layer-body.swap {
+    animation: cs2-slide-in .28s var(--cs-ease) both;
+}
+
+/* ── the layer footer ──
+   The single biggest v2 tax: eight sections × close-find-reopen ≈ 16
+   taps per block, because the spine was a hub-and-spoke for content
+   that is a sequence. Every layer now ends with the way forward. */
+.cs2-layer-foot {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 1px solid var(--cs-line);
+}
+
+.cs2-layer.dark .cs2-layer-foot {
+    border-top-color: rgba(255, 255, 255, .08);
+}
+
+.cs2-layer-foot button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    border-radius: 14px;
+    font-family: var(--font-display);
+    font-size: .84rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 52px;
+    transition: transform .1s;
+}
+
+.cs2-layer-foot .ghost {
+    flex: 0 0 auto;
+    padding: 14px 18px;
+    border: 1.5px solid var(--cs-line);
+    background: var(--cs-card);
+    color: var(--s600);
+}
+
+.cs2-layer-foot .primary {
+    flex: 1;
+    border: 0;
+    background: var(--cs-grad);
+    color: #fff;
+    box-shadow: 0 8px 22px -8px rgba(31, 88, 150, .55);
+}
+
+.cs2-layer-foot button:active {
+    transform: scale(.98);
+}
+
+.cs2-layer.dark .cs2-layer-foot .ghost {
+    background: rgba(255, 255, 255, .06);
+    border-color: rgba(255, 255, 255, .12);
+    color: #cbd5e1;
+}
+
+/* dark theme (flashcards) */
+.cs2-layer.dark {
+    background: var(--s900);
+}
+
+.cs2-layer.dark .cs2-layer-head {
+    background: rgba(15, 23, 42, .85);
+    border-bottom-color: rgba(255, 255, 255, .08);
+}
+
+.cs2-layer.dark .cs2-layer-title .t {
+    color: #f1f5f9;
+}
+
+.cs2-layer.dark .cs2-layer-title .s {
+    color: #64748b;
+}
+
+.cs2-layer.dark .cs2-head-btn {
+    background: rgba(255, 255, 255, .06);
+    border-color: rgba(255, 255, 255, .1);
+    color: #cbd5e1;
+}
+
+/* ════ SECTION CONTENT TYPOGRAPHY ════ */
+.cs2-sec {
+    animation: cs2-fade-up .3s var(--cs-ease) both;
+}
+
+.cs2-sec+.cs2-sec {
+    margin-top: 26px;
+}
+
+.cs2-sec-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.cs2-sec-label .ln {
+    flex: 1;
+    height: 1px;
+    background: var(--cs-line);
+}
+
+.cs2-prose {
+    font-size: .92rem;
+    color: var(--s700);
+    line-height: 1.7;
+}
+
+/* definition plate */
+.cs2-def {
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-left: 3px solid transparent;
+    border-image: linear-gradient(180deg, var(--g600), var(--indigo)) 1;
+    border-radius: 4px 14px 14px 4px;
+    padding: 15px 16px;
+    font-size: .93rem;
+    color: var(--s800);
+    line-height: 1.7;
+    box-shadow: var(--cs-shadow);
+}
+
+/* clean list w/ gradient ticks */
+.cs2-tick-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.cs2-tick {
+    position: relative;
+    padding-left: 18px;
+    font-size: .88rem;
+    color: var(--s700);
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.cs2-tick::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--cs-grad);
+}
+
+.cs2-tick.warn::before {
+    background: var(--amber);
+}
+
+.cs2-tick.bad::before {
+    background: var(--red);
+}
+
+/* named-value chips */
+.cs2-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.cs2-value {
+    padding: 6px 13px;
+    border-radius: 10px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    color: var(--s800);
+    font-family: var(--font-display);
+    font-size: .78rem;
+    font-weight: 600;
+    box-shadow: var(--cs-shadow);
+}
+
+/* formula plate (dark moment) */
+.cs2-formula {
+    background: var(--s900);
+    color: #e2e8f0;
+    border-radius: 16px;
+    padding: 18px 20px;
+    font-family: var(--font-display);
+    font-size: 1.08rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: .02em;
+    overflow-x: auto;
+    box-shadow: var(--cs-shadow-lift);
+    position: relative;
+}
+
+.cs2-formula::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3px;
+    background: var(--cs-grad);
+    border-radius: 16px 16px 0 0;
+}
+
+/* callout: exam tip / principle */
+.cs2-callout {
+    position: relative;
+    background: var(--cs-grad-soft);
+    border: 1px solid rgba(15, 111, 140, .18);
+    border-radius: 14px;
+    padding: 14px 15px;
+    font-size: .88rem;
+    color: var(--s800);
+    line-height: 1.65;
+}
+
+.cs2-callout .co-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-body);
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--indigo);
+    margin-bottom: 7px;
+}
+
+.cs2-callout.danger {
+    background: var(--red-bg);
+    border-color: rgba(196, 61, 61, .22);
+}
+
+.cs2-callout.danger .co-tag {
+    color: var(--red);
+}
+
+/* The trap gets its own plate. v2 gave it the same .cs2-callout box as
+   the exam tip and the principle, so the one thing that costs marks
+   looked like the four things that don't. */
+.cs2-trap-plate {
+    background: linear-gradient(150deg, #2a1518 0%, var(--s900) 70%);
+    border: 1px solid rgba(196, 61, 61, .35);
+    border-radius: 16px;
+    padding: 17px;
+    color: #f1f5f9;
+    font-size: .9rem;
+    line-height: 1.65;
+    box-shadow: var(--cs-shadow-lift);
+}
+
+.cs2-trap-plate .tp-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-body);
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #f0a0a0;
+    margin-bottom: 9px;
+}
+
+/* ── accordion (replaces raw <details>) ── */
+.cs2-acc {
+    border: 1px solid var(--cs-line);
+    background: var(--cs-card);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.cs2-acc .acc-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 14px;
+    border: 0;
+    background: transparent;
+    font-family: var(--font-display);
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--indigo);
+    cursor: pointer;
+    min-height: 46px;
+    text-align: left;
+}
+
+.cs2-acc .acc-head>span {
+    flex: 1;
+}
+
+.cs2-acc .acc-head .caret {
+    font-size: .65rem;
+    color: var(--s400);
+    transition: transform .25s var(--cs-ease);
+}
+
+.cs2-acc .acc-head.open .caret {
+    transform: rotate(180deg);
+}
+
+.cs2-acc .acc-body {
+    padding: 0 14px 14px;
+    animation: cs2-fade .2s both;
+}
+
+/* ── worked-scenario stepper ── */
+.cs2-scenario {
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--cs-shadow);
+}
+
+.cs2-scenario .setup {
+    font-size: .88rem;
+    color: var(--s800);
+    line-height: 1.65;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--cs-line);
+    margin-bottom: 14px;
+}
+
+/* v2 printed the worked answer directly beneath the question it was
+   the answer to. Reading a solution is not solving anything. */
+.cs2-try-btn {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px;
+    border-radius: 12px;
+    border: 1.5px dashed var(--g400);
+    background: var(--cs-grad-soft);
+    color: var(--indigo);
+    font-family: var(--font-display);
+    font-size: .82rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 48px;
+}
+
+.cs2-try-btn:active {
+    transform: scale(.98);
+}
+
+.cs2-step {
+    display: flex;
+    gap: 13px;
+}
+
+.cs2-step .rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.cs2-step .n {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--cs-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: .68rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cs2-step .l {
+    width: 2px;
+    flex: 1;
+    background: var(--s200);
+    margin: 3px 0;
+    min-height: 12px;
+}
+
+.cs2-step .txt {
+    font-size: .86rem;
+    color: var(--s700);
+    line-height: 1.6;
+    padding-bottom: 15px;
+}
+
+.cs2-step:last-of-type .txt {
+    padding-bottom: 0;
+}
+
+.cs2-answer {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--cs-grad);
+    color: #fff;
+    font-size: .87rem;
+    line-height: 1.6;
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+}
+
+/* ── APPLY: five treatments, not five identical callouts ──
+   v3.0 stacked Principle, Spot-it-by, Worked scenario, Trap and
+   Examiner's angle in the same box, so the screen read as one
+   undifferentiated wall and nothing looked more important than
+   anything else. Same content, five weights. */
+
+/* 1 — the principle reads as a headline, not as box number one */
+.cs2-lead {
+    position: relative;
+    padding-left: 16px;
+}
+
+.cs2-lead::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--cs-grad);
+}
+
+.cs2-lead p {
+    font-family: var(--font-display);
+    font-size: 1.06rem;
+    font-weight: 600;
+    color: var(--cs-ink);
+    line-height: 1.55;
+    letter-spacing: -.01em;
+    margin-top: 6px;
+}
+
+/* 2 — cues are scanned, not read */
+.cs2-cues {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cs2-cue {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    padding: 11px 13px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 12px;
+    box-shadow: var(--cs-shadow);
+}
+
+.cs2-cue .n {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    background: var(--cs-grad-soft);
+    color: var(--indigo);
+    font-family: var(--font-display);
+    font-size: .64rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.cs2-cue .t {
+    flex: 1;
+    min-width: 0;
+    font-size: .85rem;
+    color: var(--s700);
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+/* 3 — "careful", folded into the solution where it belongs */
+.cs2-watch {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-top: 12px;
+    padding: 11px 13px;
+    border-radius: 11px;
+    background: var(--red-bg);
+    font-size: .82rem;
+    color: var(--s700);
+    line-height: 1.55;
+}
+
+.cs2-watch>i {
+    color: var(--red);
+    font-size: .78rem;
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+.cs2-watch>span {
+    flex: 1;
+    min-width: 0;
+}
+
+.cs2-watch b {
+    color: var(--red);
+}
+
+/* 4 — a lighter trap plate, for the comparison trap inside Apply */
+.cs2-trap-plate.soft {
+    background: linear-gradient(150deg, #241417 0%, #17212f 75%);
+}
+
+/* ── figure jump / source link / checkpoint ── */
+.cs2-figjump {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 10px;
+    border-radius: 14px;
+    border: 1px solid var(--cs-line);
+    background: var(--cs-card);
+    box-shadow: var(--cs-shadow);
+    cursor: pointer;
+}
+
+.cs2-figjump:active {
+    transform: scale(.99);
+}
+
+.cs2-figjump img {
+    width: 54px;
+    height: 54px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: var(--s100);
+    flex-shrink: 0;
+}
+
+.cs2-figjump>span {
+    flex: 1;
+    min-width: 0;
+}
+
+.cs2-figjump .fj-t {
+    display: block;
+    font-family: var(--font-display);
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+}
+
+.cs2-figjump .fj-s {
+    display: block;
+    font-size: .73rem;
+    color: var(--cs-mute);
+    margin-top: 2px;
+}
+
+.cs2-figjump>i {
+    color: var(--indigo);
+    font-size: .8rem;
+    flex-shrink: 0;
+}
+
+/* The NCERT scans, demoted from a station to a citation. */
+.cs2-source {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px dashed var(--cs-line);
+    background: transparent;
+    color: var(--s500);
+    font-family: var(--font-body);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 46px;
+}
+
+.cs2-source>span {
+    flex: 1;
+}
+
+.cs2-source>i:first-child {
+    color: var(--indigo);
+}
+
+.cs2-source:active {
+    transform: scale(.99);
+}
+
+/* Checkpoint — turns a page that was read into a page that was learned */
+.cs2-recall {
+    background: var(--cs-card);
+    border: 1px solid transparent;
+    background:
+        linear-gradient(var(--cs-card), var(--cs-card)) padding-box,
+        var(--cs-grad) border-box;
+    border: 1px solid transparent;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--cs-shadow);
+    text-align: center;
+}
+
+.cs2-recall .q {
+    font-family: var(--font-display);
+    font-size: .96rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+    line-height: 1.5;
+    margin: 8px 0 14px;
+}
+
+.cs2-recall .a {
+    margin-top: 12px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    background: var(--cs-grad-soft);
+    font-size: .86rem;
+    color: var(--s800);
+    line-height: 1.6;
+    text-align: left;
+    animation: cs2-fade-up .3s var(--cs-ease) both;
+}
+
+/* ════ QUIZ OPTIONS (PYQ / variants / AR) ════ */
+.cs2-q-text {
+    font-family: var(--font-display);
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: var(--cs-ink);
+    line-height: 1.55;
+    margin-bottom: 16px;
+}
+
+.cs2-opt {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1.5px solid var(--cs-line);
+    background: var(--cs-card);
+    cursor: pointer;
+    font-size: .87rem;
+    color: var(--s700);
+    line-height: 1.55;
+    transition: border-color .18s, background .18s, transform .1s;
+    margin-bottom: 8px;
+    min-height: 48px;
+}
+
+.cs2-opt .ot {
+    flex: 1;
+}
+
+.cs2-opt:active:not(:disabled) {
+    transform: scale(.99);
+}
+
+.cs2-opt .key {
+    font-family: var(--font-display);
+    font-weight: 700;
+    flex-shrink: 0;
+    min-width: 18px;
+    color: var(--s400);
+    transition: color .18s;
+}
+
+.cs2-opt.sel {
+    border-color: var(--g500);
+    background: var(--cs-grad-soft);
+}
+
+.cs2-opt.sel .key {
+    color: var(--g600);
+}
+
+.cs2-opt.correct {
+    border-color: var(--indigo);
+    background: var(--cs-grad-soft);
+    color: var(--indigo);
+    animation: cs2-correct .4s cubic-bezier(.34, 1.4, .64, 1);
+}
+
+.cs2-opt.correct .key {
+    color: var(--indigo);
+}
+
+.cs2-opt.wrong {
+    border-color: var(--red);
+    background: var(--red-bg);
+    color: var(--red);
+    animation: cs2-shake .35s;
+}
+
+.cs2-opt.wrong .key {
+    color: var(--red);
+}
+
+.cs2-opt.locked {
+    cursor: default;
+}
+
+/* The four assertion–reason options are the same ~50-character
+   sentences on every A–R block in the app. Lead with the short form;
+   keep the exam's exact wording underneath. */
+.cs2-opt.two .o-short {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: inherit;
+    font-size: .85rem;
+}
+
+.cs2-opt.two .o-full {
+    display: block;
+    font-size: .73rem;
+    color: var(--cs-mute);
+    line-height: 1.45;
+    margin-top: 3px;
+}
+
+.cs2-opt.two.correct .o-full,
+.cs2-opt.two.wrong .o-full {
+    opacity: .75;
+}
+
+.cs2-check-btn {
+    width: 100%;
+    padding: 14px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--cs-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: .86rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 50px;
+    margin-top: 4px;
+    transition: opacity .2s, transform .1s;
+}
+
+.cs2-check-btn:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+.cs2-check-btn:active:not(:disabled) {
+    transform: scale(.98);
+}
+
+.cs2-reveal {
+    margin-top: 14px;
+    animation: cs2-fade-up .3s var(--cs-ease) both;
+}
+
+/* AR statement plate */
+.cs2-ar-plate {
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 14px;
+    padding: 15px 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--cs-shadow);
+}
+
+.cs2-ar-plate .row {
+    font-size: .87rem;
+    color: var(--s700);
+    line-height: 1.65;
+}
+
+.cs2-ar-plate .row+.row {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--cs-line);
+}
+
+.cs2-ar-plate .row b {
+    color: var(--cs-ink);
+    font-family: var(--font-display);
+    font-size: .78rem;
+}
+
+/* ════ PAGER ════ */
+.cs2-pg-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.cs2-pg-segs {
+    flex: 1;
+    display: flex;
+    gap: 4px;
+}
+
+.cs2-pg-seg {
+    flex: 1;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--s200);
+    transition: background .3s, transform .3s;
+}
+
+.cs2-pg-seg.on {
+    background: var(--cs-grad);
+}
+
+/* Flashcard segments carry per-card outcome, not just position. */
+.cs2-pg-seg.ok {
+    background: var(--cs-grad);
+}
+
+.cs2-pg-seg.no {
+    background: var(--red);
+}
+
+.cs2-pg-seg.cur {
+    transform: scaleY(2);
+    background: #94a3b8;
+}
+
+.cs2-layer.dark .cs2-pg-seg {
+    background: rgba(255, 255, 255, .12);
+}
+
+.cs2-layer.dark .cs2-pg-seg.ok {
+    background: var(--cs-grad);
+}
+
+.cs2-layer.dark .cs2-pg-seg.no {
+    background: #c43d3d;
+}
+
+.cs2-pg-count {
+    font-family: var(--font-display);
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--cs-mute);
+    flex-shrink: 0;
+}
+
+.cs2-layer.dark .cs2-pg-count {
+    color: #64748b;
+}
+
+.cs2-pg-body {
+    animation: cs2-slide-in .3s var(--cs-ease) both;
+}
+
+.cs2-pg-body.back {
+    animation: cs2-slide-back .3s var(--cs-ease) both;
+}
+
+.cs2-pg-nav {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.cs2-pg-nav button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    font-family: var(--font-display);
+    font-size: .84rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 50px;
+    border: 1.5px solid var(--cs-line);
+    background: var(--cs-card);
+    color: var(--s600);
+    transition: transform .1s;
+}
+
+.cs2-pg-nav button:first-child {
+    flex: 0 0 64px;
+}
+
+.cs2-pg-nav button.primary {
+    border: 0;
+    background: var(--cs-grad);
+    color: #fff;
+    box-shadow: 0 8px 20px -8px rgba(31, 88, 150, .55);
+}
+
+.cs2-pg-nav button:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+.cs2-pg-nav button:active:not(:disabled) {
+    transform: scale(.98);
+}
+
+.cs2-q-tags {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+/* ── the real/variant divider ──
+   v2 shuffled genuine past papers and generated practice questions
+   into one pager with matching layout. The one boundary this product
+   cannot afford to blur is which questions NEET actually asked. */
+.cs2-divider-slide {
+    text-align: center;
+    padding: 34px 18px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 20px;
+    box-shadow: var(--cs-shadow);
+    animation: cs2-pop .4s cubic-bezier(.34, 1.4, .64, 1) both;
+}
+
+.cs2-divider-slide .dv-ico {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    background: var(--cs-grad);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 12px 28px -10px rgba(31, 88, 150, .55);
+}
+
+.cs2-divider-slide h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--cs-ink);
+}
+
+.cs2-divider-slide p {
+    font-size: .84rem;
+    color: var(--cs-body);
+    line-height: 1.6;
+    margin: 8px auto 14px;
+    max-width: 40ch;
+}
+
+/* ════ FLASHCARDS — full-screen dark takeover ════ */
+.cs2-fc-stage {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 190px - var(--safe-top) - var(--safe-bottom));
+}
+
+.cs2-fc-scene {
+    flex: 1;
+    perspective: 1100px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+}
+
+.cs2-fc-inner {
+    position: relative;
+    width: 100%;
+    transform-style: preserve-3d;
+    transition: transform .5s cubic-bezier(.3, 1.2, .4, 1);
+    display: flex;
+}
+
+.cs2-fc-inner.flipped {
+    transform: rotateY(180deg);
+}
+
+.cs2-fc-face {
+    width: 100%;
+    border-radius: 24px;
+    padding: 26px 24px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.cs2-fc-front {
+    background: linear-gradient(155deg, #16233f 0%, var(--s900) 55%, #0e2e3a 100%);
+    border: 1px solid rgba(255, 255, 255, .09);
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .6);
+}
+
+.cs2-fc-back {
+    position: absolute;
+    inset: 0;
+    transform: rotateY(180deg);
+    background: linear-gradient(155deg, #10344c 0%, #0e2e3a 100%);
+    border: 1px solid rgba(93, 146, 207, .28);
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .6);
+    /* Auto-fit should mean this never fires. Kept as a floor for the one
+       pathological 1200-character card, not as the normal case. */
+    overflow-y: auto;
+    padding: 22px 20px;
+}
+
+.cs2-fc-pills {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.cs2-fc-pill {
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, .08);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, .09);
+}
+
+.cs2-fc-pill.hard {
+    color: #f0b4b4;
+    border-color: rgba(196, 61, 61, .4);
+}
+
+.cs2-fc-pill.easy {
+    color: #9fd6cf;
+    border-color: rgba(15, 111, 140, .5);
+}
+
+/* A card you sent to the back of the deck, come back around. */
+.cs2-fc-pill.again {
+    color: #cbd5e1;
+    background: rgba(93, 146, 207, .18);
+    border-color: rgba(93, 146, 207, .4);
+}
+
+/* THE BUG: this was a flex container wrapped straight around safeHtml()
+   output. A fill-blank card's text contains inline tags, so every run of
+   text between them became its own anonymous flex item — and flex-direction
+   is row. "On nutrient agar," and "small and compact" and "whereas fungal
+   colonies" laid out as three columns, running off the card.
+   The fix is one wrapper: the flex container now has exactly one child,
+   whatever the content contains. */
+.cs2-fc-q {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.cs2-fc-q .fq-in,
+.cs2-fc-ans .fq-in {
+    width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+.cs2-fc-q .fq-in {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: #f1f5f9;
+    line-height: 1.45;
+    letter-spacing: -.01em;
+}
+
+/* A flashcard you have to scroll is not a flashcard. Rather than fix the
+   type size and let the content overflow, fit the type to the content —
+   the card is the frame, the text lives inside it. */
+.cs2-fc-q.fs-xl .fq-in {
+    font-size: 1.42rem;
+    line-height: 1.4;
+}
+
+.cs2-fc-q.fs-l .fq-in {
+    font-size: 1.2rem;
+    line-height: 1.42;
+}
+
+.cs2-fc-q.fs-m .fq-in {
+    font-size: 1.04rem;
+    line-height: 1.48;
+}
+
+.cs2-fc-q.fs-s .fq-in {
+    font-size: .92rem;
+    line-height: 1.5;
+}
+
+.cs2-fc-q.fs-xs .fq-in {
+    font-size: .82rem;
+    line-height: 1.52;
+    font-weight: 600;
+}
+
+.cs2-fc-q.fs-xxs .fq-in {
+    font-size: .74rem;
+    line-height: 1.5;
+    font-weight: 600;
+}
+
+.cs2-fc-hint {
+    margin-top: 22px;
+    font-size: .74rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    justify-content: center;
+    animation: cs2-breathe 2.6s ease-in-out infinite;
+}
+
+.cs2-fc-albl {
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #5d92cf;
+    margin-bottom: 12px;
+}
+
+.cs2-fc-ans {
+    color: #e2e8f0;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+}
+
+.cs2-fc-ans .fq-in {
+    font-size: 1.02rem;
+    line-height: 1.65;
+}
+
+.cs2-fc-ans.fs-xl .fq-in {
+    font-size: 1.14rem;
+    line-height: 1.6;
+}
+
+.cs2-fc-ans.fs-l .fq-in {
+    font-size: 1.04rem;
+    line-height: 1.62;
+}
+
+.cs2-fc-ans.fs-m .fq-in {
+    font-size: .95rem;
+    line-height: 1.6;
+}
+
+.cs2-fc-ans.fs-s .fq-in {
+    font-size: .87rem;
+    line-height: 1.58;
+}
+
+.cs2-fc-ans.fs-xs .fq-in {
+    font-size: .79rem;
+    line-height: 1.55;
+}
+
+.cs2-fc-ans.fs-xxs .fq-in {
+    font-size: .72rem;
+    line-height: 1.5;
+}
+
+/* the mistake box shrinks with the answer it sits under */
+.cs2-fc-mis.fs-xs {
+    font-size: .72rem;
+    padding: 10px 12px;
+    margin-top: 12px;
+}
+
+.cs2-fc-mis.fs-xxs {
+    font-size: .67rem;
+    padding: 9px 11px;
+    margin-top: 10px;
+    line-height: 1.45;
+}
+
+.cs2-fc-mis {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(196, 61, 61, .12);
+    border: 1px solid rgba(196, 61, 61, .3);
+    font-size: .8rem;
+    color: #fca5a5;
+    line-height: 1.55;
+}
+
+/* Drag tint — you see which way you're committing before you let go.
+   Left = got it, right = review again. */
+.cs2-fc-inner.drag-got .cs2-fc-back {
+    border-color: rgba(15, 111, 140, .85);
+    box-shadow: 0 0 0 2px rgba(15, 111, 140, .35), 0 24px 60px -20px rgba(0, 0, 0, .6);
+}
+
+.cs2-fc-inner.drag-again .cs2-fc-back {
+    border-color: rgba(196, 61, 61, .8);
+    box-shadow: 0 0 0 2px rgba(196, 61, 61, .3), 0 24px 60px -20px rgba(0, 0, 0, .6);
+}
+
+.cs2-fc-swipehint {
+    margin-top: 14px;
+    font-size: .68rem;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    justify-content: center;
+}
+
+.cs2-fc-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.cs2-fc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 16px;
+    font-family: var(--font-display);
+    font-size: .86rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 54px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, .06);
+    color: #cbd5e1;
+    transition: transform .1s;
+}
+
+.cs2-fc-btn:active {
+    transform: scale(.97);
+}
+
+.cs2-fc-btn.got {
+    border: 0;
+    background: var(--cs-grad);
+    color: #fff;
+    box-shadow: 0 10px 26px -8px rgba(31, 88, 150, .6);
+}
+
+/* completion — shared by flashcards (dark) and PYQ (.light) */
+.cs2-fc-doneview {
+    text-align: center;
+    padding: 40px 10px;
+    color: #e2e8f0;
+    animation: cs2-pop .45s cubic-bezier(.34, 1.4, .64, 1) both;
+}
+
+.cs2-fc-doneview h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-top: 18px;
+    color: #f1f5f9;
+}
+
+.cs2-fc-doneview p {
+    font-size: .82rem;
+    color: #94a3b8;
+    margin-top: 6px;
+    max-width: 36ch;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.55;
+}
+
+.cs2-fc-doneview .cs2-ring .pct {
+    color: #f1f5f9;
+}
+
+.cs2-fc-doneview .cs2-ring .track {
+    stroke: rgba(255, 255, 255, .1);
+}
+
+.cs2-fc-doneview .dv-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 22px;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* the PYQ result card lives on the light layer */
+.cs2-fc-doneview.light {
+    color: var(--cs-ink);
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 20px;
+    box-shadow: var(--cs-shadow);
+    padding: 34px 18px;
+}
+
+.cs2-fc-doneview.light h3 {
+    color: var(--cs-ink);
+}
+
+.cs2-fc-doneview.light p {
+    color: var(--cs-body);
+}
+
+.cs2-fc-doneview.light .cs2-ring .pct {
+    color: var(--cs-ink);
+}
+
+.cs2-fc-doneview.light .cs2-ring .track {
+    stroke: var(--s100);
+}
+
+.cs2-fc-doneview .dv-ico.plain {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    margin: 0 auto;
+    background: var(--cs-grad-soft);
+    color: var(--indigo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.cs2-fc-restart {
+    padding: 13px 26px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    background: rgba(255, 255, 255, .06);
+    color: #e2e8f0;
+    font-family: var(--font-display);
+    font-size: .82rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 48px;
+}
+
+.cs2-fc-restart:active {
+    transform: scale(.97);
+}
+
+/* ════ VISUAL MAP ════ */
+.cs2-map {
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 16px;
+    padding: 18px 14px;
+    box-shadow: var(--cs-shadow);
+    text-align: center;
+}
+
+.cs2-map-row {
+    display: flex;
+    justify-content: center;
+}
+
+/* An actual drawn connector, rather than v2's "↓" text character. */
+.cs2-map-link {
+    width: 2px;
+    height: 18px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, var(--g600), var(--indigo));
+    opacity: .35;
+    border-radius: 2px;
+}
+
+.cs2-map-fan {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 7px;
+    position: relative;
+    padding-top: 4px;
+}
+
+.cs2-map-node {
+    display: inline-block;
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-size: .84rem;
+    font-weight: 700;
+    max-width: 100%;
+}
+
+.cs2-map-node.root {
+    background: var(--cs-grad);
+    color: #fff;
+    box-shadow: 0 8px 20px -8px rgba(31, 88, 150, .55);
+}
+
+.cs2-map-node.parent {
+    background: var(--s800);
+    color: #f1f5f9;
+    font-size: .76rem;
+}
+
+.cs2-map-child {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    color: var(--s700);
+    font-size: .76rem;
+    font-weight: 600;
+    box-shadow: var(--cs-shadow);
+    cursor: pointer;
+    transition: all .2s;
+}
+
+
+
+.cs2-rels {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cs2-rel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 12px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 12px;
+    font-size: .76rem;
+    min-height: 44px;
+}
+
+.cs2-rel .fr {
+    font-weight: 700;
+    color: var(--cs-ink);
+    min-width: 64px;
+}
+
+.cs2-rel .rl {
+    color: var(--cs-mute);
+    font-style: italic;
+    flex: 1;
+    text-align: center;
+}
+
+.cs2-rel .to {
+    font-weight: 700;
+    color: var(--indigo);
+    min-width: 64px;
+    text-align: right;
+}
+
+/* Relationships just read. There is no filter, because two rows never
+   needed one — and a control nobody can explain is worse than no control. */
+
+.cs2-flow-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: var(--cs-shadow);
+    position: relative;
+}
+
+.cs2-flow-wrap svg .cs2-node {
+    transition: opacity .2s;
+}
+
+/* ════ FIGURES ════ */
+/* The figure stays put while the labels scroll past it. In v2 you read
+   "label 4 = thylakoid lumen" with the figure four screens above. */
+.cs2-fig-pin {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--s50);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}
+
+.cs2-fig-img {
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 18px;
+    overflow: hidden;
+    text-align: center;
+    box-shadow: var(--cs-shadow);
+}
+
+.cs2-fig-img .fig-holder {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.cs2-fig-img img {
+    max-width: 100%;
+    max-height: 240px;
+    object-fit: contain;
+    cursor: zoom-in;
+    display: block;
+    margin: 0 auto;
+    padding: 12px;
+}
+
+.cs2-fig-img .fig-zoom {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 0;
+    border-top: 1px solid var(--cs-line);
+    background: var(--s50);
+    color: var(--indigo);
+    font-family: var(--font-body);
+    font-size: .7rem;
+    font-weight: 700;
+    padding: 9px;
+    cursor: pointer;
+    min-height: 38px;
+}
+
+/* Numbered markers on the figure itself — the way figure questions are
+   actually asked. Rendered only when the analysis carries coordinates;
+   otherwise the pinned figure + synced label rows do the work. */
+.cs2-hotspots {
+    position: absolute;
+    inset: 12px;
+    pointer-events: none;
+}
+
+.cs2-hot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: var(--cs-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: .62rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .35);
+    transition: transform .2s;
+}
+
+.cs2-hot.active {
+    transform: translate(-50%, -50%) scale(1.35);
+    box-shadow: 0 0 0 4px rgba(15, 111, 140, .3);
+}
+
+.cs2-figq {
+    background: var(--cs-grad-soft);
+    border: 1px dashed var(--g400);
+    border-radius: 14px;
+    padding: 13px 15px;
+    margin-bottom: 14px;
+    font-size: .88rem;
+    color: var(--s800);
+    line-height: 1.6;
+    font-family: var(--font-display);
+    font-weight: 600;
+}
+
+.cs2-comp {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 11px;
+    font-size: .82rem;
+    color: var(--s700);
+    line-height: 1.55;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    min-height: 44px;
+}
+
+.cs2-comp .cm {
+    flex: 1;
+}
+
+.cs2-comp.active {
+    border-color: var(--g400);
+    background: var(--cs-grad-soft);
+}
+
+.cs2-comp .lbl {
+    min-width: 30px;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: 7px;
+    background: var(--cs-grad);
+    color: #fff;
+    font-size: .68rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cs2-numbers {
+    background: var(--s900);
+    border-radius: 14px;
+    padding: 14px 16px;
+}
+
+.cs2-numbers .row {
+    font-size: .82rem;
+    color: #9fc3e8;
+    font-family: var(--font-mono, monospace);
+    line-height: 1.7;
+}
+
+/* ════ LIGHTBOX ════
+   v2's "tap to zoom" toggled a max-height class. On a full page of
+   NCERT body text that is not a zoom, it is a taller thumbnail. */
+.cs2-lb {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background: #0b1220;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity .24s;
+}
+
+.cs2-lb.in {
+    opacity: 1;
+}
+
+.cs2-lb-head {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: calc(10px + var(--safe-top)) 12px 10px;
+    background: rgba(11, 18, 32, .9);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+.cs2-lb-head .cs2-head-btn {
+    background: rgba(255, 255, 255, .07);
+    border-color: rgba(255, 255, 255, .12);
+    color: #e2e8f0;
+}
+
+.cs2-lb-title {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-display);
+    font-size: .82rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cs2-lb-stage {
+    flex: 1;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pinch-zoom pan-x pan-y;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10px;
+}
+
+.cs2-lb-stage img {
+    width: 100%;
+    height: auto;
+    max-width: none;
+    border-radius: 8px;
+    background: #fff;
+    transition: width .2s var(--cs-ease);
+    cursor: zoom-in;
+}
+
+.cs2-lb-foot {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 10px 12px calc(12px + var(--safe-bottom));
+    background: rgba(11, 18, 32, .9);
+}
+
+.cs2-lb-foot:empty {
+    display: none;
+}
+
+.cs2-lb-foot button {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, .07);
+    color: #e2e8f0;
+    font-size: .9rem;
+    cursor: pointer;
+}
+
+.cs2-lb-foot button:disabled {
+    opacity: .3;
+}
+
+.cs2-lb-foot .lb-count {
+    font-family: var(--font-display);
+    font-size: .8rem;
+    font-weight: 700;
+    color: #94a3b8;
+    min-width: 62px;
+    text-align: center;
+}
+
+/* ════ EMPTY ════ */
+.cs2-empty {
+    text-align: center;
+    padding: 42px 20px;
+    color: var(--cs-mute);
+    font-size: .84rem;
+}
+
+.cs2-empty i {
+    font-size: 1.6rem;
+    display: block;
+    margin-bottom: 12px;
+    color: var(--s300);
+}
+
+/* ════ SUCCESS MOMENT ════
+   v2 froze the screen for 1200ms and then navigated somewhere without
+   asking. Same celebration; now it says where it's going and a tap
+   goes there immediately. */
+.cs2-success {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(248, 250, 252, .94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    animation: cs2-fade .25s both;
+    cursor: pointer;
+}
+
+.cs2-success .ck {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: var(--cs-grad);
+    color: #fff;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 18px 44px -12px rgba(31, 88, 150, .6);
+    animation: cs2-pop .5s cubic-bezier(.34, 1.5, .64, 1) both;
+}
+
+.cs2-success h3 {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--cs-ink);
+}
+
+.cs2-success p {
+    font-size: .82rem;
+    color: var(--cs-body);
+    text-align: center;
+    max-width: 34ch;
+    padding: 0 20px;
+}
+
+.cs2-success .sk {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1.5px solid var(--cs-line);
+    background: var(--cs-card);
+    color: var(--s600);
+    font-family: var(--font-display);
+    font-size: .78rem;
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    min-height: 42px;
+}
+
+/* ════ ANIMATIONS ════ */
+@keyframes cs2-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cs2-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes cs2-pop {
+    0% {
+        opacity: 0;
+        transform: scale(.6);
+    }
+
+    70% {
+        transform: scale(1.06);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes cs2-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(26px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes cs2-slide-back {
+    from {
+        opacity: 0;
+        transform: translateX(-26px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes cs2-shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
+
+    75% {
+        transform: translateX(-3px);
+    }
+}
+
+@keyframes cs2-correct {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.015);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes cs2-breathe {
+
+    0%,
+    100% {
+        opacity: .55;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes cs2-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 3px rgba(31, 88, 150, .18);
+    }
+
+    50% {
+        box-shadow: 0 0 0 6px rgba(31, 88, 150, .06);
+    }
+}
+
+/* staggered list entrances */
+.cs2-chapters .cs2-chapter-row:nth-child(1),
+.cs2-subjects .cs2-subject-card:nth-child(1),
+.cs2-spine .cs2-station:nth-child(1) {
+    animation-delay: .03s;
+}
+
+.cs2-chapters .cs2-chapter-row:nth-child(2),
+.cs2-subjects .cs2-subject-card:nth-child(2),
+.cs2-spine .cs2-station:nth-child(2) {
+    animation-delay: .06s;
+}
+
+.cs2-chapters .cs2-chapter-row:nth-child(3),
+.cs2-subjects .cs2-subject-card:nth-child(3),
+.cs2-spine .cs2-station:nth-child(3) {
+    animation-delay: .09s;
+}
+
+.cs2-chapters .cs2-chapter-row:nth-child(4),
+.cs2-spine .cs2-station:nth-child(4) {
+    animation-delay: .12s;
+}
+
+.cs2-chapters .cs2-chapter-row:nth-child(5),
+.cs2-spine .cs2-station:nth-child(5) {
+    animation-delay: .15s;
+}
+
+.cs2-chapters .cs2-chapter-row:nth-child(6),
+.cs2-spine .cs2-station:nth-child(6) {
+    animation-delay: .18s;
+}
+
+.cs2-chapters .cs2-chapter-row:nth-child(7),
+.cs2-spine .cs2-station:nth-child(7) {
+    animation-delay: .21s;
+}
+
+.cs2-chapters .cs2-chapter-row:nth-child(n+8),
+.cs2-spine .cs2-station:nth-child(n+8) {
+    animation-delay: .24s;
+}
+
+/* wider phones / small tablets */
+@media (min-width: 520px) {
+    .cs2-subjects {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .cs2-spine {
+        padding-left: 34px;
+        padding-right: 16px;
+    }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .cs2-picker,
+    .cs2-listbody,
+    .cs2-statline,
+    .cs2-resume,
+    .cs2-subject-card,
+    .cs2-chapter-row,
+    .cs2-station,
+    .cs2-block-hero,
+    .cs2-recap,
+    .cs2-sec,
+    .cs2-pg-body,
+    .cs2-layer-body.swap,
+    .cs2-reveal,
+    .cs2-recall .a,
+    .cs2-success .ck,
+    .cs2-celebrate,
+    .cs2-divider-slide,
+    .cs2-fc-doneview,
+    .cs2-acc .acc-body,
+    .cs2-skel {
+        animation: none !important;
+    }
+
+    .cs2-skel {
+        background: var(--s100);
+    }
+
+    .cs2-layer,
+    .cs2-fc-inner,
+    .cs2-ring .fill,
+    .cs2-lb,
+    .cs2-lb-stage img,
+    .cs2-head-bar>i {
+        transition: none !important;
+    }
+
+    .cs2-station.current .dot {
+        animation: none !important;
+    }
+
+    .cs2-fc-hint {
+        animation: none !important;
+        opacity: .8;
+    }
+}

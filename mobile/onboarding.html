@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" data-bars="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <title>Welcome - NAADI AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles-mobile.css">
+    <!-- last-loaded: adds only .onb-* classes, and reclaims .onb-body from
+         .auth-page-body's centring flexbox -->
+    <link rel="stylesheet" href="onboarding.css">
+    <!-- Desktop-native (≥1024px) spread for the tour. Double-gated: the
+         media attribute skips the download on phones, and the sheet
+         itself is wrapped in an identical @media query. Presentation
+         only — onboarding.js is not touched. -->
+    <link rel="stylesheet" href="onboarding-desktop.css" media="(min-width: 1024px)">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+</head>
+
+<body class="auth-page-body onb-body">
+
+    <!-- Same animated background as login / signup -->
+    <div class="auth-bg">
+        <div class="auth-bg-gradient"></div>
+        <div class="auth-bg-grid"></div>
+        <div class="auth-orb auth-orb-1"></div>
+        <div class="auth-orb auth-orb-2"></div>
+        <div class="auth-orb auth-orb-3"></div>
+    </div>
+
+    <div class="onb-shell">
+
+        <header class="onb-head">
+            <button class="onb-back" id="onb-back" onclick="onbBack()" aria-label="Previous slide" hidden>
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div class="onb-rail" id="onb-rail" role="progressbar" aria-label="Tour progress"></div>
+            <button class="onb-skip" id="onb-skip" onclick="onbSkipAll()">Skip</button>
+        </header>
+
+        <!-- Slides are rendered by onboarding.js. Swipe, arrow keys and the
+             pill all route through onbGoTo(). -->
+        <main class="onb-stage" id="onb-stage" aria-roledescription="carousel" aria-label="What NAADI does"></main>
+
+        <footer class="onb-foot">
+            <button class="onb-cta" id="onb-cta" onclick="onbNext()">
+                <span id="onb-cta-label">Next</span>
+                <i class="fa-solid fa-arrow-right" id="onb-cta-icon"></i>
+            </button>
+        </footer>
+
+    </div>
+
+    <div id="nd-toast-container"></div>
+    <script src="system-bars.js"></script>
+    <script src="shared.js"></script>
+    <script src="onboarding.js"></script>
+
+</body>
+
+</html>

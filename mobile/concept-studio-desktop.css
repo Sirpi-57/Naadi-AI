@@ -1,0 +1,3201 @@
+/* ════════════════════════════════════════════════════════════════
+   NAADI AI — CONCEPT STUDIO · DESKTOP WORKSTATION
+   concept-studio-desktop.css   (replaces the old CSS-only desktop pass)
+   ─────────────────────────────────────────────────────────────────
+   A desktop-native rebuild of Concept Studio, NOT a widened phone.
+
+   • Loaded from app.html with  media="(min-width: 1024px)"  AND the
+     entire sheet is additionally wrapped in @media (min-width:1024px),
+     so it is inert on phones / the Capacitor build under any loader.
+   • Every rule is scoped to the `csd-` namespace or to the two Studio
+     view containers, so it can never touch a mobile `cs2-` element.
+   • Pairs with concept-studio-desktop.js, which renders the `csd-` DOM
+     only when the viewport is ≥1024px.
+
+   Design language — reuses the app's tokens (styles-mobile.css), never
+   invents colour:
+     signature      the CASE CHART (left rounds rail) + ECG progress
+                    pulse, and the SECTION SPINE (right rail)
+     one gradient   --g600 → --indigo  (progress / correct / must-know)
+     channels       red   = danger  (traps, watch-outs, wrong)
+                    amber = insider (NEET tip, examiner angle)
+                    slate plate --s900 = "commit to memory"
+                    (named values, formula, flashcards)
+     type           Sora display · DM Sans body · Caveat = the mentor's
+                    handwritten margin notes (used with restraint)
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* ── tokens (desktop-only, csd-scoped) ─────────────────────────── */
+    :root {
+        --csd-chart-w: 328px;
+        /* left rounds rail  */
+        --csd-spine-w: 312px;
+        /* right section rail*/
+        --csd-read: 720px;
+        /* body reading measure */
+        --csd-top-h: 62px;
+        /* workstation top bar  */
+
+        --csd-bg: #f5f7fb;
+        --csd-panel: #ffffff;
+        --csd-ink: var(--s900);
+        --csd-body: var(--s600);
+        --csd-mute: var(--s400);
+        --csd-line: #e6ebf2;
+        --csd-line-soft: #eef2f7;
+
+        --csd-grad: linear-gradient(135deg, var(--g600) 0%, var(--indigo) 100%);
+        --csd-grad-soft: linear-gradient(135deg, rgba(31, 88, 150, .07), rgba(15, 111, 140, .07));
+
+        --csd-r: 16px;
+        --csd-r-sm: 11px;
+        --csd-shadow: 0 1px 2px rgba(15, 23, 42, .05), 0 10px 28px -14px rgba(15, 23, 42, .16);
+        --csd-shadow-lift: 0 2px 6px rgba(15, 23, 42, .07), 0 22px 48px -18px rgba(23, 63, 111, .30);
+        --csd-ring-focus: 0 0 0 3px rgba(31, 88, 150, .32);
+        --csd-ease: cubic-bezier(.22, 1, .36, 1);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       0. HOST CONTAINERS
+       The picker + chapter list live inside .m-main (offset by the app
+       sidebar). The journey takes over the whole viewport as a fixed
+       workstation, so it is immune to any .m-main / .no-tabbar quirks.
+       ════════════════════════════════════════════════════════════ */
+    #quick-revise-content .csd {
+        min-height: calc(100vh - 56px);
+        background:
+            radial-gradient(1200px 480px at 78% -10%, rgba(15, 111, 140, .06), transparent 60%),
+            var(--csd-bg);
+    }
+
+    /* Journey workstation: full-bleed fixed overlay. The mobile shell is
+       already hidden by navigate(); this simply owns the viewport. */
+    #csd-station {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        display: grid;
+        grid-template-columns: var(--csd-chart-w) minmax(0, 1fr) var(--csd-spine-w);
+        grid-template-rows: var(--csd-top-h) minmax(0, 1fr);
+        grid-template-areas:
+            "top   top    top"
+            "chart center spine";
+        background: var(--csd-bg);
+        font-family: var(--font-body);
+        color: var(--csd-ink);
+        -webkit-font-smoothing: antialiased;
+        transition: grid-template-columns .3s var(--csd-ease);
+    }
+
+    /* issue 1 — the case chart collapses so the reading column fills the space */
+    #csd-station.chart-collapsed {
+        grid-template-columns: 0 minmax(0, 1fr) var(--csd-spine-w);
+    }
+
+    #csd-station.chart-collapsed .csd-chart {
+        opacity: 0;
+        pointer-events: none;
+        border-right-color: transparent;
+    }
+
+    .csd-chart-toggle.on {
+        color: var(--g600);
+        background: var(--csd-grad-soft);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #csd-station {
+            transition: none;
+        }
+    }
+
+    /* Everything in the csd tree opts out of the UA button chrome */
+    .csd button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: inherit;
+    }
+
+    .csd :focus-visible,
+    #csd-station :focus-visible {
+        outline: none;
+        box-shadow: var(--csd-ring-focus);
+        border-radius: 8px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       1. SHARED PRIMITIVES
+       ════════════════════════════════════════════════════════════ */
+
+    /* eyebrow / micro label */
+    .csd-eyebrow {
+        font-family: var(--font-body);
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--csd-mute);
+    }
+
+    /* a labelled divider used above each content block */
+    .csd-seclabel {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 12px;
+    }
+
+    .csd-seclabel .t {
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .13em;
+        text-transform: uppercase;
+        color: var(--g600);
+        white-space: nowrap;
+    }
+
+    .csd-seclabel .ln {
+        height: 1px;
+        flex: 1;
+        background: var(--csd-line);
+    }
+
+    /* progress ring */
+    .csd-ring {
+        position: relative;
+        display: inline-grid;
+        place-items: center;
+        flex-shrink: 0;
+    }
+
+    .csd-ring svg {
+        transform: rotate(-90deg);
+    }
+
+    .csd-ring .track {
+        stroke: var(--s200);
+    }
+
+    .csd-ring.empty .track {
+        stroke-dasharray: 2 4;
+        stroke: var(--s300);
+    }
+
+    .csd-ring .fill {
+        transition: stroke-dashoffset 1s var(--csd-ease);
+    }
+
+    .csd-ring .lbl {
+        position: absolute;
+        font-family: var(--font-display);
+        font-weight: 700;
+        color: var(--csd-ink);
+        line-height: 1;
+    }
+
+    .csd-ring .lbl .u {
+        font-size: .55em;
+        margin-left: .5px;
+        color: var(--csd-mute);
+    }
+
+    .csd-ring .lbl .done {
+        color: var(--indigo);
+    }
+
+    /* chips */
+    .csd-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: .7rem;
+        font-weight: 600;
+        line-height: 1;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: var(--s100);
+        color: var(--s600);
+        white-space: nowrap;
+    }
+
+    .csd-chip i {
+        font-size: .62rem;
+    }
+
+    .csd-chip.grad {
+        background: var(--csd-grad);
+        color: #fff;
+    }
+
+    .csd-chip.star {
+        background: linear-gradient(135deg, #fff4d6, #ffe7ad);
+        color: #8a5a00;
+    }
+
+    .csd-chip.year {
+        background: var(--g50);
+        color: var(--g700);
+    }
+
+    .csd-chip.danger {
+        background: var(--red-bg);
+        color: var(--red);
+    }
+
+    .csd-chip.done {
+        background: var(--indigo-bg);
+        color: var(--indigo);
+    }
+
+    .csd-chip.ghost {
+        background: transparent;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        color: var(--s500);
+    }
+
+    /* primary / ghost buttons */
+    .csd-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-family: var(--font-body);
+        font-weight: 600;
+        font-size: .92rem;
+        padding: 11px 18px;
+        border-radius: 12px;
+        transition: transform .12s var(--csd-ease), box-shadow .18s, background .18s, color .18s;
+    }
+
+    .csd-btn.primary {
+        background: var(--csd-grad);
+        color: #fff;
+        box-shadow: 0 8px 20px -10px rgba(23, 63, 111, .6);
+    }
+
+    .csd-btn.primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 26px -10px rgba(23, 63, 111, .7);
+    }
+
+    .csd-btn.ghost {
+        background: #fff;
+        color: var(--s700);
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+    }
+
+    .csd-btn.ghost:hover {
+        box-shadow: inset 0 0 0 1px var(--s300);
+        background: var(--s50);
+    }
+
+    .csd-btn:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* semantic content channels — the heart of the "read it at a glance"
+       hierarchy. Each channel has a distinct shape + edge + tint. */
+    .csd-def {
+        font-size: 1.06rem;
+        line-height: 1.62;
+        color: var(--csd-ink);
+        background: #fff;
+        border-radius: var(--csd-r);
+        padding: 20px 22px 20px 26px;
+        box-shadow: var(--csd-shadow);
+        position: relative;
+    }
+
+    .csd-def::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 14px;
+        bottom: 14px;
+        width: 4px;
+        border-radius: 4px;
+        background: var(--csd-grad);
+    }
+
+    .csd-prose {
+        font-size: .98rem;
+        line-height: 1.68;
+        color: var(--csd-body);
+    }
+
+    .csd-prose strong {
+        color: var(--csd-ink);
+    }
+
+    /* danger channel (red) — traps, watch-outs, misconceptions */
+    .csd-danger {
+        background: var(--red-bg);
+        border-radius: var(--csd-r);
+        padding: 16px 18px 16px 18px;
+        color: #7a2222;
+        font-size: .96rem;
+        line-height: 1.6;
+        box-shadow: inset 0 0 0 1px rgba(196, 61, 61, .18);
+    }
+
+    .csd-danger .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: var(--red);
+        margin-bottom: 8px;
+    }
+
+    .csd-danger.hard {
+        background: #fbeaea;
+        box-shadow: inset 0 0 0 1px rgba(196, 61, 61, .32);
+    }
+
+    /* insider channel (amber) — NEET tip, examiner angle, "asked as" */
+    .csd-insider {
+        background: var(--amber-bg);
+        border-radius: var(--csd-r);
+        padding: 16px 18px;
+        color: #6f4a06;
+        font-size: .95rem;
+        line-height: 1.6;
+        box-shadow: inset 0 0 0 1px rgba(192, 124, 18, .2);
+    }
+
+    .csd-insider .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: var(--amber);
+        margin-bottom: 8px;
+    }
+
+    /* commit-to-memory plate (dark) — named values, formula */
+    .csd-plate {
+        background: linear-gradient(160deg, #10203a, #0b1626);
+        border-radius: var(--csd-r);
+        padding: 18px 20px;
+        color: #e8eef7;
+        box-shadow: 0 14px 34px -18px rgba(11, 22, 38, .7);
+    }
+
+    .csd-plate .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: .66rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: #7fb2d8;
+        margin-bottom: 12px;
+    }
+
+    .csd-values {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .csd-value {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: .9rem;
+        color: #fff;
+        background: rgba(125, 178, 216, .16);
+        border: 1px solid rgba(125, 178, 216, .28);
+        border-radius: 9px;
+        padding: 7px 11px;
+    }
+
+    .csd-formula {
+        font-family: var(--font-display);
+        font-size: 1.14rem;
+        letter-spacing: .01em;
+        color: #fff;
+        line-height: 1.5;
+    }
+
+    /* tick list (watch-outs / cues styled elsewhere) */
+    .csd-ticks {
+        display: grid;
+        gap: 8px;
+    }
+
+    .csd-tick {
+        display: flex;
+        gap: 11px;
+        font-size: .95rem;
+        line-height: 1.55;
+        color: var(--csd-body);
+    }
+
+    .csd-tick::before {
+        content: "";
+        flex-shrink: 0;
+        width: 7px;
+        height: 7px;
+        margin-top: 8px;
+        border-radius: 50%;
+        background: var(--csd-grad);
+    }
+
+    .csd-tick.warn::before {
+        background: var(--red);
+    }
+
+    /* a scrollbar treatment for inner rails */
+    .csd-scroll {
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--s300) transparent;
+    }
+
+    /* skeletons */
+    .csd-skel {
+        background: linear-gradient(100deg, #eef2f7 30%, #f6f9fc 50%, #eef2f7 70%);
+        background-size: 220% 100%;
+        animation: csd-shimmer 1.3s linear infinite;
+        border-radius: 12px;
+    }
+
+    @keyframes csd-shimmer {
+        0% {
+            background-position: 180% 0;
+        }
+
+        100% {
+            background-position: -80% 0;
+        }
+    }
+
+    /* empty / error — direction, not mood */
+    .csd-empty {
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+        text-align: center;
+        padding: 44px 24px;
+        color: var(--s500);
+        font-size: .95rem;
+    }
+
+    .csd-empty i {
+        font-size: 1.6rem;
+        color: var(--s300);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       2. PICKER  (view: quick-revise)
+       An editorial landing, not a wall of tiles. The app sidebar is the
+       nav; here we set intent + resume + pick a subject.
+       ════════════════════════════════════════════════════════════ */
+    .csd-picker {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 56px 40px 80px;
+    }
+
+    .csd-picker-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 32px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid var(--csd-line);
+    }
+
+    .csd-picker-head h1 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 2.7rem;
+        line-height: 1.02;
+        letter-spacing: -.02em;
+        color: var(--csd-ink);
+        margin: 12px 0 10px;
+    }
+
+    .csd-picker-head p {
+        font-size: 1.02rem;
+        line-height: 1.5;
+        color: var(--s500);
+        max-width: 46ch;
+    }
+
+    .csd-seg {
+        display: inline-flex;
+        padding: 4px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+    }
+
+    .csd-seg button {
+        font-size: .9rem;
+        font-weight: 600;
+        color: var(--s500);
+        padding: 9px 18px;
+        border-radius: 9px;
+        transition: color .15s, background .15s, box-shadow .15s;
+    }
+
+    .csd-seg button.active {
+        color: #fff;
+        background: var(--csd-grad);
+        box-shadow: 0 6px 16px -8px rgba(23, 63, 111, .6);
+    }
+
+    /* resume — the mentor pointing you back to the open case */
+    .csd-resume {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 20px;
+        width: 100%;
+        text-align: left;
+        margin: 30px 0 8px;
+        padding: 20px 22px;
+        background:
+            var(--csd-grad-soft),
+            #fff;
+        border-radius: var(--csd-r);
+        box-shadow: var(--csd-shadow);
+        transition: transform .16s var(--csd-ease), box-shadow .2s;
+    }
+
+    .csd-resume:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--csd-shadow-lift);
+    }
+
+    .csd-resume .rs-eyebrow {
+        color: var(--indigo);
+        margin-bottom: 4px;
+    }
+
+    .csd-resume .rs-name {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.18rem;
+        color: var(--csd-ink);
+        display: block;
+    }
+
+    .csd-resume .rs-sub {
+        font-size: .88rem;
+        color: var(--s500);
+    }
+
+    .csd-resume .rs-go {
+        display: grid;
+        place-items: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: var(--csd-grad);
+        color: #fff;
+        font-size: .9rem;
+    }
+
+    /* subject cards — three characterful cards, not a grid of tiles */
+    .csd-subjects {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-top: 34px;
+    }
+
+    .csd-subject {
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        padding: 26px 24px 22px;
+        background: #fff;
+        border-radius: var(--csd-r);
+        box-shadow: var(--csd-shadow);
+        position: relative;
+        overflow: hidden;
+        transition: transform .18s var(--csd-ease), box-shadow .22s;
+    }
+
+    .csd-subject::after {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 3px;
+        background: var(--csd-grad);
+        opacity: .0;
+        transition: opacity .2s;
+    }
+
+    .csd-subject:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--csd-shadow-lift);
+    }
+
+    .csd-subject:hover::after {
+        opacity: 1;
+    }
+
+    .csd-subject .sic {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        font-size: 1.35rem;
+        color: var(--g600);
+        background: var(--csd-grad-soft);
+    }
+
+    .csd-subject .sname {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.4rem;
+        color: var(--csd-ink);
+    }
+
+    .csd-subject .smeta {
+        font-size: .88rem;
+        color: var(--s500);
+        margin-top: 3px;
+    }
+
+    .csd-subject .sgo {
+        margin-top: auto;
+        font-size: .82rem;
+        font-weight: 600;
+        color: var(--g600);
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .csd-subject .sgo i {
+        transition: transform .18s var(--csd-ease);
+    }
+
+    .csd-subject:hover .sgo i {
+        transform: translateX(4px);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       3. CHAPTER BOARD  (view: quick-revise, after a subject)
+       ════════════════════════════════════════════════════════════ */
+    .csd-board {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 34px 40px 80px;
+    }
+
+    .csd-board-top {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 8px;
+    }
+
+    .csd-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: .86rem;
+        font-weight: 600;
+        color: var(--s500);
+        padding: 8px 12px 8px 8px;
+        border-radius: 9px;
+        transition: color .15s, background .15s;
+    }
+
+    .csd-back:hover {
+        color: var(--g600);
+        background: #fff;
+    }
+
+    .csd-board h1 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 2rem;
+        letter-spacing: -.02em;
+        color: var(--csd-ink);
+    }
+
+    .csd-board-sub {
+        font-size: .92rem;
+        color: var(--s500);
+        margin-top: 2px;
+    }
+
+    .csd-board-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin: 22px 0 20px;
+        flex-wrap: wrap;
+    }
+
+    .csd-filter {
+        display: inline-flex;
+        gap: 4px;
+        padding: 4px;
+        background: #fff;
+        border-radius: 11px;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+    }
+
+    .csd-filter button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: .84rem;
+        font-weight: 600;
+        color: var(--s500);
+        padding: 8px 13px;
+        border-radius: 8px;
+        transition: color .15s, background .15s;
+    }
+
+    .csd-filter button .n {
+        font-size: .72rem;
+        font-weight: 700;
+        color: var(--s400);
+        background: var(--s100);
+        padding: 1px 6px;
+        border-radius: 999px;
+    }
+
+    .csd-filter button.active {
+        color: #fff;
+        background: var(--csd-grad);
+    }
+
+    .csd-filter button.active .n {
+        color: #fff;
+        background: rgba(255, 255, 255, .22);
+    }
+
+    .csd-search {
+        position: relative;
+        min-width: 260px;
+    }
+
+    .csd-search i {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--s400);
+        font-size: .85rem;
+    }
+
+    .csd-search input {
+        width: 100%;
+        font-family: var(--font-body);
+        font-size: .9rem;
+        color: var(--csd-ink);
+        padding: 11px 14px 11px 36px;
+        border-radius: 11px;
+        border: none;
+        background: #fff;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        transition: box-shadow .15s;
+    }
+
+    .csd-search input:focus {
+        outline: none;
+        box-shadow: inset 0 0 0 1px var(--g400), var(--csd-ring-focus);
+    }
+
+    .csd-chapters {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 16px;
+    }
+
+    .csd-chapter {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 16px;
+        align-items: start;
+        text-align: left;
+        padding: 20px;
+        background: #fff;
+        border-radius: var(--csd-r);
+        box-shadow: var(--csd-shadow);
+        transition: transform .16s var(--csd-ease), box-shadow .2s;
+    }
+
+    .csd-chapter:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--csd-shadow-lift);
+    }
+
+    .csd-chapter.done {
+        background: linear-gradient(180deg, #f4faf8, #fff);
+    }
+
+    .csd-chapter .cname {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.08rem;
+        line-height: 1.28;
+        color: var(--csd-ink);
+    }
+
+    .csd-chapter .cmeta {
+        font-size: .84rem;
+        color: var(--s500);
+        margin-top: 6px;
+    }
+
+    .csd-chapter .ctags {
+        margin-top: 11px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       4. WORKSTATION TOP BAR
+       ════════════════════════════════════════════════════════════ */
+    .csd-top {
+        grid-area: top;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 0 20px;
+        background: var(--s900);
+        color: #fff;
+    }
+
+    .csd-top .csd-iconbtn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        color: #cdd8e6;
+        background: rgba(255, 255, 255, .07);
+        transition: background .15s, color .15s;
+    }
+
+    .csd-top .csd-iconbtn:hover {
+        background: rgba(255, 255, 255, .14);
+        color: #fff;
+    }
+
+    .csd-top .ct-mid {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .csd-top .ct-title {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1rem;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .csd-top .ct-sub {
+        font-size: .76rem;
+        color: #9fb3c9;
+        margin-top: 1px;
+    }
+
+    /* ECG progress pulse in the top bar — the brand's own trace, filling
+       left-to-right as the chapter is completed. */
+    .csd-pulse {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .csd-pulse .pv {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: .92rem;
+        color: #fff;
+    }
+
+    .csd-pulse .pv .u {
+        font-size: .7em;
+        color: #9fb3c9;
+    }
+
+    .csd-ecg {
+        width: 132px;
+        height: 30px;
+        position: relative;
+    }
+
+    .csd-ecg svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .csd-ecg .base {
+        stroke: rgba(255, 255, 255, .18);
+    }
+
+    .csd-ecg .lead {
+        stroke: #58c6c9;
+        filter: drop-shadow(0 0 4px rgba(88, 198, 201, .6));
+        transition: stroke-dashoffset 1s var(--csd-ease);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       5. CASE CHART  (left rounds rail — the signature)
+       ════════════════════════════════════════════════════════════ */
+    .csd-chart {
+        grid-area: chart;
+        background: #fff;
+        border-right: 1px solid var(--csd-line);
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        min-width: 0;
+        overflow: hidden;
+        transition: opacity .22s var(--csd-ease);
+    }
+
+    .csd-chart-head {
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid var(--csd-line-soft);
+    }
+
+    .csd-chart-head .ch-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .csd-chart-head .ch-stat {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .csd-chart-head .ch-stat .txt strong {
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+        color: var(--csd-ink);
+    }
+
+    .csd-chart-head .ch-stat .txt {
+        font-size: .82rem;
+        color: var(--s500);
+        line-height: 1.4;
+    }
+
+    .csd-chart-head .ch-must {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 9px;
+        font-size: .76rem;
+        font-weight: 600;
+        color: #8a5a00;
+    }
+
+    .csd-chart-head .ch-must i {
+        color: #d9a017;
+    }
+
+    .csd-rounds {
+        flex: 1;
+        min-height: 0;
+        padding: 12px 12px 24px;
+    }
+
+    .csd-rounds-label {
+        padding: 6px 8px 10px;
+    }
+
+    /* each concept = a chart line */
+    .csd-round {
+        --dot: var(--s300);
+        display: grid;
+        grid-template-columns: 26px minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+        width: 100%;
+        text-align: left;
+        padding: 11px 12px 11px 8px;
+        border-radius: 12px;
+        position: relative;
+        transition: background .14s;
+    }
+
+    .csd-round:hover {
+        background: var(--s50);
+    }
+
+    /* the vertical thread connecting the chart lines */
+    .csd-round::before {
+        content: "";
+        position: absolute;
+        left: 20px;
+        top: -6px;
+        bottom: -6px;
+        width: 2px;
+        background: var(--csd-line);
+        z-index: 0;
+    }
+
+    .csd-round:first-child::before {
+        top: 18px;
+    }
+
+    .csd-round:last-child::before {
+        bottom: auto;
+        height: 24px;
+    }
+
+    .csd-round .idx {
+        position: relative;
+        z-index: 1;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: .78rem;
+        font-weight: 700;
+        color: var(--s500);
+        background: #fff;
+        box-shadow: inset 0 0 0 2px var(--s200);
+    }
+
+    .csd-round.done .idx {
+        color: #fff;
+        background: var(--csd-grad);
+        box-shadow: none;
+    }
+
+    .csd-round.current .idx {
+        color: #fff;
+        background: var(--s900);
+        box-shadow: 0 0 0 4px rgba(15, 23, 42, .12);
+    }
+
+    .csd-round .rtitle {
+        font-size: .9rem;
+        font-weight: 600;
+        line-height: 1.32;
+        color: var(--s700);
+    }
+
+    .csd-round.current .rtitle {
+        color: var(--csd-ink);
+    }
+
+    .csd-round.done .rtitle {
+        color: var(--s500);
+    }
+
+    .csd-round .rtags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 6px;
+    }
+
+    .csd-round .rhere {
+        font-size: .64rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--indigo);
+    }
+
+    .csd-round.tier-a .rtitle::after {
+        content: "★";
+        margin-left: 7px;
+        color: #d9a017;
+        font-size: .7rem;
+    }
+
+    .csd-round.active-block {
+        background: var(--csd-grad-soft);
+        box-shadow: inset 0 0 0 1px rgba(31, 88, 150, .16);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       6. CENTER — BLOCK HEADER + SECTION READING PANE
+       ════════════════════════════════════════════════════════════ */
+    .csd-center {
+        grid-area: center;
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .csd-center-scroll {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--s300) transparent;
+    }
+
+    .csd-inner {
+        max-width: calc(var(--csd-read) + 80px);
+        margin: 0 auto;
+        padding: 30px 40px 64px;
+        transition: max-width .3s var(--csd-ease), padding .3s var(--csd-ease);
+    }
+
+    /* when the case chart is collapsed the reading column claims the freed
+       space: a wider measure AND a comfortable step-up in type so it's
+       genuinely bigger and easier to read (not just re-centred). */
+    #csd-station.chart-collapsed .csd-inner {
+        max-width: 1000px;
+        padding-left: 56px;
+        padding-right: 56px;
+    }
+
+    #csd-station.chart-collapsed .csd-bhead h1 {
+        font-size: 2rem;
+    }
+
+    #csd-station.chart-collapsed .csd-bhead .precision {
+        font-size: 1.1rem;
+    }
+
+    #csd-station.chart-collapsed .csd-def {
+        font-size: 1.15rem;
+    }
+
+    #csd-station.chart-collapsed .csd-prose {
+        font-size: 1.05rem;
+    }
+
+    #csd-station.chart-collapsed .csd-lead p {
+        font-size: 1.34rem;
+    }
+
+    #csd-station.chart-collapsed .csd-scenario .setup {
+        font-size: 1.08rem;
+    }
+
+    #csd-station.chart-collapsed .csd-step .txt {
+        font-size: 1.04rem;
+    }
+
+    #csd-station.chart-collapsed .csd-tick {
+        font-size: 1.02rem;
+    }
+
+    #csd-station.chart-collapsed .csd-cue {
+        font-size: 1.01rem;
+    }
+
+    #csd-station.chart-collapsed .csd-value {
+        font-size: .96rem;
+    }
+
+    #csd-station.chart-collapsed .csd-recall .q,
+    #csd-station.chart-collapsed .csd-recall .a {
+        font-size: 1.02rem;
+    }
+
+    #csd-station.chart-collapsed .csd-fc-q {
+        font-size: 1.28rem;
+    }
+
+    #csd-station.chart-collapsed .csd-q-text {
+        font-size: 1.12rem;
+    }
+
+    #csd-station.chart-collapsed .csd-opt .ot {
+        font-size: 1.02rem;
+    }
+
+    #csd-station.chart-collapsed .csd-teaser {
+        font-size: 1rem;
+    }
+
+    /* block header (persistent while sections switch) */
+    .csd-bhead {
+        padding-bottom: 22px;
+        border-bottom: 1px solid var(--csd-line);
+        margin-bottom: 24px;
+    }
+
+    .csd-bhead .btags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: 12px;
+    }
+
+    .csd-bhead h1 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 1.85rem;
+        line-height: 1.12;
+        letter-spacing: -.015em;
+        color: var(--csd-ink);
+    }
+
+    .csd-bhead .precision {
+        margin-top: 12px;
+        font-size: 1.02rem;
+        line-height: 1.55;
+        color: var(--s600);
+        padding-left: 15px;
+        border-left: 3px solid;
+        border-image: var(--csd-grad) 1;
+    }
+
+    .csd-teaser {
+        display: flex;
+        gap: 11px;
+        align-items: flex-start;
+        margin-top: 16px;
+        padding: 12px 15px;
+        background: var(--csd-grad-soft);
+        border-radius: 12px;
+        font-size: .9rem;
+        color: var(--s600);
+        line-height: 1.5;
+    }
+
+    .csd-teaser .ava {
+        flex-shrink: 0;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        background: var(--csd-grad);
+        font-size: .8rem;
+    }
+
+    .csd-teaser strong {
+        color: var(--csd-ink);
+    }
+
+    /* the active section title inside the pane */
+    .csd-sectitle {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .csd-sectitle .si {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        font-size: 1rem;
+        color: var(--g600);
+        background: var(--csd-grad-soft);
+    }
+
+    .csd-sectitle.danger .si {
+        color: var(--red);
+        background: var(--red-bg);
+    }
+
+    .csd-sectitle h2 {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: var(--csd-ink);
+    }
+
+    .csd-sectitle .sh {
+        font-size: .82rem;
+        color: var(--s500);
+    }
+
+    /* a generic content block spacing rhythm */
+    .csd-block {
+        margin-bottom: 26px;
+    }
+
+    .csd-block:last-child {
+        margin-bottom: 0;
+    }
+
+    /* two-column split used inside Understand / Apply */
+    .csd-split {
+        display: grid;
+        grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+        gap: 24px;
+        align-items: start;
+    }
+
+    .csd-split .side {
+        display: grid;
+        gap: 16px;
+        position: sticky;
+        top: 0;
+    }
+
+    /* figure preview jump */
+    .csd-figjump {
+        display: grid;
+        grid-template-columns: 74px minmax(0, 1fr) auto;
+        gap: 13px;
+        align-items: center;
+        width: 100%;
+        text-align: left;
+        padding: 10px;
+        background: #fff;
+        border-radius: 13px;
+        box-shadow: var(--csd-shadow);
+        transition: transform .15s var(--csd-ease), box-shadow .18s;
+    }
+
+    .csd-figjump:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--csd-shadow-lift);
+    }
+
+    .csd-figjump img {
+        width: 74px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 9px;
+        background: var(--s100);
+    }
+
+    .csd-figjump .fj-t {
+        font-weight: 600;
+        font-size: .9rem;
+        color: var(--csd-ink);
+        display: block;
+    }
+
+    .csd-figjump .fj-s {
+        font-size: .8rem;
+        color: var(--s500);
+    }
+
+    /* checkpoint (say-it-back) */
+    .csd-recall {
+        background: #fff;
+        border-radius: 14px;
+        padding: 17px 18px;
+        box-shadow: var(--csd-shadow);
+        box-shadow: var(--csd-shadow), inset 0 0 0 1px var(--csd-line-soft);
+    }
+
+    .csd-recall .q {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.45;
+        color: var(--csd-ink);
+        margin: 8px 0 14px;
+    }
+
+    .csd-recall .a {
+        margin-top: 14px;
+        font-size: .95rem;
+        line-height: 1.55;
+        color: var(--csd-body);
+        padding-top: 14px;
+        border-top: 1px dashed var(--csd-line);
+    }
+
+    /* source link */
+    .csd-source {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: .86rem;
+        font-weight: 600;
+        color: var(--s500);
+        padding: 11px 14px;
+        border-radius: 11px;
+        background: #fff;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        transition: color .15s, box-shadow .15s;
+    }
+
+    .csd-source:hover {
+        color: var(--g600);
+        box-shadow: inset 0 0 0 1px var(--g400);
+    }
+
+    /* cues (Apply · spot it by) */
+    .csd-cues {
+        display: grid;
+        gap: 10px;
+    }
+
+    .csd-cue {
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+        background: #fff;
+        border-radius: 12px;
+        padding: 13px 15px;
+        box-shadow: inset 0 0 0 1px var(--csd-line-soft);
+        font-size: .94rem;
+        line-height: 1.5;
+        color: var(--csd-body);
+    }
+
+    .csd-cue .n {
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: .82rem;
+        color: var(--g600);
+        background: var(--csd-grad-soft);
+    }
+
+    /* lead sentence (Apply · the principle) */
+    .csd-lead {
+        background: var(--csd-grad-soft);
+        border-radius: var(--csd-r);
+        padding: 20px 22px;
+    }
+
+    .csd-lead p {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 1.24rem;
+        line-height: 1.42;
+        color: var(--csd-ink);
+        margin-top: 6px;
+    }
+
+    /* worked scenario */
+    .csd-scenario {
+        background: #fff;
+        border-radius: var(--csd-r);
+        padding: 20px 22px;
+        box-shadow: var(--csd-shadow);
+    }
+
+    .csd-scenario .setup {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--csd-ink);
+    }
+
+    .csd-try {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        margin-top: 16px;
+        font-weight: 600;
+        font-size: .9rem;
+        color: var(--g600);
+        padding: 11px 16px;
+        border-radius: 11px;
+        background: var(--csd-grad-soft);
+        transition: background .15s;
+    }
+
+    .csd-try:hover {
+        background: rgba(31, 88, 150, .12);
+    }
+
+    .csd-steps {
+        margin-top: 18px;
+        display: grid;
+        gap: 2px;
+    }
+
+    .csd-step {
+        display: grid;
+        grid-template-columns: 30px minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .csd-step .rail {
+        display: grid;
+        justify-items: center;
+        gap: 3px;
+    }
+
+    .csd-step .rail .n {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: .78rem;
+        color: #fff;
+        background: var(--csd-grad);
+    }
+
+    .csd-step .rail .l {
+        width: 2px;
+        flex: 1;
+        min-height: 14px;
+        background: var(--s200);
+    }
+
+    .csd-step .txt {
+        font-size: .96rem;
+        line-height: 1.55;
+        color: var(--csd-body);
+        padding: 2px 0 16px;
+    }
+
+    .csd-answer {
+        display: flex;
+        gap: 11px;
+        align-items: flex-start;
+        margin-top: 8px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        background: var(--indigo-bg);
+        color: #0c5064;
+        font-weight: 600;
+        font-size: .97rem;
+        line-height: 1.5;
+    }
+
+    .csd-answer i {
+        color: var(--indigo);
+        margin-top: 3px;
+    }
+
+    .csd-watch {
+        display: flex;
+        gap: 11px;
+        align-items: flex-start;
+        margin-top: 12px;
+        font-size: .92rem;
+        line-height: 1.5;
+        color: #7a2222;
+    }
+
+    .csd-watch i {
+        color: var(--red);
+        margin-top: 3px;
+    }
+
+    /* accordion (examiner angle, process, key numbers) */
+    .csd-acc {
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        overflow: hidden;
+    }
+
+    .csd-acc .head {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        width: 100%;
+        text-align: left;
+        padding: 14px 16px;
+        font-weight: 600;
+        font-size: .92rem;
+        color: var(--s700);
+    }
+
+    .csd-acc .head .caret {
+        margin-left: auto;
+        color: var(--s400);
+        transition: transform .2s;
+    }
+
+    .csd-acc .head.open .caret {
+        transform: rotate(180deg);
+    }
+
+    .csd-acc .body {
+        padding: 0 16px 16px;
+    }
+
+    /* ── ASSERTION–REASON drill + PYQ options ── */
+    .csd-ar-plate {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .csd-ar-plate .row {
+        background: #fff;
+        border-radius: 12px;
+        padding: 14px 16px;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        font-size: .96rem;
+        line-height: 1.55;
+        color: var(--csd-ink);
+    }
+
+    .csd-ar-plate .row b {
+        display: block;
+        font-family: var(--font-display);
+        font-size: .68rem;
+        letter-spacing: .1em;
+        color: var(--g600);
+        margin-bottom: 5px;
+    }
+
+    .csd-opts {
+        display: grid;
+        gap: 9px;
+    }
+
+    .csd-opt {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr);
+        gap: 13px;
+        align-items: center;
+        width: 100%;
+        text-align: left;
+        padding: 13px 15px;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        font-size: .95rem;
+        color: var(--csd-body);
+        transition: box-shadow .14s, background .14s;
+    }
+
+    .csd-opt:hover:not(.locked) {
+        box-shadow: inset 0 0 0 1px var(--g400);
+    }
+
+    .csd-opt .key {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: .82rem;
+        color: var(--s600);
+        background: var(--s100);
+    }
+
+    .csd-opt.two {
+        align-items: flex-start;
+    }
+
+    .csd-opt .ot {
+        display: grid;
+        gap: 2px;
+    }
+
+    .csd-opt .o-short {
+        font-weight: 600;
+        color: var(--csd-ink);
+    }
+
+    .csd-opt .o-full {
+        font-size: .82rem;
+        color: var(--s500);
+        line-height: 1.4;
+    }
+
+    .csd-opt.sel {
+        background: var(--csd-grad-soft);
+        box-shadow: inset 0 0 0 1.5px var(--g500);
+    }
+
+    .csd-opt.sel .key {
+        background: var(--csd-grad);
+        color: #fff;
+    }
+
+    .csd-opt.correct {
+        background: var(--indigo-bg);
+        box-shadow: inset 0 0 0 1.5px var(--indigo);
+    }
+
+    .csd-opt.correct .key {
+        background: var(--indigo);
+        color: #fff;
+    }
+
+    .csd-opt.wrong {
+        background: var(--red-bg);
+        box-shadow: inset 0 0 0 1.5px var(--red);
+    }
+
+    .csd-opt.wrong .key {
+        background: var(--red);
+        color: #fff;
+    }
+
+    .csd-opt.locked {
+        cursor: default;
+    }
+
+    .csd-check {
+        margin-top: 15px;
+    }
+
+    .csd-reveal {
+        margin-top: 16px;
+        display: grid;
+        gap: 12px;
+    }
+
+    .csd-callout {
+        background: #fff;
+        border-radius: 12px;
+        padding: 15px 17px;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        font-size: .94rem;
+        line-height: 1.55;
+        color: var(--csd-body);
+    }
+
+    .csd-callout.good {
+        background: var(--indigo-bg);
+        box-shadow: inset 0 0 0 1px rgba(15, 111, 140, .25);
+        color: #0c5064;
+    }
+
+    .csd-callout .co-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--g600);
+        margin-bottom: 7px;
+    }
+
+    .csd-callout.good .co-tag {
+        color: var(--indigo);
+    }
+
+    /* ── VISUAL MAP ── */
+    .csd-map {
+        display: grid;
+        justify-items: center;
+        gap: 0;
+        padding: 8px 0 4px;
+    }
+
+    .csd-map-node {
+        font-weight: 600;
+        font-size: .95rem;
+        padding: 11px 18px;
+        border-radius: 12px;
+        text-align: center;
+        max-width: 380px;
+    }
+
+    .csd-map-node.parent {
+        background: #fff;
+        color: var(--s600);
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        font-size: .86rem;
+    }
+
+    .csd-map-node.root {
+        background: var(--csd-grad);
+        color: #fff;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.02rem;
+        box-shadow: 0 12px 26px -14px rgba(23, 63, 111, .6);
+    }
+
+    .csd-map-link {
+        width: 2px;
+        height: 22px;
+        background: var(--s300);
+    }
+
+    .csd-map-fan {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 9px;
+        max-width: 560px;
+    }
+
+    .csd-map-child {
+        font-size: .86rem;
+        font-weight: 600;
+        color: var(--g700);
+        background: var(--csd-grad-soft);
+        border-radius: 10px;
+        padding: 9px 13px;
+    }
+
+    .csd-rels {
+        display: grid;
+        gap: 8px;
+    }
+
+    .csd-rel {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+        background: #fff;
+        border-radius: 11px;
+        padding: 11px 14px;
+        box-shadow: inset 0 0 0 1px var(--csd-line-soft);
+        font-size: .88rem;
+    }
+
+    .csd-rel .fr {
+        font-weight: 600;
+        color: var(--csd-ink);
+        text-align: right;
+    }
+
+    .csd-rel .rl {
+        font-size: .74rem;
+        color: #fff;
+        background: var(--csd-grad);
+        padding: 4px 9px;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+
+    .csd-rel .to {
+        color: var(--s600);
+    }
+
+    .csd-flow {
+        background:
+            radial-gradient(circle at 1px 1px, var(--s200) 1px, transparent 0) 0 0/22px 22px,
+            #fff;
+        border-radius: var(--csd-r);
+        padding: 22px;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        overflow-x: auto;
+    }
+
+    /* ── FLASHCARDS (desktop flip card) ── */
+    .csd-fc {
+        display: grid;
+        gap: 18px;
+        justify-items: center;
+    }
+
+    .csd-fc-progress {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        max-width: 560px;
+    }
+
+    .csd-fc-segs {
+        display: flex;
+        gap: 4px;
+        flex: 1;
+    }
+
+    .csd-fc-seg {
+        height: 5px;
+        flex: 1;
+        border-radius: 3px;
+        background: var(--s200);
+    }
+
+    .csd-fc-seg.cur {
+        background: var(--s900);
+    }
+
+    .csd-fc-seg.ok {
+        background: var(--indigo);
+    }
+
+    .csd-fc-seg.no {
+        background: var(--red);
+    }
+
+    .csd-fc-count {
+        font-size: .82rem;
+        font-weight: 600;
+        color: var(--s500);
+    }
+
+    .csd-fc-scene {
+        width: 100%;
+        max-width: 560px;
+        height: 340px;
+        perspective: 1600px;
+        cursor: pointer;
+    }
+
+    .csd-fc-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform .5s var(--csd-ease);
+    }
+
+    .csd-fc-inner.flipped {
+        transform: rotateY(180deg);
+    }
+
+    .csd-fc-face {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        border-radius: 20px;
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .csd-fc-front {
+        background: linear-gradient(160deg, #1a2c48, #12203a);
+        color: #eaf1f9;
+        box-shadow: var(--csd-shadow-lift);
+        border: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    /* chips read on the dark front */
+    .csd-fc-front .csd-chip {
+        background: rgba(255, 255, 255, .12);
+        color: #dbe6f3;
+        box-shadow: none;
+    }
+
+    .csd-fc-front .csd-chip.danger {
+        background: rgba(196, 61, 61, .3);
+        color: #fecaca;
+    }
+
+    .csd-fc-front .csd-chip.ghost {
+        background: rgba(255, 255, 255, .06);
+        color: #aebfd2;
+    }
+
+    .csd-fc-back {
+        background: linear-gradient(160deg, #10203a, #0b1626);
+        color: #eaf1f9;
+        transform: rotateY(180deg);
+        box-shadow: var(--csd-shadow-lift);
+    }
+
+    .csd-fc-pills {
+        display: flex;
+        gap: 7px;
+        margin-bottom: 6px;
+    }
+
+    .csd-fc-q {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 1.35rem;
+        line-height: 1.4;
+        color: #f2f7fc;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, .25) transparent;
+    }
+
+    /* the scroll wrapper centres short content, but lets long content scroll
+       from the top instead of spilling outside the card (overflow fix). */
+    .csd-fc .fc-scrollc {
+        margin: auto 0;
+        width: 100%;
+    }
+
+    .csd-fc-albl {
+        font-size: .66rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: #7fb2d8;
+        flex-shrink: 0;
+        margin-bottom: 10px;
+    }
+
+    .csd-fc-ans {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        color: #fff;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, .25) transparent;
+    }
+
+    .csd-fc-mis {
+        font-size: .82rem;
+        line-height: 1.45;
+        color: #cdd8e6;
+        border-top: 1px solid rgba(255, 255, 255, .12);
+        padding-top: 12px;
+        margin-top: 14px;
+        text-align: left;
+    }
+
+    .csd-fc-mis strong {
+        color: #fecaca;
+    }
+
+    .csd-fc-hint {
+        text-align: center;
+        font-size: .78rem;
+        color: #8ea6c0;
+        flex-shrink: 0;
+    }
+
+    .csd-fc-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+
+    .csd-fc-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: .9rem;
+        padding: 11px 20px;
+        border-radius: 12px;
+        background: #fff;
+        color: var(--s700);
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        transition: box-shadow .14s, transform .12s;
+    }
+
+    .csd-fc-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: inset 0 0 0 1px var(--s300);
+    }
+
+    .csd-fc-btn.got {
+        background: var(--csd-grad);
+        color: #fff;
+        box-shadow: none;
+    }
+
+    .csd-fc-doneview {
+        display: grid;
+        justify-items: center;
+        gap: 14px;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .csd-fc-doneview h3 {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.4rem;
+        color: var(--csd-ink);
+    }
+
+    .csd-fc-doneview p {
+        color: var(--s500);
+        font-size: .95rem;
+    }
+
+    .csd-fc-doneview .dv-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 6px;
+    }
+
+    /* done-view inside the dark popup */
+    .csd-fc-doneview.on-dark h3 {
+        color: #fff;
+    }
+
+    .csd-fc-doneview.on-dark p {
+        color: #b9c6d6;
+    }
+
+    .csd-fc-doneview.on-dark .csd-ring .lbl {
+        color: #fff;
+    }
+
+    .csd-fc-doneview.on-dark .csd-ring .track {
+        stroke: rgba(255, 255, 255, .16);
+    }
+
+    /* ── inline "deck" launcher — a dark card that pops the study modal ── */
+    .csd-fc-launch,
+    .csd-fc-modal button {
+        font-family: var(--font-body);
+        cursor: pointer;
+        border: none;
+    }
+
+    .csd-fc-launch {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+        text-align: left;
+        padding: 18px 20px;
+        border-radius: 18px;
+        color: #eaf1f9;
+        background: linear-gradient(150deg, #1a2c48, #0f1c33);
+        box-shadow: var(--csd-shadow-lift);
+        border: 1px solid rgba(255, 255, 255, .08);
+        transition: transform .14s var(--csd-ease), box-shadow .14s;
+    }
+
+    .csd-fc-launch:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 40px rgba(10, 20, 38, .3);
+    }
+
+    .csd-fc-launch .fl-ic {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        font-size: 1.3rem;
+        color: #cfe6f4;
+        background: rgba(255, 255, 255, .1);
+    }
+
+    .csd-fc-launch .fl-main {
+        min-width: 0;
+    }
+
+    .csd-fc-launch .fl-t {
+        display: block;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #fff;
+    }
+
+    .csd-fc-launch .fl-s {
+        display: block;
+        font-size: .82rem;
+        color: #9fb3c9;
+        margin: 2px 0 10px;
+    }
+
+    .csd-fc-segs.mini {
+        max-width: 220px;
+    }
+
+    .csd-fc-segs.mini .csd-fc-seg {
+        height: 4px;
+        background: rgba(255, 255, 255, .16);
+    }
+
+    .csd-fc-segs.mini .csd-fc-seg.ok {
+        background: var(--indigo);
+    }
+
+    .csd-fc-segs.mini .csd-fc-seg.no {
+        background: var(--red);
+    }
+
+    .csd-fc-launch .fl-go {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 1rem;
+        color: #0f1c33;
+        background: linear-gradient(135deg, #7fd0e6, #cfe6f4);
+    }
+
+    /* ── the popup modal ── */
+    .csd-fc-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+    }
+
+    .csd-fc-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(6, 12, 22, .68);
+        -webkit-backdrop-filter: blur(5px);
+        backdrop-filter: blur(5px);
+        opacity: 0;
+        transition: opacity .22s var(--csd-ease);
+    }
+
+    .csd-fc-modal.in .csd-fc-backdrop {
+        opacity: 1;
+    }
+
+    .csd-fc-dialog {
+        position: relative;
+        z-index: 1;
+        width: min(660px, 94vw);
+        opacity: 0;
+        transform: translateY(10px) scale(.98);
+        transition: opacity .24s var(--csd-ease), transform .24s var(--csd-ease);
+    }
+
+    .csd-fc-modal.in .csd-fc-dialog {
+        opacity: 1;
+        transform: none;
+    }
+
+    .csd-fc-x {
+        position: absolute;
+        top: -48px;
+        right: 0;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #dbe6f3;
+        background: rgba(255, 255, 255, .12);
+        transition: background .14s;
+    }
+
+    .csd-fc-x:hover {
+        background: rgba(255, 255, 255, .22);
+        color: #fff;
+    }
+
+    /* the flip card fills the dialog and stands taller in the popup */
+    .csd-fc-modal .csd-fc {
+        width: 100%;
+    }
+
+    .csd-fc-modal .csd-fc-progress {
+        max-width: none;
+    }
+
+    .csd-fc-modal .csd-fc-scene {
+        max-width: none;
+        height: min(58vh, 460px);
+    }
+
+    .csd-fc-modal .csd-fc-count {
+        color: #cbd5e1;
+    }
+
+    .csd-fc-modal .csd-fc-seg {
+        background: rgba(255, 255, 255, .18);
+    }
+
+    .csd-fc-modal .csd-fc-seg.cur {
+        background: #fff;
+    }
+
+    .csd-fc-modal .csd-fc-seg.ok {
+        background: var(--indigo);
+    }
+
+    .csd-fc-modal .csd-fc-seg.no {
+        background: var(--red);
+    }
+
+    .csd-fc-modal .csd-fc-doneview {
+        padding: 40px 20px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .csd-fc-backdrop,
+        .csd-fc-dialog {
+            transition: none;
+        }
+    }
+
+    /* ── PYQ (paged) ── */
+    .csd-pyq-index {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 18px;
+    }
+
+    .csd-pyq-dot {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        font-size: .78rem;
+        font-weight: 700;
+        color: var(--s500);
+        background: #fff;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        transition: all .14s;
+    }
+
+    .csd-pyq-dot.cur {
+        color: #fff;
+        background: var(--s900);
+    }
+
+    .csd-pyq-dot.ok {
+        color: #fff;
+        background: var(--indigo);
+        box-shadow: none;
+    }
+
+    .csd-pyq-dot.no {
+        color: #fff;
+        background: var(--red);
+        box-shadow: none;
+    }
+
+    .csd-pyq-dot.div {
+        background: var(--csd-grad-soft);
+        color: var(--g600);
+    }
+
+    .csd-q-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: 14px;
+    }
+
+    .csd-q-text {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: var(--csd-ink);
+        margin-bottom: 18px;
+    }
+
+    .csd-pyq-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid var(--csd-line);
+    }
+
+    .csd-divider-slide {
+        text-align: center;
+        padding: 40px 24px;
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+    }
+
+    .csd-divider-slide .dv-ico {
+        width: 58px;
+        height: 58px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        font-size: 1.4rem;
+        color: #fff;
+        background: var(--csd-grad);
+    }
+
+    .csd-divider-slide h3 {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.35rem;
+        color: var(--csd-ink);
+    }
+
+    .csd-divider-slide p {
+        max-width: 46ch;
+        color: var(--s500);
+        line-height: 1.55;
+    }
+
+    /* ── FIGURES ── */
+    .csd-fig {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        gap: 26px;
+        align-items: start;
+    }
+
+    .csd-fig-pin {
+        position: sticky;
+        top: 0;
+    }
+
+    .csd-fig-holder {
+        position: relative;
+        background: #fff;
+        border-radius: var(--csd-r);
+        padding: 12px;
+        box-shadow: var(--csd-shadow);
+    }
+
+    .csd-fig-holder img {
+        width: 100%;
+        border-radius: 10px;
+        display: block;
+        cursor: zoom-in;
+        background: var(--s50);
+    }
+
+    .csd-hot {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: .72rem;
+        font-weight: 700;
+        color: #fff;
+        background: var(--s900);
+        box-shadow: 0 0 0 3px #fff, 0 4px 10px rgba(0, 0, 0, .3);
+        cursor: pointer;
+        transition: transform .14s;
+    }
+
+    .csd-hot:hover,
+    .csd-hot.active {
+        transform: translate(-50%, -50%) scale(1.18);
+        background: var(--indigo);
+    }
+
+    .csd-fig-zoom {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        font-size: .82rem;
+        font-weight: 600;
+        color: var(--s500);
+    }
+
+    .csd-comp {
+        display: grid;
+        gap: 3px;
+        width: 100%;
+        text-align: left;
+        padding: 12px 14px;
+        border-radius: 11px;
+        background: #fff;
+        box-shadow: inset 0 0 0 1px var(--csd-line-soft);
+        transition: box-shadow .14s, background .14s;
+    }
+
+    .csd-comp:hover,
+    .csd-comp.active {
+        background: var(--csd-grad-soft);
+        box-shadow: inset 0 0 0 1.5px var(--g400);
+    }
+
+    .csd-comp .lbl {
+        font-weight: 700;
+        font-size: .82rem;
+        color: var(--g700);
+    }
+
+    .csd-comp .cm {
+        font-size: .9rem;
+        line-height: 1.45;
+        color: var(--csd-body);
+    }
+
+    .csd-numbers {
+        display: grid;
+        gap: 8px;
+    }
+
+    .csd-numbers .row {
+        font-family: var(--font-display);
+        font-size: .92rem;
+        color: var(--csd-ink);
+        background: var(--s50);
+        border-radius: 9px;
+        padding: 10px 13px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       7. SECTION SPINE (right rail) + block actions
+       ════════════════════════════════════════════════════════════ */
+    .csd-spine {
+        grid-area: spine;
+        background: #fff;
+        border-left: 1px solid var(--csd-line);
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .csd-spine-scroll {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 20px 16px 12px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--s300) transparent;
+    }
+
+    .csd-spine-label {
+        padding: 0 6px 12px;
+    }
+
+    /* the section stations — the within-block nav */
+    .csd-station {
+        display: grid;
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+        width: 100%;
+        text-align: left;
+        padding: 11px 12px;
+        border-radius: 13px;
+        margin-bottom: 4px;
+        transition: background .14s, box-shadow .14s;
+    }
+
+    .csd-station:hover {
+        background: var(--s50);
+    }
+
+    .csd-station .sic {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        font-size: .95rem;
+        color: var(--g600);
+        background: var(--csd-grad-soft);
+        transition: all .14s;
+    }
+
+    .csd-station.danger .sic {
+        color: var(--red);
+        background: var(--red-bg);
+    }
+
+    /* issue 3 — keep station text inside the box */
+    .csd-station> :nth-child(2) {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .csd-station .stt {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .csd-station .stt .t {
+        font-weight: 600;
+        font-size: .92rem;
+        color: var(--csd-ink);
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .csd-station .stt .m {
+        font-size: .72rem;
+        color: var(--s400);
+        margin-left: auto;
+    }
+
+    .csd-station .sd {
+        font-size: .78rem;
+        color: var(--s500);
+        line-height: 1.35;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .csd-station .scount {
+        font-size: .68rem;
+        font-weight: 700;
+        color: var(--g600);
+        background: var(--csd-grad-soft);
+        border-radius: 6px;
+        padding: 1px 6px;
+    }
+
+    .csd-station.active {
+        background: var(--csd-grad-soft);
+        box-shadow: inset 0 0 0 1.5px rgba(31, 88, 150, .28);
+    }
+
+    .csd-station.active .sic {
+        background: var(--csd-grad);
+        color: #fff;
+    }
+
+    .csd-station.danger.active .sic {
+        background: var(--red);
+    }
+
+    .csd-station.visited .sic::after {
+        content: "\f00c";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        transform: translate(13px, -13px);
+        font-size: .5rem;
+        color: #fff;
+        background: var(--indigo);
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 0 0 2px #fff;
+    }
+
+    .csd-station .sic {
+        position: relative;
+    }
+
+    /* recap station variant */
+    .csd-station.recap .sic {
+        color: #8a5a00;
+        background: linear-gradient(135deg, #fff4d6, #ffe7ad);
+    }
+
+    /* block actions footer in the spine */
+    .csd-spine-foot {
+        border-top: 1px solid var(--csd-line);
+        padding: 16px;
+        display: grid;
+        gap: 12px;
+    }
+
+    .csd-opened {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-size: .8rem;
+        color: var(--s500);
+    }
+
+    .csd-opened .bar {
+        flex: 1;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--s200);
+        overflow: hidden;
+    }
+
+    .csd-opened .bar i {
+        display: block;
+        height: 100%;
+        border-radius: 3px;
+        background: var(--csd-grad);
+        transition: width .5s var(--csd-ease);
+    }
+
+    .csd-blocknav {
+        display: flex;
+        gap: 10px;
+    }
+
+    .csd-blocknav button {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        font-size: .82rem;
+        font-weight: 600;
+        color: var(--s600);
+        padding: 10px;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        transition: box-shadow .14s, color .14s;
+    }
+
+    .csd-blocknav button:hover:not(:disabled) {
+        color: var(--g600);
+        box-shadow: inset 0 0 0 1px var(--g400);
+    }
+
+    .csd-blocknav button:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+    }
+
+    .csd-done-btn {
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        font-weight: 600;
+        font-size: .95rem;
+        padding: 13px;
+        border-radius: 12px;
+        background: var(--csd-grad);
+        color: #fff;
+        box-shadow: 0 10px 22px -12px rgba(23, 63, 111, .7);
+        transition: transform .12s, box-shadow .18s, background .18s;
+    }
+
+    .csd-done-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    .csd-done-btn.done-state {
+        background: var(--indigo-bg);
+        color: var(--indigo);
+        box-shadow: none;
+        cursor: default;
+    }
+
+    .csd-done-btn.warn-state {
+        background: var(--amber-bg);
+        color: var(--amber);
+        box-shadow: none;
+    }
+
+    /* ── RECAP (the mentor's handwritten sign-off) ── */
+    .csd-recap {
+        background: linear-gradient(180deg, #fffdf6, #fff);
+        border-radius: var(--csd-r);
+        padding: 22px 24px;
+        box-shadow: var(--csd-shadow), inset 0 0 0 1px #f0e6cf;
+    }
+
+    .csd-recap-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .csd-recap-head .ava {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        background: var(--csd-grad);
+        font-size: .95rem;
+    }
+
+    .csd-recap-head .rt {
+        font-family: 'Caveat', cursive;
+        font-weight: 600;
+        font-size: 1.5rem;
+        color: var(--csd-ink);
+        line-height: 1;
+    }
+
+    .csd-recap-head .re {
+        color: var(--amber);
+    }
+
+    .csd-recap-item {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr);
+        gap: 13px;
+        padding: 12px 0;
+        border-top: 1px dashed #ecdfc4;
+    }
+
+    .csd-recap-item .ric {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        font-size: .85rem;
+        color: var(--g600);
+        background: var(--csd-grad-soft);
+    }
+
+    .csd-recap-item.bad .ric {
+        color: var(--red);
+        background: var(--red-bg);
+    }
+
+    .csd-recap-item .rit {
+        font-weight: 700;
+        font-size: .92rem;
+        color: var(--csd-ink);
+        margin-bottom: 3px;
+    }
+
+    .csd-recap-item .rib {
+        font-size: .9rem;
+        line-height: 1.5;
+        color: var(--csd-body);
+    }
+
+    .csd-recap-item .rib ul {
+        margin: 4px 0 0;
+        padding-left: 18px;
+    }
+
+    .csd-recap-item .rib li {
+        margin: 3px 0;
+    }
+
+    /* chapter-complete banner in the center */
+    .csd-celebrate {
+        text-align: center;
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+        padding: 44px 24px;
+        background: var(--csd-grad-soft);
+        border-radius: var(--csd-r);
+        margin-bottom: 24px;
+    }
+
+    .csd-celebrate .ico {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        font-size: 1.7rem;
+        color: #fff;
+        background: var(--csd-grad);
+        box-shadow: 0 14px 30px -14px rgba(23, 63, 111, .6);
+    }
+
+    .csd-celebrate h3 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: var(--csd-ink);
+    }
+
+    .csd-celebrate p {
+        color: var(--s500);
+        max-width: 44ch;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       8. LIGHTBOX
+       ════════════════════════════════════════════════════════════ */
+    .csd-lb {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        background: rgba(8, 14, 24, .86);
+        backdrop-filter: blur(6px);
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        transition: opacity .22s;
+    }
+
+    .csd-lb.in {
+        opacity: 1;
+    }
+
+    .csd-lb-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        color: #fff;
+    }
+
+    .csd-lb-head .t {
+        flex: 1;
+        font-weight: 600;
+    }
+
+    .csd-lb-head button {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        color: #cdd8e6;
+        background: rgba(255, 255, 255, .08);
+    }
+
+    .csd-lb-head button:hover {
+        background: rgba(255, 255, 255, .16);
+        color: #fff;
+    }
+
+    .csd-lb-stage {
+        flex: 1;
+        overflow: auto;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+    }
+
+    .csd-lb-stage img {
+        max-width: 100%;
+        border-radius: 8px;
+        background: #fff;
+        transition: width .2s var(--csd-ease);
+    }
+
+    .csd-lb-foot {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        padding: 16px;
+        color: #fff;
+    }
+
+    .csd-lb-foot button {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        background: rgba(255, 255, 255, .1);
+    }
+
+    .csd-lb-foot button:disabled {
+        opacity: .35;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       9. SUCCESS MOMENT (mark-done overlay)
+       ════════════════════════════════════════════════════════════ */
+    .csd-success {
+        position: fixed;
+        inset: 0;
+        z-index: 95;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 14px;
+        text-align: center;
+        background: rgba(245, 247, 251, .82);
+        backdrop-filter: blur(8px);
+        cursor: pointer;
+        animation: csd-fade .3s var(--csd-ease);
+    }
+
+    .csd-success .ck {
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 2rem;
+        color: #fff;
+        background: var(--csd-grad);
+        box-shadow: 0 20px 44px -18px rgba(23, 63, 111, .7);
+        animation: csd-pop .5s var(--csd-ease);
+    }
+
+    .csd-success h3 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 1.6rem;
+        color: var(--csd-ink);
+    }
+
+    .csd-success p {
+        color: var(--s500);
+        max-width: 40ch;
+    }
+
+    .csd-success .sk {
+        margin-top: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: var(--g600);
+    }
+
+    @keyframes csd-pop {
+        0% {
+            transform: scale(.5);
+            opacity: 0;
+        }
+
+        60% {
+            transform: scale(1.08);
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes csd-fade {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* pane swap transition */
+    .csd-swap {
+        animation: csd-swap .28s var(--csd-ease);
+    }
+
+    @keyframes csd-swap {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+
+    /* ── narrower desktops: drop the right rail into the top of center ── */
+    @media (max-width: 1200px) {
+        #csd-station {
+            grid-template-columns: 292px minmax(0, 1fr);
+            grid-template-areas:
+                "top   top"
+                "chart center";
+        }
+
+        #csd-station.chart-collapsed {
+            grid-template-columns: 0 minmax(0, 1fr);
+        }
+
+        .csd-spine {
+            display: none;
+        }
+
+        /* the spine is gone, so the inline mark-done / prev / next appears */
+        .csd-inline-actions {
+            display: flex;
+        }
+    }
+
+    @media (min-width: 1201px) {
+
+        /* on wide screens the spine carries the actions, so hide the inline set */
+        .csd-inline-actions {
+            display: none;
+        }
+    }
+
+    /* issue 2 — center section switcher: clickable panels that WRAP into rows
+       (no horizontal scrolling). Always available on desktop. */
+    .csd-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-bottom: 16px;
+        margin-bottom: 22px;
+        border-bottom: 1px solid var(--csd-line);
+    }
+
+    .csd-strip button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: .84rem;
+        font-weight: 600;
+        color: var(--s600);
+        padding: 9px 14px;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: inset 0 0 0 1px var(--csd-line);
+        transition: background .14s, color .14s, box-shadow .14s, transform .12s;
+    }
+
+    .csd-strip button:hover {
+        background: var(--s50);
+        transform: translateY(-1px);
+    }
+
+    .csd-strip button i {
+        font-size: .82rem;
+        opacity: .85;
+    }
+
+    .csd-strip button.active {
+        color: #fff;
+        background: var(--csd-grad);
+        box-shadow: none;
+    }
+
+    .csd-strip button.active i {
+        opacity: 1;
+    }
+
+    .csd-inline-actions {
+        display: none;
+        gap: 12px;
+        align-items: center;
+        margin-top: 28px;
+        padding-top: 20px;
+        border-top: 1px solid var(--csd-line);
+    }
+
+    /* ── reduced motion ── */
+    @media (prefers-reduced-motion: reduce) {
+
+        .csd *,
+        #csd-station * {
+            animation-duration: .001ms !important;
+            transition-duration: .001ms !important;
+        }
+    }
+
+}
+
+/* end @media (min-width:1024px) */

@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en" data-bars="dark light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NAADI AI</title>
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='11.2' fill='%231f5896'/%3E%3Cpath d='M5 24H15.5M32.5 24H43' stroke='white' stroke-opacity='.35' stroke-width='2.6' stroke-linecap='round'/%3E%3Cpath d='M15.5 24H17.6L19.6 28.4L23 11.4L26.4 34.2L28.8 24H32.5' fill='none' stroke='white' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&family=Caveat:wght@500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles-mobile.css">
+    <link rel="stylesheet" href="concept-studio-v2.css">
+    <link rel="stylesheet" href="practice-v2.css">
+    <link rel="stylesheet" href="profile.css">
+    <!-- Desktop adaptation layer: inert below 1024px (all rules live
+         inside a min-width media query; the media attribute just lets
+         the browser deprioritise the download on phones). -->
+    <link rel="stylesheet" href="styles-desktop.css" media="(min-width: 1024px)">
+    <!-- Studio desktop pass 5: widescreen workspace layout for the
+         Concept Studio journey. Loaded last so it supersedes the
+         column caps in styles-desktop.css; inert below 1024px. -->
+    <link rel="stylesheet" href="concept-studio-desktop.css" media="(min-width: 1024px)">
+    <!-- Arena desktop pass: widescreen workspace for the entire Arena
+         section + the shared test-taking engine (question/OMR/palette/
+         results). Same safety model as concept-studio-desktop.css —
+         every rule is inside a min-width media query and the media
+         attribute lets the browser skip the download on phones. -->
+    <link rel="stylesheet" href="arena-desktop.css" media="(min-width: 1024px)">
+
+    <!-- OPD desktop pass: widescreen redesign of the entire OPD section
+         (hub / chapter case-file / results / past-test analysis / V3
+         intervention overlay). In-test screen is out of scope — the
+         shared engine is already handled by arena-desktop.css above.
+         Same safety model: every rule lives inside a min-width media
+         query AND the media attribute skips the download on phones, so
+         mobile OPD is byte-for-byte unaffected. -->
+    <link rel="stylesheet" href="opd-desktop.css" media="(min-width: 1024px)">
+
+    <!-- LIBRARY desktop layer (study material · chapter list · PDF reader
+         workspace · notebook shelf · notebook detail). Same safety model
+         as opd-desktop.css above: the sheet is wrapped in an identical
+         @media query AND the media attribute skips the download on
+         phones, so mobile Library is byte-for-byte unaffected. -->
+    <link rel="stylesheet" href="libdesk-desktop.css" media="(min-width: 1024px)">
+
+    <!-- DOUBTS: one stylesheet for the whole conversation surface, shared
+         verbatim with the teacher portal (portal.html). Mobile rules and
+         the >=1024px two-pane layout both live inside it, so there is no
+         separate desktop file to keep in sync. Loaded LAST on purpose:
+         source order is what reveals the .dsk-only sidebar item. -->
+    <link rel="stylesheet" href="doubts.css">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <!-- Storage: profile photo uploads only (avatars/{uid}/avatar.jpg) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+</head>
+
+<body class="home-mode">
+
+    <!-- ═══════ App top bar (shell screens) ═══════ -->
+    <header class="m-topbar" id="m-topbar">
+        <!-- Pulse mark — same geometry as naadi-icon.svg and the --ecg-trace
+             loader. Shown on every view. -->
+        <div class="m-topbar-logo">
+            <svg viewBox="0 0 48 48" width="23" height="23" aria-hidden="true">
+                <path d="M5 24H15.5" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="3"
+                    stroke-linecap="round" />
+                <path d="M32.5 24H43" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="3"
+                    stroke-linecap="round" />
+                <path d="M15.5 24H17.6L19.6 28.4L23 11.4L26.4 34.2L28.8 24H32.5" fill="none" stroke="#fff"
+                    stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="32.5" cy="24" r="2" fill="#fff" />
+            </svg>
+        </div>
+
+        <!-- Wordmark: Home only. navigate() swaps it against the title block
+             below. Markup + underline path are lifted verbatim from
+             login.html's .lg2-brand so the two screens read as one product. -->
+        <div class="m-topbar-brand" id="topbar-brand">
+            <span class="m-brand-wordmark">
+                <span class="m-brand-text">NAADI <span>AI</span></span>
+                <svg class="m-brand-underline" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M0,9 H54 L58,9 L60,6 L63,15 L66,2 L69,11 L72,9 H100" />
+                </svg>
+            </span>
+        </div>
+
+        <!-- Every other view: the dynamic title, exactly as before. -->
+        <div id="topbar-titleblock" style="flex:1;min-width:0;">
+            <div class="m-topbar-title" id="topbar-title">NAADI AI</div>
+            <div class="m-topbar-sub" id="topbar-sub">Intern Doctor Console</div>
+        </div>
+        <!-- Doubts. On desktop the sidebar carries it and
+             .m-topbar .btn-icon{display:none} takes this away. -->
+        <button class="btn-icon dbt-topbtn" onclick="navigate('doubts')" aria-label="Doubts">
+            <i class="fa-solid fa-comments"></i>
+            <em class="dbt-topbtn-badge hidden" id="dbt-badge"></em>
+        </button>
+        <button class="btn-icon" onclick="navigate('profile')" aria-label="Profile">
+            <i class="fa-solid fa-user-doctor"></i>
+        </button>
+        <button class="btn-icon" onclick="handleLogout()" aria-label="Log out">
+            <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+    </header>
+
+    <!-- ═══════ Views ═══════ -->
+    <main class="m-main" id="m-main">
+
+        <!-- ═══════ HOME (live cockpit — see home.js) ═══════
+             No navigation tiles: every element here is live data that
+             deep-links straight into Studio / OPD / Arena. -->
+        <div class="view active" id="view-dashboard">
+            <!-- home.js paints the hero band + skeletons on the first frame,
+                 so there is no spinner state to pre-render here. -->
+            <div id="home-content"></div>
+        </div>
+
+        <!-- COMING SOON (generic — takes a title param, same pattern as
+             the desktop app.html's view-coming-soon) -->
+        <div class="view" id="view-coming-soon">
+            <div class="m-coming-soon">
+                <div class="empty-state">
+                    <i class="fa-solid fa-rocket"></i>
+                    <h3 id="coming-soon-title">Coming Soon</h3>
+                    <p style="margin-top:8px;color:var(--s400);" id="coming-soon-copy">This ward opens soon on the
+                        mobile app.</p>
+                    <button class="btn btn-outline" style="margin-top:20px;min-height:48px;"
+                        onclick="navigate('dashboard')">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONCEPT STUDIO — PICKER -->
+        <div class="view" id="view-quick-revise">
+            <div id="quick-revise-content">
+                <div class="loading-spinner">
+                    <div class="spinner"></div> Loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- CONCEPT STUDIO — JOURNEY -->
+        <div class="view" id="view-revise-journey">
+            <div id="revise-journey-content"></div>
+        </div>
+
+        <!-- ═══════ OPD (adaptive chapter test engine) ═══════ -->
+
+        <!-- OPD — hub: subject-wise chapter (case) list -->
+        <div class="view" id="view-opd">
+            <div id="opd-content">
+                <div class="loading-spinner">
+                    <div class="spinner"></div> Loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- OPD — chapter detail / case file (phase journey, concepts) -->
+        <div class="view" id="view-opd-chapter">
+            <div id="opd-chapter-content"></div>
+        </div>
+
+        <!-- OPD — test (focused full-screen, shared OMR engine, mode:'opd') -->
+        <div class="view" id="view-opd-test">
+            <div id="opd-test-content"></div>
+        </div>
+
+        <!-- OPD — results (score vs pass threshold, review, retest) -->
+        <div class="view" id="view-opd-results">
+            <div id="opd-results-content"></div>
+        </div>
+
+        <!-- OPD — past-test analysis. Its own view so the topbar title and
+             back stack are correct; v1 rendered this into #opd-chapter-content,
+             which left both pointing at the chapter. -->
+        <div class="view" id="view-opd-analysis">
+            <div id="opd-analysis-content"></div>
+        </div>
+
+        <!-- ═══════ PRACTICE HUB (NEET Arena · PYQ Vault · AIR Rankings) ═══════
+             view-practice-hub is a thin router view: navigate('practice-hub',
+             {tab}) forwards to the right landing (arena / pyq / air), each of
+             which renders the shared segmented switcher at the top. -->
+        <div class="view" id="view-practice-hub">
+            <div id="practice-hub-content"></div>
+        </div>
+
+        <!-- NEET ARENA — papers landing -->
+        <div class="view" id="view-arena">
+            <div id="arena-content">
+                <div class="loading-spinner">
+                    <div class="spinner"></div> Loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- NEET ARENA — test (focused full-screen, OMR engine) -->
+        <div class="view" id="view-arena-test">
+            <div id="arena-test-content"></div>
+        </div>
+
+        <!-- NEET ARENA — results -->
+        <div class="view" id="view-arena-results">
+            <div id="arena-results-content"></div>
+        </div>
+
+        <!-- NEET ARENA — per-paper leaderboard -->
+        <div class="view" id="view-arena-leaderboard">
+            <div id="arena-leaderboard-content"></div>
+        </div>
+
+        <!-- NEET ARENA — history -->
+        <div class="view" id="view-arena-history">
+            <div id="arena-history-content"></div>
+        </div>
+
+        <!-- PYQ VAULT — landing / custom test builder -->
+        <div class="view" id="view-pyq">
+            <div id="pyq-content">
+                <div class="loading-spinner">
+                    <div class="spinner"></div> Loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- PYQ VAULT — test (focused full-screen, OMR engine) -->
+        <div class="view" id="view-pyq-test">
+            <div id="pyq-test-content"></div>
+        </div>
+
+        <!-- PYQ VAULT — results -->
+        <div class="view" id="view-pyq-results">
+            <div id="pyq-results-content"></div>
+        </div>
+
+        <!-- PYQ VAULT — per-paper leaderboard -->
+        <div class="view" id="view-pyq-leaderboard">
+            <div id="pyq-leaderboard-content"></div>
+        </div>
+
+        <!-- PYQ VAULT — history -->
+        <div class="view" id="view-pyq-history">
+            <div id="pyq-history-content"></div>
+        </div>
+
+        <!-- AIR RANKINGS — overall Arena leaderboard -->
+        <div class="view" id="view-air">
+            <div id="air-content">
+                <div class="loading-spinner">
+                    <div class="spinner"></div> Loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ STUDY MATERIAL (PDF library / reader) ═══════ -->
+
+        <!-- STUDY MATERIAL — subject/class picker (Library tab, pane 1)
+             The switcher lives in a sibling div so study-material.js can
+             keep re-rendering #study-material-content untouched. -->
+        <div class="view" id="view-study-material">
+            <div class="lib-switch-holder" id="lib-switch-material"></div>
+            <div id="study-material-content">
+                <div class="loading-spinner">
+                    <div class="spinner"></div> Loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- STUDY MATERIAL — chapter list -->
+        <div class="view" id="view-study-chapters">
+            <div id="study-chapters-content"></div>
+        </div>
+
+        <!-- STUDY MATERIAL — PDF reader (focused full-screen mode) -->
+        <div class="view" id="view-pdf-reader">
+            <div id="pdf-reader-content"></div>
+        </div>
+
+        <!-- ═══════ REVISION NOTES (notebooks) ═══════ -->
+
+        <!-- REVISION NOTES — notebook grid (Library tab, pane 2) -->
+        <div class="view" id="view-revision-notes">
+            <div class="lib-switch-holder" id="lib-switch-notes"></div>
+            <div id="revision-notes-content">
+                <div class="loading-spinner">
+                    <div class="spinner"></div> Loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- REVISION NOTES — notebook detail -->
+        <div class="view" id="view-notebook-detail">
+            <div id="notebook-detail-content"></div>
+        </div>
+
+        <!-- ═══════ DOUBTS ═══════
+             Every conversation in one place: the NAADI team today,
+             class teachers and subject teachers next. Reached from the
+             top-bar icon on phones and the sidebar on desktop — no
+             bottom tab, the nav stays at five. -->
+        <div class="view" id="view-doubts">
+            <div id="doubts-content"></div>
+        </div>
+
+        <!-- ═══════ PROFILE ═══════
+             No bottom tab: the nav stays at five. Reached from the badge
+             in the top-right of the shell top bar. -->
+        <div class="view" id="view-profile">
+            <div id="profile-content">
+                <div class="loading-spinner" style="padding:40px 20px;">
+                    <div class="spinner"></div> Loading...
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ═══════ Bottom tab bar ═══════ -->
+    <nav class="m-tabbar" id="m-tabbar">
+        <!-- Desktop only (.dsk-only, hidden on phones): when the tab bar
+             becomes the left sidebar at ≥1024px, it carries the brand.
+             Pulse tile + wordmark reuse .m-topbar-logo / .m-brand-* so
+             the geometry is identical to the Home top bar and login. -->
+        <div class="dsk-sidebar-brand dsk-only">
+            <div class="m-topbar-logo">
+                <svg viewBox="0 0 48 48" width="23" height="23" aria-hidden="true">
+                    <path d="M5 24H15.5" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="3"
+                        stroke-linecap="round" />
+                    <path d="M32.5 24H43" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="3"
+                        stroke-linecap="round" />
+                    <path d="M15.5 24H17.6L19.6 28.4L23 11.4L26.4 34.2L28.8 24H32.5" fill="none" stroke="#fff"
+                        stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="32.5" cy="24" r="2" fill="#fff" />
+                </svg>
+            </div>
+            <span class="m-brand-wordmark">
+                <span class="m-brand-text">NAADI <span>AI</span></span>
+                <svg class="m-brand-underline" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M0,9 H54 L58,9 L60,6 L63,15 L66,2 L69,11 L72,9 H100" />
+                </svg>
+            </span>
+        </div>
+        <button class="mnav-item active" data-view="dashboard" onclick="navigate('dashboard')">
+            <i class="fa-solid fa-house-medical"></i><span>Home</span>
+        </button>
+        <button class="mnav-item" data-view="quick-revise" onclick="navigate('quick-revise')">
+            <i class="fa-solid fa-graduation-cap"></i><span>Studio</span>
+        </button>
+        <button class="mnav-item" data-view="opd" onclick="navigate('opd')">
+            <i class="fa-solid fa-notes-medical"></i><span>OPD</span>
+        </button>
+        <button class="mnav-item" data-view="arena" onclick="navigate('practice-hub', {tab:'arena'})">
+            <i class="fa-solid fa-bolt"></i><span>Arena</span>
+        </button>
+        <!-- PYQ Vault is reachable from inside Arena (segmented switcher),
+             so the 5th tab is now Library = Study Material + Revision Notes. -->
+        <button class="mnav-item" data-view="library" onclick="openLibrary()">
+            <i class="fa-solid fa-book-open"></i><span>Library</span>
+        </button>
+
+        <!-- Desktop-only sidebar footer (.dsk-only → hidden on phones):
+             Profile + Log out, relocated here from the top-bar icons so
+             the left rail has a base and the top bar stays clean. Same
+             onclick handlers as the top-bar buttons — no JS changes. -->
+        <div class="dsk-sidebar-foot dsk-only">
+            <button class="mnav-item" onclick="navigate('doubts')" aria-label="Doubts">
+                <i class="fa-solid fa-comments"></i><span>Doubts</span>
+                <em class="mnav-badge hidden" id="dbt-badge-side"></em>
+            </button>
+            <button class="mnav-item" onclick="navigate('profile')" aria-label="Profile">
+                <i class="fa-solid fa-user-doctor"></i><span>Profile</span>
+            </button>
+            <button class="mnav-item" onclick="handleLogout()" aria-label="Log out">
+                <i class="fa-solid fa-right-from-bracket"></i><span>Log out</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Toast container -->
+    <div id="nd-toast-container"></div>
+
+    <script src="shared.js"></script>
+    <script>
+        // ════════ AUTH GATE ════════
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                idToken = await user.getIdToken();
+
+                // First-run tour. The localStorage flag means the check costs
+                // one request per device, not one per app open.
+                if (await needsOnboarding(user.uid)) {
+                    window.location.href = 'onboarding.html';
+                    return;
+                }
+
+                // Home paints the greeting from /api/home; render it now that
+                // we have a token (the Home view is the default active view).
+                if (document.getElementById('view-dashboard')?.classList.contains('active')) {
+                    loadHome();
+                }
+
+                // Doubts badge. Deliberately independent of the Doubts
+                // screen: a reply that lands while the student is in OPD
+                // still has to light the top-bar icon. One document read
+                // per minute.
+                if (typeof ndDoubtsBadgeStart === 'function') {
+                    ndDoubtsBadgeStart(setDoubtsBadge);
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Paints the unread count on both Doubts entry points. Only one
+        // is ever visible at a time (the top-bar icon on phones, the
+        // sidebar row on desktop), but writing to both is cheaper than
+        // asking which layout we are in.
+        function setDoubtsBadge(n) {
+            const count = Number(n) || 0;
+            const label = count > 99 ? '99+' : String(count);
+            ['dbt-badge', 'dbt-badge-side'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = label;
+                el.classList.toggle('hidden', !count);
+            });
+        }
+
+        // Returns true only when we are certain the student has never seen
+        // the tour. Any failure (offline, backend not yet deployed) returns
+        // false: a broken check must never lock a student out of the app.
+        async function needsOnboarding(uid) {
+            let seen = null;
+            try { seen = localStorage.getItem('naadi_onb_' + uid); } catch (e) { /* private mode */ }
+            if (seen === '1') return false;
+
+            try {
+                const acct = await apiCall('/api/user/account');
+                if (acct.onboarding_completed) {
+                    try { localStorage.setItem('naadi_onb_' + uid, '1'); } catch (e) { }
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                console.warn('Onboarding check skipped:', e.message);
+                return false;
+            }
+        }
+
+        async function handleLogout() {
+            try { await auth.signOut(); } catch (e) { /* ignore */ }
+            window.location.href = 'login.html';
+        }
+
+        // ════════ NAVIGATION (views-as-divs + navigate(), same pattern
+        //          as the desktop app.html) ════════
+        // Profile is a real view now; nothing else is stubbed. Kept so
+        // showComingSoon() still has a copy table to grow into.
+        const SOON_COPY = {};
+
+        function navigate(viewName, params = {}) {
+            // Home runs a 30s quote timer — never let it tick against a
+            // hidden view. loadHome() restarts it when we come back.
+            if (viewName !== 'dashboard' && typeof stopHomeTimers === 'function') stopHomeTimers();
+            // Same rule for Doubts: an 8s thread poll must never tick
+            // against a view the student has navigated away from.
+            if (viewName !== 'doubts' && typeof ndDoubtsUnmount === 'function') ndDoubtsUnmount();
+
+            // Tell Nia which surface this is. Costs nothing — the context
+            // is a plain object and is only ever SENT when the student
+            // actually presses send. Views not listed fall to 'generic'.
+            // The *_test entries are what make Nia disappear during a live
+            // paper; the server refuses them independently.
+            if (typeof niaSetContext === 'function') {
+                const NIA_SURFACE = {
+                    'revise-journey': 'studio',
+                    'opd-test': 'opd_test',
+                    'arena-test': 'arena_test',
+                    'pyq-test': 'pyq_test',
+                    'opd-results': 'opd_review',
+                    'opd-analysis': 'opd_review',
+                    'arena-results': 'arena_review',
+                };
+                niaSetContext({ surface: NIA_SURFACE[viewName] || 'generic' });
+            }
+
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.mnav-item').forEach(n => n.classList.remove('active'));
+
+            const topbar = document.getElementById('m-topbar');
+            const tabbar = document.getElementById('m-tabbar');
+            const main = document.getElementById('m-main');
+            topbar.style.display = '';
+            tabbar.classList.remove('hidden');
+            main.classList.remove('no-tabbar');
+
+            // Home wears the wordmark; every other view keeps its dynamic title.
+            const isHome = viewName === 'dashboard';
+            document.getElementById('topbar-brand')?.classList.toggle('show', isHome);
+            document.getElementById('topbar-titleblock')?.classList.toggle('hidden', isHome);
+            // Home's hero band is #0B1220 and sits flush under the bar.
+            // .home-mode repaints the bar in that same ink so the two read
+            // as one surface. Cosmetic only — no routing depends on it.
+            document.body.classList.toggle('home-mode', isHome);
+
+            switch (viewName) {
+                case 'dashboard':
+                    document.getElementById('view-dashboard').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'NAADI AI';
+                    document.querySelector('.mnav-item[data-view="dashboard"]')?.classList.add('active');
+                    loadHome();
+                    break;
+
+                case 'coming-soon':
+                    document.getElementById('view-coming-soon').classList.add('active');
+                    document.getElementById('topbar-title').textContent = params.title || 'Coming Soon';
+                    break;
+
+                case 'quick-revise':
+                    document.getElementById('view-quick-revise').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'Concept Studio';
+                    document.querySelector('.mnav-item[data-view="quick-revise"]')?.classList.add('active');
+                    loadQuickRevise();
+                    break;
+
+                case 'revise-journey':
+                    document.getElementById('view-revise-journey').classList.add('active');
+                    // Journey is a focused full-screen study mode: hide the
+                    // shell top bar + tab bar; the journey renders its own
+                    // sticky top bar and sticky prev/next footer.
+                    topbar.style.display = 'none';
+                    tabbar.classList.add('hidden');
+                    main.classList.add('no-tabbar');
+                    startRevisionJourney(params.chapter_id, params.chapter_name);
+                    break;
+
+                // ════════ OPD (adaptive chapter test engine) ════════
+                case 'opd':
+                    document.getElementById('view-opd').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'OPD';
+                    document.querySelector('.mnav-item[data-view="opd"]')?.classList.add('active');
+                    loadOpdHub();
+                    break;
+
+                case 'opd-chapter':
+                    document.getElementById('view-opd-chapter').classList.add('active');
+                    document.getElementById('topbar-title').textContent =
+                        params.chapter_title || 'Case File';
+                    document.querySelector('.mnav-item[data-view="opd"]')?.classList.add('active');
+                    loadOpdChapter(params.chapter_id, params.chapter_title);
+                    break;
+
+                case 'opd-test':
+                    // Focused full-screen mode, same as arena-test/pyq-test:
+                    // hide the shell chrome; the shared OMR engine renders
+                    // its own sticky top bar + footer (mode: 'opd').
+                    document.getElementById('view-opd-test').classList.add('active');
+                    topbar.style.display = 'none';
+                    tabbar.classList.add('hidden');
+                    main.classList.add('no-tabbar');
+                    startOpdTest(params);
+                    break;
+
+                case 'opd-results':
+                    document.getElementById('view-opd-results').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'Test Results';
+                    document.querySelector('.mnav-item[data-view="opd"]')?.classList.add('active');
+                    showOpdResultsView(params);
+                    break;
+
+                case 'opd-analysis':
+                    document.getElementById('view-opd-analysis').classList.add('active');
+                    document.getElementById('topbar-title').textContent =
+                        params.test_num != null ? 'Test ' + params.test_num : 'Test Analysis';
+                    document.querySelector('.mnav-item[data-view="opd"]')?.classList.add('active');
+                    loadOpdAnalysis(params);
+                    break;
+
+                // ════════ PRACTICE HUB (Arena · PYQ Vault · AIR Rankings) ════════
+                case 'practice-hub': {
+                    // Thin router: the hub's segmented switcher lives inside
+                    // each landing view (arena / pyq / air), so forward there.
+                    const tab = params.tab === 'pyq' ? 'pyq'
+                        : params.tab === 'air' ? 'air' : 'arena';
+                    navigate(tab, params);
+                    return;
+                }
+
+                case 'arena':
+                    document.getElementById('view-arena').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'NEET Arena';
+                    document.querySelector('.mnav-item[data-view="arena"]')?.classList.add('active');
+                    loadArenaLanding();
+                    break;
+
+                case 'pyq':
+                    // PYQ Vault no longer has a bottom tab — it lives inside the
+                    // Practice Hub switcher, so the Arena tab stays lit.
+                    document.getElementById('view-pyq').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'PYQ Vault';
+                    document.querySelector('.mnav-item[data-view="arena"]')?.classList.add('active');
+                    loadPyqLanding();
+                    break;
+
+                case 'air':
+                    // AIR Rankings has NO bottom tab of its own — reached only
+                    // via the segmented switcher inside the Practice Hub.
+                    document.getElementById('view-air').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'AIR Rankings';
+                    document.querySelector('.mnav-item[data-view="arena"]')?.classList.add('active');
+                    loadAirRankings();
+                    break;
+
+                case 'arena-test':
+                case 'pyq-test': {
+                    // Test-taking is a focused full-screen mode, same as the
+                    // Concept Studio journey: hide the shell chrome; the
+                    // engine renders its own sticky top bar + footer.
+                    const mode = viewName === 'arena-test' ? 'arena' : 'pyq';
+                    document.getElementById(`view-${viewName}`).classList.add('active');
+                    topbar.style.display = 'none';
+                    tabbar.classList.add('hidden');
+                    main.classList.add('no-tabbar');
+                    startPracticeTest(mode, params);
+                    break;
+                }
+
+                case 'arena-results':
+                case 'pyq-results': {
+                    const mode = viewName === 'arena-results' ? 'arena' : 'pyq';
+                    document.getElementById(`view-${viewName}`).classList.add('active');
+                    document.getElementById('topbar-title').textContent =
+                        mode === 'arena' ? 'Arena Results' : 'PYQ Results';
+                    document.querySelector('.mnav-item[data-view="arena"]')?.classList.add('active');
+                    showTestResultsView(mode, params);
+                    break;
+                }
+
+                case 'arena-leaderboard':
+                case 'pyq-leaderboard': {
+                    const mode = viewName === 'arena-leaderboard' ? 'arena' : 'pyq';
+                    document.getElementById(`view-${viewName}`).classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'Leaderboard';
+                    document.querySelector('.mnav-item[data-view="arena"]')?.classList.add('active');
+                    loadPaperLeaderboard(mode, params.year, params.paper_code);
+                    break;
+                }
+
+                case 'arena-history':
+                case 'pyq-history': {
+                    const mode = viewName === 'arena-history' ? 'arena' : 'pyq';
+                    document.getElementById(`view-${viewName}`).classList.add('active');
+                    document.getElementById('topbar-title').textContent =
+                        mode === 'arena' ? 'Arena History' : 'PYQ History';
+                    document.querySelector('.mnav-item[data-view="arena"]')?.classList.add('active');
+                    loadPracticeHistory(mode);
+                    break;
+                }
+
+                // ════════ STUDY MATERIAL (PDF library / reader) ════════
+                case 'study-material':
+                    document.getElementById('view-study-material').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'Library';
+                    document.querySelector('.mnav-item[data-view="library"]')?.classList.add('active');
+                    mountLibrarySwitcher('material');
+                    loadStudyMaterial();
+                    break;
+
+                case 'study-chapters':
+                    // Deep screen — no switcher (you're inside a subject now).
+                    document.getElementById('view-study-chapters').classList.add('active');
+                    document.getElementById('topbar-title').textContent =
+                        `${params.subject || 'Chapters'} · Class ${params.class_level || ''}`;
+                    document.querySelector('.mnav-item[data-view="library"]')?.classList.add('active');
+                    loadStudyChapters(params.subject, params.class_level);
+                    break;
+
+                case 'pdf-reader':
+                    // The reader is a focused full-screen mode, same as the
+                    // Concept Studio journey and the Arena/PYQ test screens:
+                    // hide the shell chrome; the reader renders its own
+                    // sticky top bar and bottom toolbar.
+                    document.getElementById('view-pdf-reader').classList.add('active');
+                    topbar.style.display = 'none';
+                    tabbar.classList.add('hidden');
+                    main.classList.add('no-tabbar');
+                    openPdfReader(params.chapter);
+                    break;
+
+                // ════════ REVISION NOTES (notebooks) ════════
+                case 'revision-notes':
+                    document.getElementById('view-revision-notes').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'Library';
+                    document.querySelector('.mnav-item[data-view="library"]')?.classList.add('active');
+                    mountLibrarySwitcher('notes');
+                    loadRevisionNotes();
+                    break;
+
+                case 'notebook-detail':
+                    document.getElementById('view-notebook-detail').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'Notebook';
+                    document.querySelector('.mnav-item[data-view="library"]')?.classList.add('active');
+                    loadNotebookDetail(params.notebook_id);
+                    break;
+
+                // ════════ PROFILE ════════
+                // Keeps the tab bar visible (it is a shell screen), but lights
+                // no tab: Profile does not belong to any of the five.
+                case 'doubts':
+                    document.getElementById('view-doubts').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'Doubts';
+                    document.getElementById('topbar-sub').textContent = 'Ask. Get answers.';
+                    ndDoubtsMount('doubts-content', 'student');
+                    break;
+
+                case 'profile':
+                    document.getElementById('view-profile').classList.add('active');
+                    document.getElementById('topbar-title').textContent = 'Profile';
+                    loadProfile();
+                    break;
+            }
+            window.scrollTo({ top: 0 });
+        }
+
+        function showComingSoon(title) {
+            document.getElementById('coming-soon-title').textContent = `${title} — Coming Soon`;
+            document.getElementById('coming-soon-copy').textContent =
+                SOON_COPY[title] || `${title} — coming soon to the mobile app.`;
+            navigate('coming-soon', { title });
+        }
+    </script>
+    <script src="quotes.js"></script>
+    <script src="concept-studio.js"></script>
+    <!-- Desktop-only Concept Studio engine. Self-gates to >=1024px via matchMedia:
+         on phones the IIFE registers one idle listener and does nothing else
+         (no globals overridden, no DOM touched). Must load AFTER concept-studio.js,
+         which defines the loadQuickRevise / loadReviseChapters / startRevisionJourney
+         entry points this file overrides when active. -->
+    <script src="concept-studio-desktop.js"></script>
+    <script src="practice-hub.js"></script>
+    <script src="test-engine.js"></script>
+    <script src="opd.js"></script>
+    <!-- Desktop-only Arena engine. Self-gates to >=1024px via matchMedia:
+         on phones the IIFE registers one idle listener and does nothing
+         else (no globals overridden, no DOM touched). Must load AFTER
+         practice-hub.js + test-engine.js (whose loadArenaLanding /
+         renderTestShell / renderTestResults etc. it overrides when
+         active) and after opd.js (so OPD's shared-engine usage is fully
+         wired before the override captures the render functions). -->
+    <script src="arena-desktop.js"></script>
+    <!-- OPD desktop layer. Self-gates to >=1024px via matchMedia: on
+         phones the IIFE registers one idle listener and does nothing
+         else (no globals overridden, no DOM touched, no overlay built).
+         At >=1024px it captures OPD's render entry points (renderOpdHub,
+         renderOpdChapter, renderOpdResults, the intervention renderers,
+         opdIntOverlayEl, ...), re-homes them into a widescreen layout by
+         reusing opd.js's own state/handlers/helpers, and restores every
+         original verbatim if the viewport drops below 1024px. Must load
+         AFTER opd.js (so those functions exist to capture) and after
+         arena-desktop.js (which owns the shared in-test engine). -->
+    <script src="opd-desktop.js"></script>
+    <script src="revision-notes.js"></script>
+    <script src="study-material.js"></script>
+    <script src="library.js"></script>
+
+    <!-- LIBRARY desktop layer. MUST load after revision-notes.js /
+         study-material.js / library.js so it can capture their render
+         entry points. Self-gated with matchMedia('(min-width:1024px)'):
+         on a phone it registers one idle listener and does nothing else. -->
+    <script src="libdesk-desktop.js"></script>
+    <script src="profile.js"></script>
+    <!-- DOUBTS: shared verbatim with portal.html. Depends only on
+         shared.js (apiCall / escapeHtml / ndToast). -->
+    <script src="doubts.js"></script>
+    <link rel="stylesheet" href="nia.css">
+    <script src="nia.js"></script>
+    <script src="system-bars.js"></script>
+    <!-- home.js last: it uses phOpenSheet() from practice-hub.js and
+         nextQuote() from quotes.js -->
+    <script src="home.js"></script>
+
+</body>
+
+</html>

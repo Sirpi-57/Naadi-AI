@@ -1,0 +1,954 @@
+/* ════════════════════════════════════════════════════════════════
+   NAADI AI — DOUBTS (doubts.css)
+   ─────────────────────────────────────────────────────────────────
+   ONE stylesheet, loaded by BOTH shells:
+       app.html     (student)   — .m-topbar / .m-tabbar shell
+       portal.html  (teacher)   — .pt-topbar / .m-tabbar shell
+
+   It therefore may not depend on anything either shell defines
+   beyond the design tokens in styles-mobile.css :root, which both
+   load first (--s*, --g*, --red, --font-display, --font-body).
+   Every class is namespaced .dbt-*, so it cannot collide with
+   .pf-* (profile), .pt-* (portal), .tc-* (teacher class) or .adm-*.
+
+   LAYOUT MODEL — the reason this file is short
+   ─────────────────────────────────────────────
+   Mobile does NOT try to be a two-pane app squeezed into one column.
+   The conversation list is ordinary in-flow page content, so it
+   scrolls with the shell and needs no viewport-height arithmetic
+   against two different top bars and a tab bar.
+
+   Opening a conversation raises the chat pane as a FIXED full-screen
+   surface at z-index 400 — the same escape hatch #pf-sup-modal used,
+   for the same reason: the tab bar sits at z-index 95 and was
+   painting over the composer. Sizing is dvh so an open keyboard can
+   never push the composer off-screen, and the foot pads for the
+   home indicator.
+
+   Desktop (>=1024px) drops the overlay entirely and becomes a real
+   two-pane grid: list left, chat right, both permanently visible,
+   no navigation between them. That is the whole desktop story and
+   it lives in the single media query at the bottom.
+
+   Loaded LAST in both <head>s so these rules win on source order —
+   which is what reveals the .dsk-only sidebar item at >=1024px.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════
+   1 · SHELL ENTRY POINTS (top-bar icon + its unread badge)
+   ════════════════════════════════════════════════════════════════ */
+
+/* The badge rides the top-bar button, so the button needs a
+   positioning context. Both shells' buttons are plain <button>s. */
+.dbt-topbtn {
+    position: relative;
+}
+
+.dbt-topbtn-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 99px;
+    background: var(--red);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: .58rem;
+    font-weight: 800;
+    font-style: normal;
+    line-height: 17px;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--s900);
+    pointer-events: none;
+}
+
+.dbt-topbtn-badge.hidden {
+    display: none;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   2 · SPLIT
+   ════════════════════════════════════════════════════════════════ */
+
+.dbt {
+    font-family: var(--font-body);
+    color: var(--s800);
+}
+
+.dbt-split {
+    display: block;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   3 · CONVERSATION LIST
+   ════════════════════════════════════════════════════════════════ */
+
+.dbt-list {
+    padding: 12px 14px 22px;
+}
+
+/* Group header. Encodes a real division — who you are talking to —
+   not decoration. Part 2 adds a second group ("My teachers") and
+   the renderer needs no change. */
+.dbt-group {
+    font-family: var(--font-display);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--s400);
+    margin: 16px 4px 8px;
+}
+
+.dbt-group:first-child {
+    margin-top: 2px;
+}
+
+.dbt-row {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    text-align: left;
+    background: #fff;
+    border: 1px solid var(--s200);
+    border-radius: 14px;
+    padding: 13px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    transition: border-color .16s, box-shadow .16s, background .16s;
+}
+
+.dbt-row:hover {
+    border-color: var(--g200);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, .06);
+}
+
+.dbt-row:focus-visible {
+    outline: 2px solid var(--g500);
+    outline-offset: 2px;
+}
+
+.dbt-row.on {
+    border-color: var(--g400);
+    background: var(--g50);
+}
+
+.dbt-ico {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    background: var(--g50);
+    color: var(--g600);
+    font-size: .95rem;
+}
+
+.dbt-row-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.dbt-row-top {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.dbt-row-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .92rem;
+    color: var(--s900);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dbt-row-when {
+    margin-left: auto;
+    flex: 0 0 auto;
+    font-size: .64rem;
+    color: var(--s400);
+    font-weight: 600;
+}
+
+.dbt-row-sub {
+    font-size: .76rem;
+    color: var(--s500);
+    line-height: 1.45;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.dbt-row-unread {
+    flex: 0 0 auto;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 6px;
+    margin-left: 6px;
+    border-radius: 99px;
+    background: var(--red);
+    color: #fff;
+    font-size: .6rem;
+    font-weight: 800;
+    font-style: normal;
+    line-height: 19px;
+    text-align: center;
+}
+
+.dbt-row-unread.hidden {
+    display: none;
+}
+
+/* Resolved threads read quieter than open ones without going grey-on-
+   grey — the row is still fully legible, it just stops competing. */
+.dbt-pill {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    background: var(--s100);
+    color: var(--s500);
+}
+
+.dbt-pill.open {
+    background: var(--amber-bg);
+    color: var(--amber);
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   4 · CHAT PANE
+   Mobile: fixed full-screen overlay above the tab bar (z 95).
+   ════════════════════════════════════════════════════════════════ */
+
+.dbt-pane {
+    display: none;
+}
+
+.dbt-split.chat-open .dbt-pane {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background: var(--s50);
+    /* dvh so an open keyboard shrinks the log, not the composer */
+    height: 100vh;
+    height: 100dvh;
+}
+
+.dbt-pane-head {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 12px 10px;
+    background: var(--s900);
+    color: #fff;
+}
+
+.dbt-back {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(255, 255, 255, .08);
+    color: #fff;
+    font-size: .95rem;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.dbt-back:hover {
+    background: rgba(255, 255, 255, .16);
+}
+
+.dbt-back:focus-visible {
+    outline: 2px solid var(--g400);
+    outline-offset: 2px;
+}
+
+.dbt-head-who {
+    flex: 1;
+    min-width: 0;
+}
+
+.dbt-head-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .95rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dbt-head-sub {
+    font-size: .68rem;
+    color: var(--s400);
+    font-weight: 500;
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Message log ── */
+.dbt-log {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 14px 14px 6px;
+}
+
+.dbt-msg {
+    max-width: 82%;
+    margin: 7px 0;
+    padding: 9px 12px;
+    border-radius: 13px;
+    font-size: .84rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: var(--s100);
+    color: var(--s800);
+    margin-right: auto;
+    border-bottom-left-radius: 4px;
+}
+
+.dbt-msg.mine {
+    margin-left: auto;
+    margin-right: 0;
+    background: var(--s900);
+    color: #fff;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 4px;
+}
+
+.dbt-msg-meta {
+    font-size: .6rem;
+    opacity: .7;
+    margin-top: 4px;
+}
+
+/* Day divider — the only structural marker in the log, and it earns
+   its place: a doubt asked last Tuesday reads very differently from
+   one asked an hour ago. */
+.dbt-day {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 10px;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--s400);
+}
+
+.dbt-day::before,
+.dbt-day::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--s200);
+}
+
+/* ── Composer ── */
+.dbt-composer {
+    flex: 0 0 auto;
+    background: #fff;
+    border-top: 1px solid var(--s200);
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+.dbt-composer-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.dbt-input {
+    flex: 1;
+    min-width: 0;
+    resize: none;
+    border: 1px solid var(--s200);
+    border-radius: 12px;
+    padding: 10px 12px;
+    /* 16px exactly — anything smaller and iOS zooms the page on focus */
+    font-size: 16px;
+    font-family: var(--font-body);
+    line-height: 1.45;
+    color: var(--s800);
+    background: var(--s50);
+    max-height: 120px;
+}
+
+.dbt-input:focus {
+    outline: none;
+    border-color: var(--g400);
+    background: #fff;
+}
+
+.dbt-send {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 44px;
+    border: none;
+    border-radius: 12px;
+    background: var(--g600);
+    color: #fff;
+    font-size: .95rem;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.dbt-send:hover:not(:disabled) {
+    background: var(--g700);
+}
+
+.dbt-send:disabled {
+    opacity: .5;
+    cursor: default;
+}
+
+.dbt-send:focus-visible {
+    outline: 2px solid var(--g400);
+    outline-offset: 2px;
+}
+
+/* Retention notice. Stated once, plainly, where the message is
+   written — not buried in a policy page. */
+.dbt-note {
+    margin: 7px 2px 0;
+    font-size: .63rem;
+    line-height: 1.45;
+    color: var(--s400);
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   5 · EMPTY / LOADING / ERROR
+   ════════════════════════════════════════════════════════════════ */
+
+.dbt-empty {
+    text-align: center;
+    padding: 46px 26px;
+    color: var(--s500);
+}
+
+.dbt-empty i {
+    font-size: 1.6rem;
+    color: var(--s300);
+    margin-bottom: 12px;
+    display: block;
+}
+
+.dbt-empty-t {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--s800);
+    margin-bottom: 5px;
+}
+
+.dbt-empty-s {
+    font-size: .8rem;
+    line-height: 1.55;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+.dbt-skel {
+    height: 64px;
+    border-radius: 14px;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, var(--s100) 25%, var(--s50) 50%, var(--s100) 75%);
+    background-size: 400% 100%;
+    animation: dbt-shimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes dbt-shimmer {
+    from {
+        background-position: 100% 0;
+    }
+
+    to {
+        background-position: 0 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dbt-skel {
+        animation: none;
+    }
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   7 · PART 2 — teacher conversations, supervision, safety
+   ════════════════════════════════════════════════════════════════ */
+
+/* Group header now carries an action, so it becomes a row. */
+.dbt-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dbt-newbtn {
+    margin-left: auto;
+    border: 1px solid var(--s200);
+    background: #fff;
+    color: var(--g600);
+    border-radius: 99px;
+    padding: 4px 11px;
+    font-family: var(--font-body);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dbt-newbtn:hover {
+    background: var(--g50);
+    border-color: var(--g200);
+}
+
+.dbt-newbtn:focus-visible {
+    outline: 2px solid var(--g500);
+    outline-offset: 2px;
+}
+
+.dbt-groupnote {
+    margin: 0 4px 10px;
+    font-size: .76rem;
+    line-height: 1.5;
+    color: var(--s500);
+}
+
+.dbt-row-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.dbt-pill.flag {
+    background: var(--red-bg);
+    color: var(--red);
+}
+
+/* ── Pane header actions (resolve · report) ── */
+.dbt-headbtn {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255, 255, 255, .08);
+    color: #fff;
+    font-size: .82rem;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.dbt-headbtn:hover {
+    background: rgba(255, 255, 255, .18);
+}
+
+.dbt-headbtn:focus-visible {
+    outline: 2px solid var(--g400);
+    outline-offset: 2px;
+}
+
+/* ── The disclosure banner ──
+   Deliberately quiet but permanent. It is not a warning and should not
+   read as one; it is a fact about the room both people are standing in. */
+.dbt-notice {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    padding: 9px 14px;
+    background: var(--g50);
+    border-bottom: 1px solid var(--g100);
+    font-size: .7rem;
+    line-height: 1.5;
+    color: var(--g700);
+}
+
+.dbt-notice i {
+    margin-top: 2px;
+    flex: 0 0 auto;
+    opacity: .75;
+}
+
+/* ── Read-only foot, where a composer would be ── */
+.dbt-composer.dbt-readonly {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    color: var(--s500);
+    font-size: .76rem;
+    padding: 15px 14px calc(15px + env(safe-area-inset-bottom, 0px));
+    background: var(--s50);
+}
+
+/* ── Teacher Home: unanswered-doubts line ── */
+.pt-doubts-alert {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    text-align: left;
+    background: var(--g50);
+    border: 1px solid var(--g200);
+    border-radius: 13px;
+    padding: 12px 14px;
+    margin: 0 0 14px;
+    font-family: var(--font-body);
+    font-size: .84rem;
+    color: var(--g700);
+    cursor: pointer;
+}
+
+.pt-doubts-alert:hover {
+    background: var(--g100);
+}
+
+.pt-doubts-alert:focus-visible {
+    outline: 2px solid var(--g500);
+    outline-offset: 2px;
+}
+
+.pt-doubts-alert span {
+    flex: 1;
+}
+
+.pt-doubts-alert b {
+    font-weight: 700;
+}
+
+.pt-doubts-alert-go {
+    opacity: .5;
+    font-size: .72rem;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   8 · PICKER / REPORT SHEET
+   ════════════════════════════════════════════════════════════════ */
+
+.dbt-sheet-back {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(15, 23, 42, .5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+}
+
+.dbt-sheet {
+    width: 100%;
+    max-height: 78vh;
+    max-height: 78dvh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 18px 18px 0 0;
+    padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+    animation: dbt-rise .18s ease-out;
+}
+
+@keyframes dbt-rise {
+    from {
+        transform: translateY(14px);
+        opacity: .6;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dbt-sheet {
+        animation: none;
+    }
+}
+
+.dbt-sheet-t {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--s900);
+}
+
+.dbt-sheet-s {
+    margin: 6px 0 14px;
+    font-size: .76rem;
+    line-height: 1.55;
+    color: var(--s500);
+}
+
+.dbt-sheet-body .dbt-input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.dbt-pick {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    text-align: left;
+    background: #fff;
+    border: 1px solid var(--s200);
+    border-radius: 12px;
+    padding: 11px 13px;
+    margin-bottom: 7px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.dbt-pick:hover {
+    background: var(--g50);
+    border-color: var(--g200);
+}
+
+.dbt-pick:focus-visible {
+    outline: 2px solid var(--g500);
+    outline-offset: 2px;
+}
+
+.dbt-ini {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: var(--g50);
+    color: var(--g600);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .74rem;
+}
+
+.dbt-pick-n {
+    font-weight: 600;
+    font-size: .88rem;
+    color: var(--s800);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dbt-sheet-actions {
+    display: flex;
+    gap: 9px;
+    margin-top: 14px;
+}
+
+.dbt-btn {
+    flex: 1;
+    border-radius: 11px;
+    padding: 11px 14px;
+    font-family: var(--font-body);
+    font-size: .82rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.dbt-btn.quiet {
+    background: #fff;
+    border-color: var(--s200);
+    color: var(--s600);
+}
+
+.dbt-btn.quiet:hover {
+    background: var(--s50);
+}
+
+.dbt-btn.danger {
+    background: var(--red);
+    color: #fff;
+}
+
+.dbt-btn.danger:hover {
+    filter: brightness(.94);
+}
+
+.dbt-btn:focus-visible {
+    outline: 2px solid var(--g500);
+    outline-offset: 2px;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   6 · DESKTOP (>=1024px) — real two-pane, no overlay
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* The sidebar item. Its markup carries .dsk-only, which
+       styles-mobile.css sets to display:none; this file loads last so
+       this rule wins on source order and reveals it here only.
+       Covers both shells: the student's sidebar footer item and the
+       teacher's JS-built nav row. */
+    .dsk-only.dbt-navitem,
+    .m-tabbar .mnav-item.dsk-only {
+        display: flex;
+    }
+
+    /* The mobile top-bar entry point is redundant once the sidebar
+       carries Doubts. The student shell already blanket-hides
+       .m-topbar .btn-icon; the teacher shell does not, so hide ours. */
+    .pt-topbar .dbt-topbtn {
+        display: none;
+    }
+
+    .dbt {
+        /* Fill the shell's content column. 190px covers the top bar
+           plus the screen's own padding in both shells; the panes
+           scroll internally so an approximation here is safe. */
+        height: calc(100vh - 190px);
+        min-height: 460px;
+    }
+
+    .dbt-split {
+        display: grid;
+        grid-template-columns: 320px minmax(0, 1fr);
+        gap: 16px;
+        height: 100%;
+        align-items: stretch;
+    }
+
+    .dbt-list {
+        padding: 4px 4px 4px 0;
+        overflow-y: auto;
+        border-right: 1px solid var(--s200);
+        padding-right: 14px;
+    }
+
+    /* Both panes are always up on desktop, so .chat-open carries no
+       meaning here — the selector is written without it. */
+    .dbt-pane,
+    .dbt-split.chat-open .dbt-pane {
+        display: flex;
+        flex-direction: column;
+        position: static;
+        inset: auto;
+        z-index: auto;
+        height: 100%;
+        background: #fff;
+        border: 1px solid var(--s200);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .dbt-pane-head {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--s200);
+        background: #fff;
+        color: var(--s900);
+    }
+
+    .dbt-head-sub {
+        color: var(--s500);
+    }
+
+    /* No back button when there is nowhere to go back to. */
+    .dbt-back {
+        display: none;
+    }
+
+    .dbt-log {
+        padding: 18px 20px 8px;
+    }
+
+    .dbt-msg {
+        max-width: 62%;
+        font-size: .86rem;
+    }
+
+    .dbt-composer {
+        padding: 12px 16px 14px;
+        border-top: 1px solid var(--s200);
+    }
+
+    .dbt-input {
+        font-size: .88rem;
+    }
+
+    .dbt-row {
+        padding: 12px;
+    }
+
+    /* ── Part 2 on desktop ── */
+
+    /* The pane header is white here, so its buttons cannot be white-on-
+       white the way they are against the navy mobile bar. */
+    .dbt-headbtn {
+        background: var(--s100);
+        color: var(--s600);
+    }
+
+    .dbt-headbtn:hover {
+        background: var(--s200);
+        color: var(--s800);
+    }
+
+    .dbt-notice {
+        padding: 10px 20px;
+        font-size: .72rem;
+    }
+
+    .dbt-composer.dbt-readonly {
+        padding: 18px;
+    }
+
+    /* A bottom sheet is a phone idiom. On a laptop it becomes a centred
+       dialog — the same markup, a different room. */
+    .dbt-sheet-back {
+        align-items: center;
+        padding: 24px;
+    }
+
+    .dbt-sheet {
+        width: 460px;
+        max-width: 100%;
+        max-height: 74vh;
+        border-radius: 16px;
+        padding: 22px;
+    }
+
+    .dbt-newbtn {
+        font-size: .7rem;
+    }
+}

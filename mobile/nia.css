@@ -1,0 +1,1105 @@
+/* ════════════════════════════════════════════════════════════════
+   NAADI AI — NIA (nia.css)
+
+   Tokens are inherited from styles-mobile.css / portal.css. Nothing is
+   invented here; --g600, --s500 and friends are the app's existing scale.
+
+   TWO LAYOUTS, NOT ONE STRETCHED COLUMN
+
+     PHONE (<1024px)   Nia is a sheet. It rises from the bottom, covers
+                       the page, and dims what is behind it, because on a
+                       phone there is no "beside".
+
+     DESKTOP (≥1024px) Nia is a docked column on the right, 380px, with
+                       NO scrim. The student is asking about the page —
+                       dimming it would defeat the feature. The page stays
+                       readable, selectable and scrollable while Nia talks.
+
+   The signature is the pulse: the same ECG idea the app already uses for
+   its loader, shrunk to a 8px dot that beats while Nia is alive. It is
+   the one decorative thing in the file and everything else stays quiet.
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+    --nia-w: 380px;
+    --nia-radius: 18px;
+    --nia-ink: var(--s900, #0f172a);
+    --nia-accent: var(--g600, #1f5896);
+    --nia-accent-soft: var(--g50, #eef4fb);
+    --nia-line: var(--s200, #e2e8f0);
+    --nia-shadow: 0 18px 48px rgba(15, 23, 42, .18);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   [hidden] MUST WIN. This rule is not optional.
+
+   The browser's own stylesheet says [hidden] { display: none }, but a
+   UA rule loses to ANY author rule. So `.nia-panel { display: flex }`
+   below silently beats it, and every el.hidden = true in nia.js becomes
+   a no-op: the panel renders open on page load and the close button
+   appears to do nothing.
+
+   Worse, the same applies to .nia-fab — which is how the launcher
+   would stay on screen during a live test even though the JavaScript
+   had correctly hidden it.
+
+   !important because .nia-panel's display is set again inside two media
+   queries, and a plain [hidden] rule would lose to those on specificity
+   in one direction or source order in the other.
+   ════════════════════════════════════════════════════════════════ */
+
+.nia-help[hidden],
+.nia-acts[hidden],
+.nia-panel[hidden],
+.nia-fab[hidden],
+.nia-scrim[hidden],
+.nia-sel[hidden],
+.nia-list[hidden],
+.nia-mobile-btn[hidden] {
+    display: none !important;
+}
+
+/* ── the pulse. One keyframe, reused by the fab, the avatar and the
+      welcome mark. ─────────────────────────────────────────────── */
+.nia-pulse {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    animation: nia-beat 2.4s ease-in-out infinite;
+}
+
+@keyframes nia-beat {
+
+    0%,
+    72%,
+    100% {
+        transform: scale(1);
+        opacity: .9;
+    }
+
+    78% {
+        transform: scale(1.6);
+        opacity: 1;
+    }
+
+    84% {
+        transform: scale(.85);
+        opacity: .75;
+    }
+
+    90% {
+        transform: scale(1.25);
+        opacity: 1;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LAUNCHER
+   ════════════════════════════════════════════════════════════════ */
+
+.nia-fab {
+    position: fixed;
+    right: 22px;
+    bottom: calc(22px + var(--safe-bottom, 0px));
+    z-index: 940;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 50px;
+    padding: 0 20px 0 15px;
+    border: 0;
+    border-radius: 26px;
+    cursor: pointer;
+    background: var(--nia-accent);
+    color: #fff;
+    font-family: var(--font-body, sans-serif);
+    font-size: .87rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+    box-shadow: 0 10px 26px rgba(31, 88, 150, .34);
+    transition: transform .16s ease, box-shadow .18s ease;
+}
+
+.nia-fab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(31, 88, 150, .42);
+}
+
+.nia-fab.is-open {
+    transform: scale(.9);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.nia-fab-mark {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .2);
+}
+
+/* The bottom tab bar owns the bottom-right on a phone, so the fab moves
+   up and sheds its label — a 50px pill floating over the tabs is the
+   single most common way this pattern goes wrong. */
+@media (max-width: 1023px) {
+    .nia-fab {
+        right: 16px;
+        bottom: calc(var(--tabbar-h, 62px) + 16px + var(--safe-bottom, 0px));
+        height: 46px;
+        padding: 0 16px 0 13px;
+        font-size: .82rem;
+    }
+
+    .nia-fab-txt {
+        display: none;
+    }
+
+    .nia-fab {
+        padding: 0;
+        width: 46px;
+        justify-content: center;
+    }
+}
+
+/* the in-page entry point beside Doubts (rendered by the host page) */
+.nia-mobile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 15px;
+    border: 1px solid var(--nia-line);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--nia-accent);
+    font-family: inherit;
+    font-size: .84rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SELECTION BUBBLE
+   ════════════════════════════════════════════════════════════════ */
+
+.nia-sel {
+    position: fixed;
+    z-index: 960;
+}
+
+.nia-sel-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 15px;
+    border: 0;
+    border-radius: 19px;
+    cursor: pointer;
+    background: var(--s900, #0f172a);
+    color: #fff;
+    font-family: var(--font-body, sans-serif);
+    font-size: .79rem;
+    font-weight: 700;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, .3);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PANEL
+   ════════════════════════════════════════════════════════════════ */
+
+.nia-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 950;
+    background: rgba(15, 23, 42, .45);
+    backdrop-filter: blur(2px);
+}
+
+.nia-panel {
+    position: fixed;
+    z-index: 955;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    overflow: hidden;
+}
+
+/* ── PHONE: a sheet ─────────────────────────────────────────── */
+@media (max-width: 1023px) {
+    .nia-panel {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 8vh;
+        border-radius: 22px 22px 0 0;
+        box-shadow: var(--nia-shadow);
+        animation: nia-rise .26s cubic-bezier(.22, 1, .36, 1);
+        padding-bottom: var(--safe-bottom, 0px);
+    }
+
+    @keyframes nia-rise {
+        from {
+            transform: translateY(14px);
+            opacity: .6;
+        }
+
+        to {
+            transform: none;
+            opacity: 1;
+        }
+    }
+
+    body.nia-locked {
+        overflow: hidden;
+    }
+}
+
+/* ── DESKTOP: a docked column, no scrim ─────────────────────── */
+@media (min-width: 1024px) {
+    .nia-panel {
+        top: 16px;
+        right: 16px;
+        bottom: 16px;
+        width: var(--nia-w);
+        border: 1px solid var(--nia-line);
+        border-radius: var(--nia-radius);
+        box-shadow: var(--nia-shadow);
+        animation: nia-slide .22s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    @keyframes nia-slide {
+        from {
+            transform: translateX(18px);
+            opacity: 0;
+        }
+
+        to {
+            transform: none;
+            opacity: 1;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .nia-panel,
+    .nia-pulse,
+    .nia-fab {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ── header ─────────────────────────────────────────────────── */
+.nia-head {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 14px 12px 14px 16px;
+    border-bottom: 1px solid var(--nia-line);
+    background: linear-gradient(180deg, var(--nia-accent-soft), #fff);
+    flex-shrink: 0;
+}
+
+.nia-avatar {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--nia-accent);
+    flex-shrink: 0;
+}
+
+.nia-head-txt {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.nia-head-txt b {
+    font-family: var(--font-display, sans-serif);
+    font-size: .98rem;
+    font-weight: 700;
+    color: var(--nia-ink);
+    line-height: 1.2;
+}
+
+.nia-head-txt em {
+    font-style: normal;
+    font-size: .71rem;
+    color: var(--s500, #64748b);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nia-icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--s500, #64748b);
+    cursor: pointer;
+    font-size: .88rem;
+    flex-shrink: 0;
+}
+
+.nia-icon:hover {
+    background: var(--s100, #f1f5f9);
+    color: var(--nia-ink);
+}
+
+/* ── "How Nia works" ────────────────────────────────────────────
+   Explains behaviour, never an allowance. A visible tally would make a
+   student ration questions, which is exactly what we do not want. */
+.nia-help {
+    border-bottom: 1px solid var(--nia-line);
+    background: var(--s50, #f8fafc);
+    padding: 16px 18px 14px;
+    max-height: 62%;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.nia-help h4 {
+    font-family: var(--font-display, sans-serif);
+    font-size: .86rem;
+    font-weight: 700;
+    color: var(--nia-ink);
+    margin: 0 0 12px;
+}
+
+.nia-help dl {
+    margin: 0;
+}
+
+.nia-help dt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--s700, #334155);
+    margin-bottom: 3px;
+}
+
+.nia-help dt i {
+    width: 14px;
+    text-align: center;
+    color: var(--nia-accent);
+    font-size: .74rem;
+}
+
+.nia-help dd {
+    margin: 0 0 12px 22px;
+    font-size: .77rem;
+    line-height: 1.55;
+    color: var(--s500, #64748b);
+}
+
+.nia-help dd b {
+    color: var(--s700, #334155);
+    font-weight: 700;
+}
+
+.nia-help-foot {
+    margin: 2px 0 12px;
+    padding-top: 11px;
+    border-top: 1px solid var(--nia-line);
+    font-size: .72rem;
+    line-height: 1.5;
+    color: var(--s400, #94a3b8);
+}
+
+.nia-help-x {
+    width: 100%;
+    padding: 9px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--nia-accent);
+    color: #fff;
+    font-family: inherit;
+    font-size: .79rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.nia-icon.on {
+    background: var(--nia-accent);
+    color: #fff;
+}
+
+.nia-icon.on:hover {
+    background: var(--nia-accent);
+    color: #fff;
+}
+
+/* ── history list ───────────────────────────────────────────── */
+.nia-list {
+    border-bottom: 1px solid var(--nia-line);
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--s50, #f8fafc);
+    flex-shrink: 0;
+}
+
+.nia-list-row {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 11px 16px;
+    border: 0;
+    border-bottom: 1px solid var(--nia-line);
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.nia-list-row:hover {
+    background: #fff;
+}
+
+.nia-list-row b {
+    display: block;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--s800, #1e293b);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nia-list-row em {
+    font-style: normal;
+    font-size: .69rem;
+    color: var(--s400, #94a3b8);
+}
+
+.nia-list-empty {
+    padding: 18px 16px;
+    font-size: .8rem;
+    color: var(--s500, #64748b);
+    line-height: 1.5;
+}
+
+/* ── body ───────────────────────────────────────────────────── */
+.nia-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 18px 16px 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--s300, #cbd5e1) transparent;
+}
+
+.nia-welcome {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+    padding: 6px 2px 4px;
+}
+
+.nia-w-mark {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--nia-accent);
+}
+
+.nia-welcome p {
+    font-size: .88rem;
+    line-height: 1.62;
+    color: var(--s600, #475569);
+    margin: 0;
+}
+
+.nia-welcome b {
+    color: var(--nia-ink);
+}
+
+.nia-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 2px;
+}
+
+.nia-chip {
+    padding: 8px 13px;
+    border: 1px solid var(--nia-line);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--s600, #475569);
+    font-family: inherit;
+    font-size: .76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color .14s, color .14s;
+}
+
+.nia-chip:hover {
+    border-color: var(--g400, #5d92cf);
+    color: var(--nia-accent);
+}
+
+/* ── messages ───────────────────────────────────────────────── */
+.nia-msg {
+    display: flex;
+    gap: 9px;
+    margin-bottom: 15px;
+    align-items: flex-start;
+}
+
+.nia-msg.nia-user {
+    justify-content: flex-end;
+}
+
+.nia-m-mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--nia-accent);
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+.nia-m-txt {
+    font-size: .875rem;
+    line-height: 1.68;
+    color: var(--s700, #334155);
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    min-width: 0;
+}
+
+.nia-user .nia-m-txt {
+    max-width: 82%;
+    padding: 10px 14px;
+    border-radius: 15px 15px 4px 15px;
+    background: var(--nia-accent);
+    color: #fff;
+    font-weight: 500;
+}
+
+.nia-assistant .nia-m-txt {
+    flex: 1;
+}
+
+.nia-assistant.nia-soft .nia-m-txt {
+    padding: 11px 14px;
+    border-radius: 13px;
+    background: var(--amber-bg, #faf2e2);
+    color: var(--s700, #334155);
+}
+
+/* The few characters at the very end of a stream that are not yet
+   provably complete. Rendered as plain text, so its newlines need
+   preserving; it is replaced on the next chunk. */
+.nia-m-txt .nia-tail {
+    white-space: pre-wrap;
+}
+
+.nia-m-txt ul,
+.nia-m-txt ol {
+    margin: 8px 0 8px 18px;
+    padding: 0;
+}
+
+.nia-m-txt li {
+    margin-bottom: 5px;
+}
+
+.nia-m-txt p {
+    margin: 0 0 9px;
+}
+
+.nia-m-txt p:last-child {
+    margin-bottom: 0;
+}
+
+.nia-m-txt b,
+.nia-m-txt strong {
+    color: var(--nia-ink);
+    font-weight: 700;
+}
+
+.nia-m-txt code {
+    font-family: var(--font-mono, monospace);
+    font-size: .82em;
+    padding: 1px 5px;
+    border-radius: 5px;
+    background: var(--s100, #f1f5f9);
+}
+
+.nia-m-txt sub,
+.nia-m-txt sup {
+    font-size: .72em;
+    line-height: 0;
+}
+
+/* ── answer actions ─────────────────────────────────────────── */
+.nia-acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    /* Sits in the scroll column, not in the message's flex row. The
+       31px left margin lines it up under the text, past the avatar. */
+    margin: -6px 0 15px 31px;
+}
+
+.nia-act {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border: 1px solid var(--nia-line);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--s500, #64748b);
+    font-family: inherit;
+    font-size: .72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color .14s, color .14s;
+}
+
+.nia-act:hover {
+    border-color: var(--g400, #5d92cf);
+    color: var(--nia-accent);
+}
+
+.nia-act i {
+    font-size: .7rem;
+}
+
+/* ── sheets (notebook picker, teacher picker) ───────────────────
+   Scoped INSIDE the panel, not the page: on desktop Nia is a docked
+   column beside the work, and a full-page overlay would cover the very
+   thing the student is asking about. */
+.nia-sheet {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: flex-end;
+    background: rgba(15, 23, 42, .38);
+}
+
+.nia-sheet-card {
+    width: 100%;
+    max-height: 88%;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 30px rgba(15, 23, 42, .2);
+    animation: nia-rise .2s cubic-bezier(.22, 1, .36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nia-sheet-card {
+        animation: none;
+    }
+}
+
+.nia-sheet-card header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 10px 13px 16px;
+    border-bottom: 1px solid var(--nia-line);
+    flex-shrink: 0;
+}
+
+.nia-sheet-card header b {
+    flex: 1;
+    font-family: var(--font-display, sans-serif);
+    font-size: .9rem;
+    color: var(--nia-ink);
+}
+
+.nia-sheet-body {
+    padding: 14px 16px 18px;
+    overflow-y: auto;
+}
+
+.nia-sheet-load,
+.nia-sheet-msg {
+    font-size: .8rem;
+    line-height: 1.55;
+    color: var(--s500, #64748b);
+    margin: 0 0 12px;
+}
+
+.nia-sheet-msg.small {
+    font-size: .74rem;
+}
+
+.nia-sheet-go {
+    width: 100%;
+    margin-top: 12px;
+    padding: 11px;
+    border: 0;
+    border-radius: 11px;
+    background: var(--nia-accent);
+    color: #fff;
+    font-family: inherit;
+    font-size: .83rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.nia-sheet-go:disabled {
+    opacity: .5;
+}
+
+/* notebooks */
+.nia-nb-list {
+    display: grid;
+    gap: 7px;
+    margin-bottom: 12px;
+}
+
+.nia-nb {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 11px 13px;
+    border: 1px solid var(--nia-line);
+    border-radius: 11px;
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+}
+
+.nia-nb:hover {
+    border-color: var(--g400, #5d92cf);
+}
+
+.nia-nb i {
+    color: var(--nia-accent);
+    font-size: .82rem;
+}
+
+.nia-nb span {
+    flex: 1;
+    font-size: .83rem;
+    font-weight: 600;
+    color: var(--s700, #334155);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nia-nb em {
+    font-style: normal;
+    font-size: .72rem;
+    color: var(--s400, #94a3b8);
+}
+
+.nia-nb-new {
+    display: flex;
+    gap: 8px;
+}
+
+.nia-nb-new input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--nia-line);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: .82rem;
+    outline: none;
+}
+
+.nia-nb-new input:focus {
+    border-color: var(--g400, #5d92cf);
+}
+
+.nia-nb-new button {
+    padding: 0 15px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--s700, #334155);
+    color: #fff;
+    font-family: inherit;
+    font-size: .79rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* teachers */
+.nia-tch-list {
+    display: grid;
+    gap: 7px;
+    margin-bottom: 12px;
+}
+
+.nia-tch {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 13px;
+    border: 1px solid var(--nia-line);
+    border-radius: 11px;
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+}
+
+.nia-tch.on {
+    border-color: var(--nia-accent);
+    background: var(--nia-accent-soft);
+}
+
+.nia-tch-av {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--nia-accent);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+.nia-tch-txt {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.nia-tch-txt b {
+    font-size: .83rem;
+    font-weight: 700;
+    color: var(--s800, #1e293b);
+}
+
+.nia-tch-txt em {
+    font-style: normal;
+    font-size: .72rem;
+    color: var(--s400, #94a3b8);
+}
+
+#nia-tch-msg {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--nia-line);
+    border-radius: 11px;
+    font-family: inherit;
+    font-size: .82rem;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+}
+
+#nia-tch-msg:focus {
+    border-color: var(--g400, #5d92cf);
+}
+
+/* ── status ─────────────────────────────────────────────────── */
+.nia-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.nia-status-t {
+    font-size: .8rem;
+    color: var(--s400, #94a3b8);
+}
+
+.nia-dots {
+    display: inline-flex;
+    gap: 3px;
+}
+
+.nia-dots i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--g400, #5d92cf);
+    animation: nia-dot 1.3s ease-in-out infinite;
+}
+
+.nia-dots i:nth-child(2) {
+    animation-delay: .18s;
+}
+
+.nia-dots i:nth-child(3) {
+    animation-delay: .36s;
+}
+
+@keyframes nia-dot {
+
+    0%,
+    60%,
+    100% {
+        opacity: .3;
+        transform: translateY(0);
+    }
+
+    30% {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nia-dots i {
+        animation: none;
+        opacity: .6;
+    }
+}
+
+/* ── notes + the doubts handoff ─────────────────────────────── */
+.nia-note {
+    margin: 2px 0 14px 31px;
+    font-size: .76rem;
+    color: var(--s400, #94a3b8);
+    line-height: 1.5;
+}
+
+.nia-doubts-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 11px;
+    padding: 9px 15px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--nia-accent);
+    color: #fff;
+    font-family: inherit;
+    font-size: .79rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* ── composer ───────────────────────────────────────────────── */
+.nia-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 9px;
+    padding: 11px 14px 6px;
+    border-top: 1px solid var(--nia-line);
+    flex-shrink: 0;
+}
+
+.nia-input {
+    flex: 1;
+    min-height: 42px;
+    max-height: 132px;
+    padding: 11px 14px;
+    border: 1px solid var(--nia-line);
+    border-radius: 13px;
+    background: var(--s50, #f8fafc);
+    font-family: inherit;
+    font-size: .87rem;
+    line-height: 1.5;
+    color: var(--nia-ink);
+    resize: none;
+    outline: none;
+    transition: border-color .14s, background .14s;
+}
+
+.nia-input:focus {
+    border-color: var(--g400, #5d92cf);
+    background: #fff;
+}
+
+.nia-send {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 12px;
+    background: var(--nia-accent);
+    color: #fff;
+    cursor: pointer;
+    font-size: .85rem;
+    transition: opacity .14s;
+}
+
+.nia-send:disabled {
+    opacity: .45;
+    cursor: default;
+}
+
+.nia-foot {
+    padding: 0 16px 12px;
+    margin: 0;
+    font-size: .67rem;
+    line-height: 1.45;
+    color: var(--s400, #94a3b8);
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* ── focus visibility, everywhere ───────────────────────────── */
+.nia-fab:focus-visible,
+.nia-icon:focus-visible,
+.nia-chip:focus-visible,
+.nia-send:focus-visible,
+.nia-input:focus-visible,
+.nia-sel-btn:focus-visible,
+.nia-list-row:focus-visible,
+.nia-help-x:focus-visible,
+.nia-act:focus-visible,
+.nia-nb:focus-visible,
+.nia-tch:focus-visible,
+.nia-sheet-go:focus-visible,
+.nia-doubts-link:focus-visible {
+    outline: 2px solid var(--g500, #2f6cb3);
+    outline-offset: 2px;
+}
+
+/* ── the per-question launcher inside an OPD review card ──────
+   Lives here rather than in opd.css because it is Nia's surface: if
+   Nia is ever removed, this style goes with it instead of lingering
+   as a rule pointing at nothing. */
+.opd-ask-nia {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 9px 15px;
+    border: 1px solid var(--nia-line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--nia-accent);
+    font-family: inherit;
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color .14s, background .14s;
+}
+
+.opd-ask-nia:hover {
+    border-color: var(--g400, #5d92cf);
+    background: var(--nia-accent-soft);
+}
+
+.opd-ask-nia:focus-visible {
+    outline: 2px solid var(--g500, #2f6cb3);
+    outline-offset: 2px;
+}

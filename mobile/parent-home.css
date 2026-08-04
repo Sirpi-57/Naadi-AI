@@ -1,0 +1,1242 @@
+/* ══════════════════════════════════════════════════════════════════
+   NAADI AI — PARENT HOME  (parent-home.css)
+   ───────────────────────────────────────────────────────────────────
+   Pairs with parent-home.js. Loaded LAST in portal.html so it can
+   override portal-desktop.css's two-column auto-flow grid, which was
+   built for the OLD home page whose children were a flat list of
+   .pt-sec cards.
+
+   ONE MARKUP TREE, TWO SHAPES
+
+   On a phone .pah-grid is display:contents — the wrappers vanish and
+   the blocks flow in source order, which IS priority order:
+
+       header → full paper → worth knowing → showing up & going in
+              → last 7 days → reading and testing → worth asking about
+
+   At >=1024px the same wrappers become a band grid. There is no
+   second render path, so the two layouts cannot drift apart.
+
+   Colours are borrowed verbatim from teacher-home.css (subject tags,
+   chapter states) so a parent and a teacher looking at the same
+   subject see the same green.
+
+   ───────────────────────────────────────────────────────────────────
+   WHY THE PREFIX IS `pah-` AND NOT `ph-`
+
+   `ph-` is the obvious abbreviation for parent home, and it is TAKEN:
+   styles-mobile.css already owns ~90 `.ph-*` rules for the student
+   app's Arena and paper screens (.ph-hero, .ph-sheet, .ph-lb-row…),
+   and portal.html loads styles-mobile.css.
+
+   There is no collision today — the two sets of names happen not to
+   overlap. That is luck, not design. The next `.ph-sec` added on
+   either side would silently restyle the other page with no error
+   anywhere, which is the CSS version of the duplicate-Flask-route
+   bug: wrong output, no warning, found in production.
+
+   `pah-` is checked clean across every stylesheet portal.html loads.
+   ══════════════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════════════════
+   1 · SHELL
+   ══════════════════════════════════════════════════════════════════ */
+
+.pah-grid,
+.pah-band,
+.pah-col-main,
+.pah-col-side {
+    display: contents;
+}
+
+.pah-sec {
+    margin: 12px 0 0;
+}
+
+/* MOBILE ORDER
+   The wrappers are display:contents, so every .pah-sec becomes a direct
+   flex item of the page body and `order` can move it without a second
+   markup tree.
+
+   Only one block moves. "Worth knowing this week" is authored LAST —
+   it belongs at the bottom on desktop, full width — but on a phone that
+   puts it below six blocks and roughly four screens of scrolling, and
+   it is the only block that ever asks a parent to do anything. So on
+   mobile it is lifted to just under the header.
+
+   Everything else keeps order:2, and equal order values fall back to
+   source order, so nothing else shifts. */
+body:not(.is-teacher) #pt-home-body.pah-root {
+    display: flex;
+    flex-direction: column;
+}
+
+.pah-root>.pah-head {
+    order: 0;
+}
+
+.pah-sec {
+    order: 2;
+}
+
+.pah-sec.pah-needs,
+.pah-sec.pah-calm {
+    order: 1;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   2 · THE (i) BUTTON AND ITS PANEL
+
+   A button and a panel, not a tooltip. A tooltip is unreachable on a
+   phone and unreadable at this length, and the whole reason this
+   exists is that a parent may have missed the induction — or joined
+   after it.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pah-sec-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pah-sec-t {
+    min-width: 0;
+}
+
+.pah-i {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--s300);
+    background: #fff;
+    color: var(--s500);
+    font-size: .62rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.pah-i:active {
+    background: var(--s100);
+}
+
+.pah-i[aria-expanded="true"] {
+    background: var(--g600);
+    border-color: var(--g600);
+    color: #fff;
+}
+
+.pah-info {
+    margin: 10px 0 2px;
+    padding: 11px 13px;
+    background: var(--g50);
+    border: 1px solid var(--g100);
+    border-radius: 10px;
+}
+
+.pah-info-h {
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--g600);
+}
+
+.pah-info p {
+    margin: 5px 0 0;
+    font-size: .78rem;
+    line-height: 1.6;
+    color: var(--s700);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   3 · HEADER
+
+   Replaces the deck for a single-child parent. The tone class only
+   shifts the left rule — a parent should not have to decode a colour
+   scale, and the sentence already says what the colour would.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pah-head {
+    background: linear-gradient(135deg, var(--g600), var(--g700));
+    color: #fff;
+    border-radius: 16px;
+    padding: 16px 16px 14px;
+    margin: 12px 0 0;
+}
+
+.pah-head-id {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.pah-av {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    object-fit: cover;
+    flex: 0 0 auto;
+    background: rgba(255, 255, 255, .16);
+}
+
+.pah-av-i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .95rem;
+    color: #fff;
+}
+
+.pah-head-t {
+    min-width: 0;
+}
+
+.pah-head-t h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pah-head-t p {
+    margin: 3px 0 0;
+    font-size: .74rem;
+    color: rgba(255, 255, 255, .8);
+}
+
+/* The one sentence the whole page exists to deliver. Nothing on the
+   header competes with it. */
+.pah-headline {
+    margin: 13px 0 0;
+    padding: 11px 13px;
+    background: rgba(255, 255, 255, .12);
+    border-radius: 11px;
+    border-left: 3px solid rgba(255, 255, 255, .55);
+    font-size: .9rem;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.pah-head.tone-watch .pah-headline {
+    border-left-color: #ffd27d;
+}
+
+.pah-head.tone-quiet .pah-headline,
+.pah-head.tone-new .pah-headline {
+    border-left-color: rgba(255, 255, 255, .35);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   4 · THE FULL PAPER
+
+   The one number on this page a NEET parent understands with no
+   explanation at all, so it gets the strongest treatment after the
+   header.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pah-paper {
+    border-left: 3px solid var(--g600);
+}
+
+.pah-paper-empty {
+    border-left: 3px solid var(--s300);
+}
+
+.pah-paper-row {
+    display: grid;
+    gap: 14px;
+    margin-top: 12px;
+}
+
+/* A grid cell holding a 2.4rem number. Without min-width:0 a long
+   paper label refuses to shrink and pushes the subject bars off the
+   card instead of wrapping. */
+.pah-paper-main {
+    min-width: 0;
+}
+
+.pah-paper-k {
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--s500);
+}
+
+.pah-paper-v {
+    margin-top: 4px;
+    font-family: var(--font-display);
+    font-size: 2.1rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--g700);
+}
+
+.pah-paper-v span {
+    font-family: var(--font-body);
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--s400);
+    margin-left: 4px;
+}
+
+.pah-paper-best {
+    margin-top: 6px;
+    font-size: .74rem;
+    color: var(--s500);
+}
+
+.pah-paper-subs {
+    display: grid;
+    gap: 8px;
+}
+
+.pah-psub {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.pah-psub-bar {
+    flex: 1;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--s100);
+    overflow: hidden;
+}
+
+.pah-psub-bar i {
+    display: block;
+    height: 100%;
+    background: var(--g500);
+}
+
+.pah-psub-v {
+    flex: 0 0 auto;
+    font-size: .76rem;
+    font-weight: 700;
+    color: var(--s800);
+    min-width: 56px;
+    text-align: right;
+}
+
+.pah-psub-v em {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--s400);
+}
+
+.pah-paper-foot {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--s100);
+    font-size: .72rem;
+    color: var(--s500);
+}
+
+.pah-none {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 13px;
+    background: var(--s50);
+    border-radius: 11px;
+}
+
+.pah-none i {
+    font-size: 1.1rem;
+    color: var(--s400);
+    margin-top: 2px;
+}
+
+.pah-none b {
+    display: block;
+    font-size: .82rem;
+    color: var(--s800);
+}
+
+.pah-none span {
+    display: block;
+    margin-top: 3px;
+    font-size: .76rem;
+    line-height: 1.5;
+    color: var(--s600);
+}
+
+.pah-custom-line {
+    margin-top: 10px;
+    font-size: .74rem;
+    color: var(--s500);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   5 · WORTH KNOWING THIS WEEK
+   ══════════════════════════════════════════════════════════════════ */
+
+.pah-needs {
+    border-left: 3px solid var(--amber-600);
+}
+
+.pah-calm {
+    border-left: 3px solid #2f9e5f;
+}
+
+.pah-alert {
+    padding: 11px 0;
+    border-bottom: 1px solid var(--s100);
+}
+
+.pah-alert:last-child {
+    border-bottom: 0;
+    padding-bottom: 2px;
+}
+
+.pah-alert-t {
+    font-size: .86rem;
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.pah-alert-b {
+    margin-top: 3px;
+    font-size: .8rem;
+    line-height: 1.5;
+    color: var(--s600);
+}
+
+/* A suggestion, and only on the first item. Deliberately framed as a
+   lightbulb rather than an arrow: an arrow reads as a next step in a
+   list of chores, which is what turns this page into pressure at
+   home. */
+.pah-alert-do {
+    display: flex;
+    gap: 9px;
+    margin-top: 9px;
+    padding: 10px 12px;
+    background: var(--g50);
+    border-radius: 10px;
+    font-size: .78rem;
+    line-height: 1.55;
+    color: var(--g700);
+}
+
+.pah-alert-do i {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    font-size: .74rem;
+    opacity: .75;
+}
+
+.pah-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 9px;
+    border: 1px solid var(--s200);
+    border-radius: 9px;
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: .76rem;
+    font-weight: 600;
+    color: var(--s600);
+    cursor: pointer;
+}
+
+.pah-more:active {
+    background: var(--s50);
+}
+
+.pah-hidden {
+    margin-top: 4px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   6 · SHOWING UP vs GOING IN
+
+   Two halves side by side even on a phone. Putting them in one row IS
+   the argument of the block: a parent has to read the contrast in one
+   glance.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pah-two {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.pah-half {
+    min-width: 0;
+    padding: 12px;
+    background: var(--s50);
+    border: 1px solid var(--s200);
+    border-radius: 12px;
+}
+
+.pah-half-k {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--s500);
+}
+
+.pah-big {
+    margin-top: 7px;
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--s900);
+}
+
+.pah-big.muted {
+    color: var(--s400);
+}
+
+.pah-big span {
+    display: block;
+    margin-top: 3px;
+    font-family: var(--font-body);
+    font-size: .7rem;
+    font-weight: 500;
+    color: var(--s500);
+}
+
+.pah-delta {
+    display: inline-block;
+    margin-top: 7px;
+    font-size: .68rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.pah-delta.up {
+    color: #2f9e5f;
+}
+
+.pah-delta.down {
+    color: var(--red);
+}
+
+.pah-delta.flat {
+    color: var(--s500);
+}
+
+.pah-mini-rows {
+    margin-top: 10px;
+    padding-top: 9px;
+    border-top: 1px solid var(--s200);
+    display: grid;
+    gap: 6px;
+}
+
+.pah-mini-rows div {
+    font-size: .72rem;
+    line-height: 1.35;
+    color: var(--s500);
+}
+
+.pah-mini-rows b {
+    color: var(--s800);
+    font-weight: 700;
+}
+
+.pah-note {
+    margin-top: 7px;
+    font-size: .7rem;
+    line-height: 1.5;
+    color: var(--s500);
+}
+
+
+/* ── does it stay learned ──────────────────────────────────────────
+   The v1→v2→v3 audit, said in a sentence. The mechanism is explained
+   BEFORE the number, because the first version led with "40% still
+   there later" and a parent had no way to know what that counted. */
+
+.pah-hold-wrap {
+    margin-top: 14px;
+    padding-top: 13px;
+    border-top: 1px solid var(--s100);
+}
+
+.pah-hold-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.pah-hold-head b {
+    font-size: .84rem;
+    color: var(--s800);
+}
+
+.pah-hold-how {
+    margin: 5px 0 0;
+    font-size: .76rem;
+    line-height: 1.55;
+    color: var(--s600);
+}
+
+.pah-hold {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    padding: 11px 13px;
+    background: var(--purple-bg);
+    border-radius: 11px;
+}
+
+.pah-hold.quiet {
+    background: var(--s100);
+}
+
+.pah-hold-b {
+    flex: 1;
+    min-width: 0;
+    font-size: .78rem;
+    line-height: 1.55;
+    color: var(--s700);
+}
+
+.pah-hold-b b {
+    color: var(--s900);
+    font-weight: 700;
+}
+
+.pah-hold-v {
+    flex: 0 0 auto;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--purple);
+    line-height: 1;
+}
+
+
+/* ── the day grid ─────────────────────────────────────────────────
+   8 weeks, not 12. Twelve was ~90% empty for a real student and read
+   as failure rather than as history. */
+
+.pah-heat-wrap {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--s100);
+}
+
+.pah-heat {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(7, 1fr);
+    gap: 3px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+
+.pah-heat::-webkit-scrollbar {
+    display: none;
+}
+
+.pah-heat i {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: var(--s200);
+}
+
+.pah-heat i.on {
+    background: var(--g500);
+}
+
+.pah-heat i.pad {
+    background: transparent;
+}
+
+.pah-heat-k {
+    margin-top: 7px;
+    font-size: .66rem;
+    color: var(--s400);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   7 · THE LAST 7 DAYS
+   ══════════════════════════════════════════════════════════════════ */
+
+.pah-week {
+    margin-top: 10px;
+}
+
+.pah-wrow {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--s100);
+}
+
+.pah-wrow:last-child {
+    border-bottom: 0;
+    padding-bottom: 2px;
+}
+
+.pah-wday {
+    flex: 0 0 62px;
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--s500);
+}
+
+.pah-wmain {
+    flex: 1;
+    min-width: 0;
+}
+
+.pah-wt {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--s800);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pah-ws {
+    margin-top: 3px;
+    font-size: .72rem;
+    color: var(--s500);
+}
+
+.pah-ws i {
+    margin-right: 4px;
+    opacity: .7;
+}
+
+.pah-wpct {
+    flex: 0 0 auto;
+    font-family: var(--font-display);
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.pah-wpct.low {
+    color: var(--red);
+}
+
+.pah-wpct.quiet {
+    font-size: .8rem;
+    color: var(--s300);
+}
+
+
+/* ── subject tags: same palette as teacher-home.css ─────────────── */
+
+.pah-tag {
+    flex: 0 0 auto;
+    font-size: .6rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--s100);
+    color: var(--s600);
+}
+
+.pah-tag.bio {
+    background: #e8f5ec;
+    color: #1c6b3a;
+}
+
+.pah-tag.phy {
+    background: #eaf1fb;
+    color: var(--g700);
+}
+
+.pah-tag.chem {
+    background: #fdeee6;
+    color: #9c4a1a;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   8 · READING AND TESTING
+
+   Two bars per subject, on separate rows with their own labels and
+   their own denominators. They are not two halves of one thing and
+   must never be drawn as a single stacked bar.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pah-subj {
+    padding: 13px 0;
+    border-bottom: 1px solid var(--s100);
+}
+
+.pah-subj:last-of-type {
+    border-bottom: 0;
+    padding-bottom: 4px;
+}
+
+.pah-subj-n {
+    margin-bottom: 9px;
+}
+
+/* One block per year. The student's own year is tinted and labelled so
+   a parent's eye lands on it first, without the other year being
+   demoted to a footnote — NEET examines both. */
+.pah-year {
+    padding: 9px 10px;
+    border-radius: 10px;
+    background: var(--s50);
+    border: 1px solid var(--s200);
+}
+
+.pah-year+.pah-year {
+    margin-top: 8px;
+}
+
+.pah-year.own {
+    background: var(--g50);
+    border-color: var(--g100);
+}
+
+.pah-year-k {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--s600);
+}
+
+.pah-year.own .pah-year-k {
+    color: var(--g700);
+}
+
+.pah-year-k em {
+    font-style: normal;
+    font-size: .6rem;
+    font-weight: 600;
+    color: var(--g600);
+    opacity: .8;
+}
+
+.pah-track {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 7px;
+}
+
+.pah-track-k {
+    flex: 0 0 52px;
+    font-size: .68rem;
+    font-weight: 600;
+    color: var(--s500);
+}
+
+.pah-trbar {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--s100);
+    overflow: hidden;
+}
+
+.pah-trbar i {
+    display: block;
+    height: 100%;
+}
+
+/* Amber for reading, blue for testing — the same two colours the
+   teacher's chapter bar uses for "read only" and "testing now". */
+.pah-trbar i.read {
+    background: #e2b13c;
+}
+
+.pah-trbar i.test {
+    background: var(--g500);
+}
+
+.pah-track-v {
+    flex: 0 0 auto;
+    min-width: 62px;
+    text-align: right;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--s700);
+}
+
+.pah-subj-f {
+    margin-top: 9px;
+    font-size: .72rem;
+    line-height: 1.45;
+    color: var(--s500);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   9 · WORTH ASKING ABOUT
+   ══════════════════════════════════════════════════════════════════ */
+
+.pah-talk {
+    border-left: 3px solid var(--purple);
+}
+
+.pah-talk-i {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--s100);
+}
+
+.pah-talk-i:last-child {
+    border-bottom: 0;
+    padding-bottom: 2px;
+}
+
+.pah-talk-t {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: .84rem;
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.pah-talk-b {
+    margin-top: 5px;
+    font-size: .79rem;
+    line-height: 1.6;
+    color: var(--s600);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   10 · MULTI-CHILD DECK
+
+   Only rendered for two or more children. The Doctor bar is gone;
+   the flag SENTENCE takes its place, so a parent scrolling past a
+   sibling card learns why it is flagged rather than only that it is.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pah-card {
+    display: flex;
+    flex-direction: column;
+}
+
+/* The v2 card lost the progress bar, so a flagged sibling is taller
+   than an unflagged one and the three summary lines stopped lining up
+   across the row. Pushing them to the bottom re-aligns them without
+   forcing a fixed height on a card whose content genuinely varies. */
+.pah-card .pt-card-lines {
+    margin-top: auto;
+}
+
+.pah-card-flag {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: var(--amber-bg);
+    border-radius: 9px;
+    font-size: .72rem;
+    line-height: 1.4;
+    color: #8a5a09;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   11 · TABLET (>=768px)
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) {
+
+    .pah-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 22px;
+        padding: 18px 20px;
+    }
+
+    .pah-head-id {
+        flex: 0 0 auto;
+    }
+
+    .pah-head-t h2 {
+        font-size: 1.45rem;
+    }
+
+    .pah-headline {
+        margin: 0;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .pah-two {
+        gap: 14px;
+    }
+
+    /* The paper card has room for the mark and the three subject bars
+       side by side rather than stacked. */
+    .pah-paper-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+        align-items: center;
+        gap: 22px;
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   12 · DESKTOP (>=1024px)
+
+   portal-desktop.css forces #pt-home-body into a flat two-column
+   auto-flow grid built for the OLD page, whose children were a loose
+   list of .pt-sec cards. This page renders its own .pah-grid, which
+   would become ONE item in that inherited grid and get squashed to
+   half width.
+
+   `.pah-root` is added by parent-home.js at render time purely to
+   raise specificity from (0,1,1,1) to (0,1,2,1), so this wins on
+   merit rather than with !important — which matters because
+   !important here would also block any future page-level theme. Same
+   trick teacher-home.css uses for .th-root.
+
+   THE SHAPE
+
+   Rows grouped by what the block IS, not by how tall it is:
+
+       band   the paper mark and anything waiting on her. Full width,
+              top of the page, where they cannot be missed.
+       main   the two blocks she reads: is it working, and what
+              happened.
+       side   what she consults: subjects, and what to ask about.
+
+   No row depends on another having content, so a quiet week still
+   fills the screen instead of collapsing into one rail.
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* Back to block flow: .pah-grid takes over from here, and the
+       mobile `order` rules stop applying because .pah-sec is no longer
+       a flex item of this element. "Worth knowing this week" drops back
+       to where it is authored — last, full width. */
+    body:not(.is-teacher) #pt-home-body.pah-root {
+        display: block;
+        flex-direction: initial;
+        grid-template-columns: none;
+        gap: 0;
+        max-width: var(--dsk-content);
+        margin: 0 auto;
+        padding: 0 8px 40px;
+    }
+
+    body:not(.is-teacher) #pt-home-body.pah-root>.pt-sec {
+        margin: 16px 0 0;
+        grid-column: auto;
+    }
+
+    .pah-head {
+        margin: 16px 0 0;
+        padding: 22px 26px;
+        border-radius: 20px;
+    }
+
+    .pah-head-t h2 {
+        font-size: 1.75rem;
+    }
+
+    .pah-headline {
+        font-size: .98rem;
+        padding: 13px 16px;
+    }
+
+    .pah-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+        gap: 18px;
+        align-items: start;
+        margin-top: 4px;
+    }
+
+    .pah-col-main,
+    .pah-col-side {
+        display: block;
+        min-width: 0;
+    }
+
+    /* Both bands run the full width, under the two-column row.
+
+       `pair` holds the paper mark and the conversation starters side by
+       side — both are short, and stacking them wastes the width. It
+       falls to one column on its own when the viewport can't give each
+       cell 360px, so the rule needs no second breakpoint.
+
+       `wide` holds "Worth knowing this week" alone, across everything,
+       at the foot of the page. */
+    .pah-band {
+        grid-column: 1 / -1;
+        min-width: 0;
+    }
+
+    .pah-band.pair {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+        gap: 0 18px;
+        align-items: start;
+    }
+
+    .pah-band.wide {
+        display: block;
+    }
+
+    .pah-band:empty,
+    .pah-col-main:empty,
+    .pah-col-side:empty {
+        display: none;
+    }
+
+    /* Both cells of the pair band start level, whatever their heights. */
+    .pah-band.pair>.pah-sec {
+        margin-top: 16px;
+    }
+
+    .pah-band>.pah-sec:first-child,
+    .pah-col-main>.pah-sec:first-child,
+    .pah-col-side>.pah-sec:first-child {
+        margin-top: 16px;
+    }
+
+    .pah-sec {
+        margin: 16px 0 0;
+        padding: 18px;
+    }
+
+    /* Inside a half-width band cell the paper stacks again — 360px is
+       not enough for the mark and three bars in one row. */
+    .pah-paper-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .pah-two {
+        gap: 16px;
+    }
+
+    .pah-half {
+        padding: 16px;
+    }
+
+    .pah-big {
+        font-size: 1.7rem;
+    }
+
+    .pah-paper-v {
+        font-size: 2.4rem;
+    }
+
+    .pah-heat i {
+        width: 13px;
+        height: 13px;
+    }
+
+    /* Wider rows earn a hover state; on a touch screen this would just
+       be a stuck highlight after every tap. */
+    .pah-wrow {
+        margin: 0 -8px;
+        padding: 10px 8px;
+        border-radius: 9px;
+        transition: background .14s;
+    }
+
+    .pah-wrow:hover {
+        background: var(--s50);
+    }
+
+    .pah-wday {
+        flex-basis: 84px;
+    }
+
+    .pah-i,
+    .pah-more {
+        transition: background .14s, border-color .14s, color .14s;
+    }
+
+    .pah-i:hover {
+        border-color: var(--g400);
+        color: var(--g600);
+    }
+
+    .pah-i[aria-expanded="true"]:hover {
+        color: #fff;
+    }
+
+    .pah-more:hover {
+        background: var(--g50);
+        border-color: var(--g400);
+        color: var(--g600);
+    }
+
+    .pah-track-k {
+        flex-basis: 60px;
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   13 · WIDE DESKTOP (>=1440px)
+
+   The band's cells are now wide enough for the paper mark and its
+   subject bars to sit side by side again.
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1440px) {
+
+    .pah-grid {
+        gap: 22px;
+    }
+
+    .pah-head-t h2 {
+        font-size: 1.95rem;
+    }
+
+    .pah-headline {
+        font-size: 1.02rem;
+    }
+
+    .pah-paper-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+        align-items: center;
+        gap: 24px;
+    }
+}

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en" data-bars="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sign Up - NAADI AI</title>
+
+    <!-- Inline favicon (pulse mark) — matches login/forgot-password -->
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%232f6cb3'/%3E%3Cpolyline points='2,13 7,13 9,7 12,17 15,10 17,13 22,13' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles-mobile.css">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <style>
+        /* ══════════════════════════════════════════════════════════════
+           SIGNUP v2 — scoped under .su2. Same visual language as the new
+           login + forgot-password (dark theme, pulse wordmark, fields,
+           button, tagline) with the compact utility header.
+
+           Student-only by design: parents arrive through the invite/claim
+           flow and centres are provisioned by NAADI AI, so a role picker
+           here could only ever create the wrong kind of account.
+
+           Fields are name/email/password only. Guardian phone and NEET
+           year now live on the onboarding tour (slide 10), which runs
+           immediately after this page.
+           ══════════════════════════════════════════════════════════════ */
+
+        .su2 {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            background: #0B1220;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            font-family: var(--font-body);
+        }
+
+        /* ── Compact branded header ────────────────────────────────── */
+        .su2-header {
+            position: relative;
+            flex-shrink: 0;
+            min-height: 132px;
+            padding-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+            overflow: hidden;
+            background: radial-gradient(120% 120% at 82% 0%, #1b3a63 0%, #0f2547 46%, #0B1220 82%);
+        }
+
+        .su2-header-grid {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            opacity: .5;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+            background-size: 28px 28px;
+            animation: su2Drift 26s linear infinite;
+        }
+
+        @keyframes su2Drift {
+            to {
+                transform: translate(28px, 28px);
+            }
+        }
+
+        .su2-pulse {
+            position: absolute;
+            bottom: 14px;
+            left: 0;
+            width: 100%;
+            z-index: 0;
+            opacity: .4;
+            pointer-events: none;
+        }
+
+        .su2-header-mark {
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-14deg);
+            z-index: 0;
+            font-size: 92px;
+            color: rgba(125, 179, 236, .08);
+            pointer-events: none;
+        }
+
+        .su2-brand {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            padding: 22px 0 0 24px;
+            text-decoration: none;
+        }
+
+        .su2-brand-wordmark {
+            position: relative;
+            display: inline-block;
+        }
+
+        .su2-brand-text {
+            display: block;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.22rem;
+            color: #fff;
+            letter-spacing: .2px;
+            line-height: 1;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, .55);
+        }
+
+        .su2-brand-text span {
+            color: #7db3ec;
+        }
+
+        .su2-brand-underline {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -9px;
+            width: 100%;
+            height: 9px;
+            overflow: visible;
+            filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .5));
+        }
+
+        .su2-brand-underline path {
+            fill: none;
+            stroke: #fff;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vector-effect: non-scaling-stroke;
+        }
+
+        /* ── Panel ─────────────────────────────────────────────────── */
+        .su2-panel {
+            position: relative;
+            z-index: 3;
+            flex: 1;
+            margin-top: -18px;
+            padding: 20px 24px calc(22px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)));
+            background: #0B1220;
+            border-radius: 22px 22px 0 0;
+            border-top: 1px solid rgba(255, 255, 255, .06);
+            box-shadow: 0 -12px 30px rgba(0, 0, 0, .35);
+        }
+
+        .su2-heading {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -.02em;
+            line-height: 1.15;
+            margin-bottom: 6px;
+        }
+
+        .su2-subheading {
+            font-size: .88rem;
+            color: rgba(255, 255, 255, .58);
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        /* Fields — identical to login */
+        .su2 .form-group {
+            margin-bottom: 13px;
+        }
+
+        .su2 .form-label {
+            display: block;
+            font-size: .72rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .5);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 8px;
+        }
+
+        .su2 .form-input-wrap {
+            position: relative;
+        }
+
+        .su2 .form-input-wrap>i:first-of-type {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, .3);
+            font-size: .9rem;
+            pointer-events: none;
+            transition: color .2s;
+        }
+
+        .su2 .form-input-wrap:focus-within>i:first-of-type {
+            color: #5d92cf;
+        }
+
+        .su2 .form-input {
+            width: 100%;
+            padding: 14px 46px 14px 42px;
+            background: rgba(255, 255, 255, .06);
+            border: 1.5px solid rgba(255, 255, 255, .1);
+            border-radius: 12px;
+            font-size: .95rem;
+            font-family: var(--font-body);
+            color: #fff;
+            outline: none;
+            transition: border-color .2s, background .2s, box-shadow .2s;
+        }
+
+        .su2 .form-input::placeholder {
+            color: rgba(255, 255, 255, .28);
+        }
+
+        .su2 .form-input:focus {
+            border-color: #5d92cf;
+            background: rgba(93, 146, 207, .1);
+            box-shadow: 0 0 0 3px rgba(93, 146, 207, .15);
+        }
+
+        .su2 .pw-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, .35);
+            font-size: .9rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 8px;
+            transition: color .2s;
+        }
+
+        .su2 .pw-toggle:hover {
+            color: rgba(255, 255, 255, .7);
+        }
+
+        /* Password strength — shows the rule where it's relevant, so the
+           student isn't told "too weak" only after pressing the button. */
+        .su2-strength {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            height: 14px;
+        }
+
+        .su2-strength-track {
+            flex: 1;
+            height: 4px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, .1);
+            overflow: hidden;
+        }
+
+        .su2-strength-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 3px;
+            background: #c43d3d;
+            transition: width .25s, background .25s;
+        }
+
+        .su2-strength-label {
+            font-size: .68rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .4);
+            min-width: 52px;
+            text-align: right;
+        }
+
+        /* Terms */
+        .su2-terms {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 14px 0 4px;
+            font-size: .78rem;
+            color: rgba(255, 255, 255, .5);
+            line-height: 1.5;
+            cursor: pointer;
+        }
+
+        .su2-terms input {
+            margin-top: 2px;
+            width: 16px;
+            height: 16px;
+            accent-color: #2f6cb3;
+            flex-shrink: 0;
+        }
+
+        .su2-terms a {
+            color: #7db3ec;
+            text-decoration: none;
+        }
+
+        /* Button — identical to login */
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            border-radius: 13px;
+            border: none;
+            background: linear-gradient(135deg, #2f6cb3 0%, #1f5896 100%);
+            color: #fff;
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: .01em;
+            transition: filter .2s, transform .08s;
+            box-shadow: 0 8px 24px rgba(47, 108, 179, .45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            margin-top: 12px;
+        }
+
+        .btn-login:hover {
+            filter: brightness(1.06);
+        }
+
+        .btn-login:active {
+            transform: scale(.98);
+        }
+
+        .btn-login:disabled {
+            opacity: .8;
+            cursor: default;
+        }
+
+        .su2-spinner {
+            width: 17px;
+            height: 17px;
+            border: 2.5px solid rgba(255, 255, 255, .35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: su2Spin .7s linear infinite;
+        }
+
+        @keyframes su2Spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Messages */
+        .su2 .msg-box {
+            display: none;
+            margin-top: 12px;
+            padding: 11px 14px;
+            border-radius: 11px;
+            font-size: .82rem;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .su2 .msg-box.show {
+            display: block;
+            animation: su2FadeIn .25s ease;
+        }
+
+        @keyframes su2FadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+        }
+
+        .su2 .msg-box.error {
+            background: rgba(196, 61, 61, .14);
+            border: 1px solid rgba(196, 61, 61, .35);
+            color: #f4a3a3;
+        }
+
+        .su2 .msg-box.success {
+            background: rgba(22, 163, 74, .14);
+            border: 1px solid rgba(22, 163, 74, .35);
+            color: #7ee0a3;
+        }
+
+        .su2-tagline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 12px;
+            color: rgba(255, 255, 255, .38);
+            font-size: .76rem;
+            font-weight: 500;
+        }
+
+        .su2-tagline i {
+            color: #5d92cf;
+            font-size: .78rem;
+        }
+
+        .switch-auth {
+            text-align: center;
+            margin-top: 10px;
+            font-size: .84rem;
+            color: rgba(255, 255, 255, .5);
+        }
+
+        .switch-auth a {
+            color: #7db3ec;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        @media (min-height: 760px) {
+            .su2-header {
+                min-height: 158px;
+            }
+        }
+    </style>
+    <!-- Desktop adaptation layer: inert below 1024px. Linked at the
+         END of head so it cascades after this page's inline styles. -->
+    <link rel="stylesheet" href="styles-desktop.css" media="(min-width: 1024px)">
+</head>
+
+<body class="auth-page-body">
+
+    <!-- Loading overlay (kept: shared.js/styles-mobile.css style it) -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+        <div style="color:#64748b;font-weight:500;margin-top:12px;">Creating your account...</div>
+    </div>
+
+    <div class="su2">
+
+        <!-- ── Compact branded header ──────────────────────────────── -->
+        <div class="su2-header">
+            <div class="su2-header-grid"></div>
+            <i class="fa-solid fa-user-doctor su2-header-mark" aria-hidden="true"></i>
+            <svg class="su2-pulse" viewBox="0 0 320 60" preserveAspectRatio="none" aria-hidden="true">
+                <polyline points="0,30 70,30 86,30 96,8 108,52 120,20 132,40 146,30 320,30" fill="none" stroke="#5AA6F0"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+
+            <a class="su2-brand" href="login.html">
+                <span class="su2-brand-wordmark">
+                    <span class="su2-brand-text">NAADI <span>AI</span></span>
+                    <svg class="su2-brand-underline" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true">
+                        <path d="M0,9 H54 L58,9 L60,6 L63,15 L66,2 L69,11 L72,9 H100" />
+                    </svg>
+                </span>
+            </a>
+        </div>
+
+        <!-- ── Panel ───────────────────────────────────────────────── -->
+        <div class="su2-panel">
+
+            <h1 class="su2-heading">Start your journey</h1>
+            <p class="su2-subheading">Create your free account. It takes less than a minute.</p>
+
+            <form id="signup-form" onsubmit="handleSignup(event)">
+
+                <!-- Student-only: parents are invited, centres are provisioned. -->
+                <input type="hidden" id="role-input" value="student">
+
+                <div class="form-group">
+                    <label class="form-label" for="signup-name">Full Name</label>
+                    <div class="form-input-wrap">
+                        <input type="text" class="form-input" id="signup-name" placeholder="Your name" required
+                            autocomplete="name">
+                        <i class="fa-regular fa-user"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="signup-email">Email Address</label>
+                    <div class="form-input-wrap">
+                        <input type="email" class="form-input" id="signup-email" placeholder="student@example.com"
+                            required autocomplete="email">
+                        <i class="fa-regular fa-envelope"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="signup-password">Password</label>
+                    <div class="form-input-wrap">
+                        <input type="password" class="form-input" id="signup-password"
+                            placeholder="At least 6 characters" required minlength="6" autocomplete="new-password"
+                            oninput="paintStrength()">
+                        <i class="fa-solid fa-lock"></i>
+                        <button type="button" class="pw-toggle" onclick="togglePassword()" aria-label="Show password">
+                            <i class="fa-regular fa-eye" id="pw-icon"></i>
+                        </button>
+                    </div>
+                    <div class="su2-strength" id="pw-strength" hidden>
+                        <div class="su2-strength-track">
+                            <div class="su2-strength-fill" id="pw-fill"></div>
+                        </div>
+                        <span class="su2-strength-label" id="pw-label"></span>
+                    </div>
+                </div>
+
+                <label class="su2-terms">
+                    <input type="checkbox" id="agree-terms" required>
+                    <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</span>
+                </label>
+
+                <button type="submit" class="btn-login" id="signup-btn">
+                    <i class="fa-solid fa-user-plus"></i> Create my free account
+                </button>
+            </form>
+
+            <div class="msg-box error" id="error-msg"></div>
+            <div class="msg-box success" id="success-msg"></div>
+
+            <div class="su2-tagline">
+                <i class="fa-solid fa-heart-pulse"></i>
+                Where future doctors begin.
+            </div>
+
+            <div class="switch-auth">
+                Already have an account? <a href="login.html">Login</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="system-bars.js"></script>
+    <script src="shared.js"></script>
+    <script>
+        // Already signed in → straight into the app shell
+        auth.onAuthStateChanged((user) => {
+            if (user && !window._signingUp) window.location.href = 'app.html';
+        });
+
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            el.textContent = msg;
+            el.classList.add('show');
+            document.getElementById('success-msg').classList.remove('show');
+        }
+        function showSuccess(msg) {
+            const el = document.getElementById('success-msg');
+            el.textContent = msg;
+            el.classList.add('show');
+            document.getElementById('error-msg').classList.remove('show');
+        }
+        function showLoading(show) {
+            document.getElementById('loading-overlay').classList.toggle('active', show);
+            const btn = document.getElementById('signup-btn');
+            btn.disabled = show;
+            btn.innerHTML = show
+                ? '<span class="su2-spinner"></span> Creating account...'
+                : '<i class="fa-solid fa-user-plus"></i> Create my free account';
+        }
+        function togglePassword() {
+            const input = document.getElementById('signup-password');
+            const icon = document.getElementById('pw-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-regular fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-regular fa-eye';
+            }
+        }
+
+        // Strength is advisory only — Firebase's real rule is the 6-char
+        // minimum below. This just tells the student where they stand
+        // while they type, instead of after they submit.
+        function paintStrength() {
+            const v = document.getElementById('signup-password').value;
+            const wrap = document.getElementById('pw-strength');
+            const fill = document.getElementById('pw-fill');
+            const label = document.getElementById('pw-label');
+            wrap.hidden = v.length === 0;
+            if (!v) return;
+
+            let score = 0;
+            if (v.length >= 6) score++;
+            if (v.length >= 10) score++;
+            if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+            if (/\d/.test(v)) score++;
+            if (/[^A-Za-z0-9]/.test(v)) score++;
+            if (v.length < 6) score = 0;
+
+            const steps = [
+                { w: '20%', c: '#c43d3d', t: 'Too short' },
+                { w: '40%', c: '#c43d3d', t: 'Weak' },
+                { w: '60%', c: '#d98b2b', t: 'Fair' },
+                { w: '80%', c: '#4ea87e', t: 'Good' },
+                { w: '100%', c: '#16a34a', t: 'Strong' },
+                { w: '100%', c: '#16a34a', t: 'Strong' }
+            ][score];
+            fill.style.width = steps.w;
+            fill.style.background = steps.c;
+            label.textContent = steps.t;
+            label.style.color = steps.c;
+        }
+
+        // ── Backend contract below is unchanged from v1 ──────────────
+        // Register user profile in backend (through API_BASE so it also
+        // works when the page isn't served by the Flask backend itself)
+        async function registerUserProfile(user, name, role) {
+            try {
+                const token = await user.getIdToken();
+                await fetch(`${API_BASE}/api/user/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        role: role,
+                        class_level: '11',
+                        target_exam: 'NEET'
+                    })
+                });
+            } catch (e) {
+                console.warn('Profile registration failed (non-blocking):', e);
+                // Non-blocking — user can still proceed
+            }
+        }
+
+        // Mark the account as not-yet-onboarded. Guardian phone and NEET
+        // year used to be collected here; they now live on the onboarding
+        // tour (slide 10), which is the very next screen. Non-blocking for
+        // the same reason as above: a network hiccup must not cost a
+        // student the account they just created.
+        async function saveSignupExtras(user) {
+            try {
+                const token = await user.getIdToken();
+                await fetch(`${API_BASE}/api/user/account/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        onboarding_completed: false
+                    })
+                });
+            } catch (e) {
+                console.warn('Signup extras failed (non-blocking):', e);
+            }
+        }
+
+        async function handleSignup(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const role = document.getElementById('role-input').value;
+
+            if (!name) { showError('Please enter your name.'); return; }
+            if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+
+            window._signingUp = true;
+            showLoading(true);
+
+            try {
+                // 1. Create Firebase Auth account
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // 2. Update display name
+                await user.updateProfile({ displayName: name });
+
+                // 3. Register profile in backend
+                await registerUserProfile(user, name, role);
+
+                // 4. Flag the account as awaiting onboarding
+                await saveSignupExtras(user);
+
+                showSuccess('Account created! Welcome aboard...');
+
+                // 5. First stop is the tour, not the app shell.
+                setTimeout(() => { window.location.href = 'onboarding.html'; }, 900);
+
+            } catch (error) {
+                window._signingUp = false;
+                showLoading(false);
+
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        showError('This email is already registered. Try logging in instead.');
+                        break;
+                    case 'auth/invalid-email':
+                        showError('Please enter a valid email address.');
+                        break;
+                    case 'auth/weak-password':
+                        showError('Password is too weak. Use at least 6 characters.');
+                        break;
+                    case 'auth/network-request-failed':
+                        showError('Network error. Check your internet connection.');
+                        break;
+                    default:
+                        showError(error.message);
+                }
+            }
+        }
+        // NOTE: Google signup omitted — signInWithPopup doesn't work inside
+        // a Capacitor WebView (spec Section 4, option a).
+    </script>
+
+</body>
+
+</html>

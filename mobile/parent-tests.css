@@ -1,0 +1,1100 @@
+/* ══════════════════════════════════════════════════════════════════
+   NAADI AI — PARENT TESTS  (parent-tests.css)
+   ───────────────────────────────────────────────────────────────────
+   Pairs with parent-tests.js. Loaded after portal-desktop.css so it can
+   override the flat two-column auto-flow grid that file forces on every
+   parent tab body.
+
+   THE LAYOUT ARGUMENT
+
+   All three levels are FULL WIDTH on desktop. No side rail, no modal.
+   The Learning tab already showed that a half-width column beside a long
+   list wastes the screen, and questions are the longest content in the
+   portal — a stem, four options, an explanation and a mistakes list do
+   not belong in a 5fr rail.
+
+   What changes with width is DENSITY, not structure: chapter folders go
+   from one column to three, the summary strip from two stats per row to
+   four, and the question body gets a comfortable reading measure instead
+   of running the full 1120px.
+
+   ───────────────────────────────────────────────────────────────────
+   WHY THE PREFIX IS `pat-`
+
+   `ph-` is the student app's Arena screens in styles-mobile.css, `pah-`
+   is the parent Home tab, `pal-` is Learning. `pat-` is checked clean
+   across every stylesheet portal.html loads. Sharing a prefix across two
+   pages in one document is the CSS version of a duplicate Flask route:
+   wrong output, no error, found in production.
+   ══════════════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════════════════
+   1 · SHELL
+   ══════════════════════════════════════════════════════════════════ */
+
+.pat-sec {
+    margin: 12px 0 0;
+}
+
+.pat-note {
+    margin: 12px 0 0;
+    font-size: .72rem;
+    color: var(--s500);
+}
+
+.pat-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 8px 14px 8px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--s200);
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--s600);
+    cursor: pointer;
+}
+
+.pat-back:active {
+    background: var(--s50);
+}
+
+.pat-go {
+    flex: 0 0 auto;
+    color: var(--s300);
+    font-size: .72rem;
+}
+
+.pat-empty {
+    margin: 14px 0 0;
+    font-size: .8rem;
+    line-height: 1.6;
+    color: var(--s500);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   2 · THE (i) BUTTON — same contract as Home and Learning
+   ══════════════════════════════════════════════════════════════════ */
+
+.pat-sec-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pat-sec-t {
+    min-width: 0;
+}
+
+.pat-i {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--s300);
+    background: #fff;
+    color: var(--s500);
+    font-size: .62rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.pat-i[aria-expanded="true"] {
+    background: var(--g600);
+    border-color: var(--g600);
+    color: #fff;
+}
+
+.pat-info {
+    margin: 10px 0 2px;
+    padding: 11px 13px;
+    background: var(--g50);
+    border: 1px solid var(--g100);
+    border-radius: 10px;
+}
+
+.pat-info-h {
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--g600);
+}
+
+.pat-info p {
+    margin: 5px 0 0;
+    font-size: .78rem;
+    line-height: 1.6;
+    color: var(--s700);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   3 · THE SUMMARY STRIP
+   ══════════════════════════════════════════════════════════════════ */
+
+.pat-strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.pat-stat {
+    padding: 11px 12px;
+    background: var(--s50);
+    border: 1px solid var(--s200);
+    border-radius: 11px;
+}
+
+.pat-stat b {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--s900);
+}
+
+.pat-stat span {
+    display: block;
+    margin-top: 3px;
+    font-size: .68rem;
+    color: var(--s500);
+}
+
+/* The sentences are the point of this block. They get body size, not
+   caption size — a parent should be able to read one and stop. */
+.pat-line {
+    margin: 12px 0 0;
+    font-size: .82rem;
+    line-height: 1.6;
+    color: var(--s700);
+}
+
+.pat-bands {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--s100);
+    display: grid;
+    gap: 8px;
+}
+
+.pat-band {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pat-band-k {
+    flex: 0 0 58px;
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--s600);
+}
+
+.pat-band-bar {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--s100);
+    overflow: hidden;
+}
+
+.pat-band-bar i {
+    display: block;
+    height: 100%;
+    background: var(--g500);
+}
+
+.pat-band-v {
+    flex: 0 0 auto;
+    min-width: 62px;
+    text-align: right;
+    font-size: .74rem;
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.pat-band-v em {
+    font-style: normal;
+    font-weight: 500;
+    font-size: .68rem;
+    color: var(--s400);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   4 · PAPER GROUPS
+
+   Best on top, earlier attempts collapsed. Same organisation the
+   student sees in their own Arena history and the teacher sees in the
+   student sheet, so three people looking at the same twenty-two
+   attempts see them arranged the same way.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pat-group {
+    margin-top: 12px;
+    border: 1px solid var(--s200);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.pat-paper {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px;
+    border: 0;
+    background: #fff;
+    text-align: left;
+    font-family: var(--font-body);
+    cursor: pointer;
+}
+
+/* The best attempt is the row a parent came for, so it keeps the plain
+   white background and gains a left accent. Earlier attempts recede. */
+.pat-paper.best {
+    border-left: 3px solid var(--g500);
+}
+
+.pat-paper.sub {
+    background: var(--s50);
+    border-top: 1px solid var(--s100);
+    padding: 10px 13px;
+}
+
+.pat-others {
+    border-top: 1px solid var(--s100);
+    background: var(--s50);
+}
+
+.pat-paper-m b {
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--g700);
+    line-height: 1;
+}
+
+.pat-paper.sub .pat-paper-m b {
+    font-size: 1.05rem;
+    color: var(--s600);
+}
+
+.pat-paper-m small {
+    font-family: var(--font-body);
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--s400);
+}
+
+.pat-paper-t {
+    min-width: 0;
+}
+
+.pat-paper-t b {
+    display: block;
+    font-size: .86rem;
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.pat-paper-t span {
+    display: block;
+    margin-top: 3px;
+    font-size: .72rem;
+    color: var(--s500);
+}
+
+.pat-bestof {
+    margin-left: 6px;
+    font-size: .6rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--amber-bg);
+    color: #8a5a09;
+}
+
+/* The three subject marks. On a phone they wrap under the row rather
+   than squeezing the score, which is the number a parent came for. */
+.pat-sm {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    padding-top: 10px;
+    margin-top: 2px;
+    border-top: 1px solid var(--s100);
+    font-size: .72rem;
+    color: var(--s500);
+}
+
+.pat-sm b {
+    color: var(--s800);
+    font-weight: 700;
+}
+
+.pat-sm.wide {
+    margin-top: 12px;
+}
+
+.pat-more {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 13px;
+    border: 0;
+    border-top: 1px solid var(--s100);
+    background: var(--s50);
+    font-family: var(--font-body);
+    font-size: .74rem;
+    font-weight: 600;
+    color: var(--s600);
+    cursor: pointer;
+}
+
+.pat-more em {
+    font-style: normal;
+    margin-left: auto;
+    font-weight: 700;
+}
+
+.pat-more em.up {
+    color: #2f9e5f;
+}
+
+.pat-more em.down {
+    color: var(--red);
+}
+
+.pat-more i {
+    font-size: .68rem;
+    color: var(--s400);
+}
+
+.pat-tag {
+    display: inline-block;
+    font-size: .6rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--s100);
+    color: var(--s600);
+}
+
+.pat-tag.retake {
+    background: var(--amber-bg);
+    color: #8a5a09;
+}
+
+.pat-tag.bio {
+    background: #e8f5ec;
+    color: #1c6b3a;
+}
+
+.pat-tag.phy {
+    background: #eaf1fb;
+    color: var(--g700);
+}
+
+.pat-tag.chem {
+    background: #fdeee6;
+    color: #9c4a1a;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   5 · CHAPTER FOLDERS
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Chapter tests are split by subject and school year, the same way the
+   Learning tab splits its syllabus map — a parent who has learned one
+   layout already knows the other. */
+.pat-fgroup {
+    margin-top: 16px;
+}
+
+.pat-fgroup-h {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 8px;
+}
+
+.pat-fgroup-h b {
+    font-size: .82rem;
+    color: var(--s800);
+}
+
+.pat-fgroup-h em {
+    font-style: normal;
+    font-size: .62rem;
+    font-weight: 600;
+    color: var(--g600);
+}
+
+.pat-fgroup-n {
+    margin-left: auto;
+    font-size: .7rem;
+    color: var(--s500);
+}
+
+.pat-folders {
+    display: grid;
+    gap: 8px;
+}
+
+.pat-folder,
+.pat-test {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--s200);
+    border-radius: 11px;
+    background: #fff;
+    text-align: left;
+    font-family: var(--font-body);
+    cursor: pointer;
+}
+
+.pat-folder-t,
+.pat-test-t {
+    flex: 1;
+    min-width: 0;
+}
+
+.pat-folder-t b,
+.pat-test-t b {
+    display: block;
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.pat-folder-t>span,
+.pat-test-t>span {
+    display: block;
+    margin-top: 4px;
+    font-size: .72rem;
+    color: var(--s500);
+}
+
+.pat-folder-t em,
+.pat-test-t em {
+    display: block;
+    margin-top: 4px;
+    font-style: normal;
+    font-size: .68rem;
+    color: var(--g600);
+}
+
+.pat-folder-n,
+.pat-test-n {
+    flex: 0 0 auto;
+    text-align: right;
+}
+
+.pat-folder-n b,
+.pat-test-n b {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--s800);
+}
+
+.pat-test-n b.low {
+    color: var(--red);
+}
+
+.pat-folder-n span,
+.pat-test-n span {
+    display: block;
+    font-size: .64rem;
+    color: var(--s400);
+}
+
+.pat-tests {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.pat-test-t b {
+    display: inline-block;
+    margin-right: 6px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   6 · ONE TEST
+   ══════════════════════════════════════════════════════════════════ */
+
+.pat-thead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.pat-thead-t {
+    min-width: 0;
+}
+
+.pat-thead-t h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--s900);
+    line-height: 1.2;
+}
+
+.pat-thead-t span {
+    display: block;
+    margin-top: 4px;
+    font-size: .72rem;
+    color: var(--s500);
+}
+
+.pat-thead-t em {
+    display: block;
+    margin-top: 4px;
+    font-style: normal;
+    font-size: .7rem;
+    color: var(--g600);
+}
+
+.pat-thead-n b {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--g700);
+    line-height: 1;
+}
+
+.pat-thead-n small {
+    font-family: var(--font-body);
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--s400);
+}
+
+.pat-counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.pat-counts span {
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+.pat-counts .ok {
+    background: #e8f5ec;
+    color: #1c6b3a;
+}
+
+.pat-counts .bad {
+    background: #fdecec;
+    color: #a32020;
+}
+
+.pat-counts .skip {
+    background: var(--s100);
+    color: var(--s600);
+}
+
+.pat-showtoggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.pat-showtoggle button {
+    padding: 7px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--s200);
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: .74rem;
+    font-weight: 600;
+    color: var(--s600);
+    cursor: pointer;
+}
+
+.pat-showtoggle button.on {
+    background: var(--g600);
+    border-color: var(--g600);
+    color: #fff;
+}
+
+.pat-showtoggle>span {
+    margin-left: auto;
+    font-size: .7rem;
+    color: var(--s400);
+}
+
+
+/* ── questions ─────────────────────────────────────────────────── */
+
+.pat-qlist {
+    margin-top: 14px;
+    display: grid;
+    gap: 10px;
+}
+
+.pat-q {
+    border: 1px solid var(--s200);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.pat-q.bad {
+    border-left: 3px solid var(--red);
+}
+
+.pat-q.skip {
+    border-left: 3px solid var(--s300);
+}
+
+.pat-q.ok {
+    border-left: 3px solid #2f9e5f;
+}
+
+.pat-q-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    width: 100%;
+    padding: 13px;
+    border: 0;
+    background: none;
+    text-align: left;
+    font-family: var(--font-body);
+    cursor: pointer;
+}
+
+.pat-q-state {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    font-size: .9rem;
+}
+
+.pat-q.ok .pat-q-state {
+    color: #2f9e5f;
+}
+
+.pat-q.bad .pat-q-state {
+    color: var(--red);
+}
+
+.pat-q.skip .pat-q-state {
+    color: var(--s400);
+}
+
+.pat-q-t {
+    flex: 1;
+    min-width: 0;
+}
+
+.pat-q-t b {
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--s400);
+}
+
+.pat-q-t p {
+    margin: 4px 0 0;
+    font-size: .82rem;
+    line-height: 1.55;
+    color: var(--s800);
+}
+
+.pat-marks {
+    flex: 0 0 auto;
+    font-size: .74rem;
+    font-weight: 700;
+    color: var(--s500);
+}
+
+.pat-marks.pos {
+    color: #2f9e5f;
+}
+
+.pat-marks.neg {
+    color: var(--red);
+}
+
+.pat-caret {
+    flex: 0 0 auto;
+    margin-top: 3px;
+    font-size: .68rem;
+    color: var(--s300);
+    transition: transform .16s;
+}
+
+.pat-q.open .pat-caret {
+    transform: rotate(180deg);
+}
+
+.pat-q-body {
+    padding: 0 13px 14px;
+}
+
+.pat-qimg {
+    width: 100%;
+    border-radius: 9px;
+    margin-bottom: 12px;
+}
+
+.pat-opts {
+    display: grid;
+    gap: 7px;
+}
+
+.pat-opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 10px 11px;
+    border: 1px solid var(--s200);
+    border-radius: 9px;
+    background: var(--s50);
+}
+
+.pat-opt.right {
+    background: #e8f5ec;
+    border-color: #b6dcc4;
+}
+
+.pat-opt.mine {
+    background: #fdecec;
+    border-color: #f2c2c2;
+}
+
+.pat-optl {
+    flex: 0 0 auto;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid var(--s300);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .65rem;
+    font-weight: 700;
+    color: var(--s600);
+}
+
+.pat-opt>div {
+    flex: 1;
+    min-width: 0;
+}
+
+.pat-opt p {
+    margin: 0;
+    font-size: .79rem;
+    line-height: 1.5;
+    color: var(--s800);
+}
+
+/* why_wrong_explanation. The most useful sentence on this screen: it
+   says why the option they picked looked right, which is the actual
+   conversation — the correct answer on its own rarely is. */
+.pat-why {
+    display: block;
+    margin-top: 7px;
+    padding-top: 7px;
+    border-top: 1px dashed #f2c2c2;
+    font-style: normal;
+    font-size: .75rem;
+    line-height: 1.55;
+    color: #a32020;
+}
+
+.pat-opt i {
+    flex: 0 0 auto;
+    color: #2f9e5f;
+    font-size: .78rem;
+    margin-top: 3px;
+}
+
+.pat-you {
+    flex: 0 0 auto;
+    font-size: .6rem;
+    font-weight: 700;
+    color: var(--s500);
+    white-space: nowrap;
+}
+
+.pat-ans {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin-top: 11px;
+    padding-top: 10px;
+    border-top: 1px solid var(--s100);
+    font-size: .74rem;
+    color: var(--s500);
+}
+
+.pat-ans b {
+    color: var(--s800);
+}
+
+.pat-blk {
+    margin-top: 12px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    background: var(--s50);
+}
+
+.pat-blk h5 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--s500);
+}
+
+.pat-blk p {
+    margin: 6px 0 0;
+    font-size: .78rem;
+    line-height: 1.6;
+    color: var(--s700);
+}
+
+.pat-blk ul {
+    margin: 7px 0 0;
+    padding-left: 18px;
+}
+
+.pat-blk li {
+    font-size: .77rem;
+    line-height: 1.55;
+    color: var(--s700);
+}
+
+.pat-blk.exp {
+    background: var(--g50);
+}
+
+.pat-blk.mis {
+    background: var(--amber-bg);
+}
+
+.pat-blk.ladder {
+    background: var(--purple-bg);
+}
+
+.pat-ladder {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.pat-step {
+    padding: 6px 11px;
+    border-radius: 9px;
+    background: #fff;
+    text-align: center;
+}
+
+.pat-step b {
+    display: block;
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+.pat-step.ok b {
+    color: #1c6b3a;
+}
+
+.pat-step.bad b {
+    color: #a32020;
+}
+
+.pat-step span {
+    display: block;
+    margin-top: 2px;
+    font-size: .62rem;
+    color: var(--s500);
+}
+
+.pat-steparrow {
+    font-size: .62rem;
+    color: var(--s300);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   7 · TABLET (>=768px)
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) {
+
+    .pat-strip {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .pat-folders {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   8 · DESKTOP (>=1024px)
+
+   portal-desktop.css forces #pt-tests-body into a flat two-column
+   auto-flow grid built for the old tab, whose children were a loose
+   list of .pt-sec cards. `.pat-root` raises specificity from (0,1,1,1)
+   to (0,1,2,1) so this wins on merit rather than with !important.
+
+   Every level stays FULL WIDTH. A question — stem, four options, an
+   explanation, a mistakes list — is the longest content in the portal
+   and does not belong in a half-width rail. What widens is density,
+   not structure.
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    body:not(.is-teacher) #pt-tests-body.pat-root {
+        display: block;
+        grid-template-columns: none;
+        gap: 0;
+        max-width: var(--dsk-content);
+        margin: 0 auto;
+        padding: 0 8px 40px;
+    }
+
+    body:not(.is-teacher) #pt-tests-body.pat-root>.pt-sec {
+        margin: 16px 0 0;
+        grid-column: auto;
+    }
+
+    .pat-sec {
+        margin: 16px 0 0;
+        padding: 18px;
+    }
+
+    .pat-folders {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 10px;
+    }
+
+    .pat-tests {
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 10px;
+    }
+
+    .pat-paper-m b {
+        font-size: 1.7rem;
+    }
+
+    .pat-thead-n b {
+        font-size: 2rem;
+    }
+
+    .pat-stat b {
+        font-size: 1.5rem;
+    }
+
+    /* Prose wants a measure, not a full 1120px line. Everything else on
+       the card still uses the whole width. */
+    .pat-q-t p,
+    .pat-blk p,
+    .pat-opt p,
+    .pat-line {
+        max-width: 78ch;
+    }
+
+    .pat-qlist {
+        gap: 12px;
+    }
+
+    /* Hover only at this breakpoint — on a touch screen it is a
+       highlight stuck under the finger after every tap. */
+    .pat-folder,
+    .pat-test,
+    .pat-paper,
+    .pat-q-head,
+    .pat-i,
+    .pat-back,
+    .pat-more,
+    .pat-showtoggle button {
+        transition: background .14s, border-color .14s, color .14s;
+    }
+
+    .pat-folder:hover,
+    .pat-test:hover {
+        border-color: var(--g400);
+        background: var(--g50);
+    }
+
+    .pat-paper:hover,
+    .pat-q-head:hover,
+    .pat-more:hover {
+        background: var(--g50);
+    }
+
+    .pat-back:hover,
+    .pat-i:hover,
+    .pat-showtoggle button:hover {
+        border-color: var(--g400);
+        color: var(--g600);
+    }
+
+    .pat-showtoggle button.on:hover,
+    .pat-i[aria-expanded="true"]:hover {
+        color: #fff;
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   9 · WIDE DESKTOP (>=1440px)
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1440px) {
+
+    .pat-folders {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+
+    .pat-strip {
+        gap: 14px;
+    }
+}

@@ -1,0 +1,1138 @@
+/* ══════════════════════════════════════════════════════════════════
+   NAADI AI — PARENT INSIGHTS  (parent-insights.css)
+   ───────────────────────────────────────────────────────────────────
+   Pairs with parent-insights.js. Loaded after portal-desktop.css so it
+   can override the flat two-column auto-flow grid that file forces on
+   every parent tab body.
+
+   THE LAYOUT ARGUMENT
+
+   Level 1 is three full-width bands. The chapter cards and the paper
+   plot both want width — cards wrap two to three across, and a plot
+   squeezed into a 5fr rail cannot show eight papers. The two small
+   aggregates share a band and fall to one column on their own.
+
+   Level 2 is full width as well: one row per idea, each carrying a
+   name, a bar and up to three chips, which is more than a half-width
+   column can hold without wrapping badly.
+
+   ───────────────────────────────────────────────────────────────────
+   WHY THE PREFIX IS `pin-`
+
+   `ph-` is the student app's Arena screens, `pah-` is parent Home,
+   `pal-` is Learning, `pat-` is Tests. `pin-` is checked clean across
+   every stylesheet portal.html loads.
+   ══════════════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════════════════
+   1 · SHELL
+   ══════════════════════════════════════════════════════════════════ */
+
+.pin-grid,
+.pin-band {
+    display: contents;
+}
+
+.pin-sec {
+    margin: 12px 0 0;
+}
+
+.pin-line {
+    margin: 12px 0 0;
+    font-size: .83rem;
+    line-height: 1.65;
+    color: var(--s700);
+}
+
+.pin-line.quiet {
+    color: var(--s500);
+    font-size: .79rem;
+}
+
+.pin-note {
+    margin: 10px 0 0;
+    font-size: .7rem;
+    color: var(--s400);
+}
+
+.pin-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 8px 14px 8px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--s200);
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--s600);
+    cursor: pointer;
+}
+
+.pin-go {
+    flex: 0 0 auto;
+    color: var(--s300);
+    font-size: .72rem;
+}
+
+.pin-tag {
+    flex: 0 0 auto;
+    font-size: .6rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--s100);
+    color: var(--s600);
+}
+
+.pin-tag.bio {
+    background: #e8f5ec;
+    color: #1c6b3a;
+}
+
+.pin-tag.phy {
+    background: #eaf1fb;
+    color: var(--g700);
+}
+
+.pin-tag.chem {
+    background: #fdeee6;
+    color: #9c4a1a;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   2 · THE (i) BUTTON
+   ══════════════════════════════════════════════════════════════════ */
+
+.pin-sec-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pin-sec-t {
+    min-width: 0;
+}
+
+.pin-i {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--s300);
+    background: #fff;
+    color: var(--s500);
+    font-size: .62rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.pin-i[aria-expanded="true"] {
+    background: var(--g600);
+    border-color: var(--g600);
+    color: #fff;
+}
+
+.pin-info {
+    margin: 10px 0 2px;
+    padding: 11px 13px;
+    background: var(--g50);
+    border: 1px solid var(--g100);
+    border-radius: 10px;
+}
+
+.pin-info-h {
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--g600);
+}
+
+.pin-info p {
+    margin: 5px 0 0;
+    font-size: .78rem;
+    line-height: 1.6;
+    color: var(--s700);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   3 · LEVEL 1 · CHAPTER CARDS
+   ══════════════════════════════════════════════════════════════════ */
+
+.pin-cgroup {
+    margin-top: 16px;
+}
+
+.pin-cgroup-h {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.pin-cgroup-h b {
+    font-size: .82rem;
+    color: var(--s800);
+}
+
+.pin-cards {
+    display: grid;
+    gap: 8px;
+}
+
+.pin-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px;
+    border: 1px solid var(--s200);
+    border-left: 3px solid var(--s300);
+    border-radius: 11px;
+    background: #fff;
+    text-align: left;
+    font-family: var(--font-body);
+    cursor: pointer;
+}
+
+/* The tone is the shortest true thing about the chapter, and it is
+   carried by the signal TEXT as well as the colour — colour alone is
+   not information a parent can rely on. */
+.pin-card.bad {
+    border-left-color: var(--red);
+}
+
+.pin-card.warn {
+    border-left-color: var(--amber-600);
+}
+
+.pin-card.good {
+    border-left-color: #2f9e5f;
+}
+
+.pin-card-t {
+    flex: 1;
+    min-width: 0;
+}
+
+.pin-card-t b {
+    display: block;
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.pin-signal {
+    display: block;
+    margin-top: 3px;
+    font-size: .74rem;
+    font-weight: 600;
+    color: var(--s600);
+}
+
+.pin-card.bad .pin-signal {
+    color: #a32020;
+}
+
+.pin-card.warn .pin-signal {
+    color: #8a5a09;
+}
+
+.pin-card.good .pin-signal {
+    color: #1c6b3a;
+}
+
+.pin-card-m {
+    flex: 0 0 auto;
+    font-size: .7rem;
+    color: var(--s400);
+    text-align: right;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   4 · PAPERS, GROUPED BY PAPER
+
+   Closed by default. Twenty-two attempts in one flat list was
+   unreadable, and thirteen of them were the same exam.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pin-pgroup {
+    margin-top: 12px;
+    border: 1px solid var(--s200);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.pin-pgroup.open {
+    border-color: var(--g300);
+}
+
+.pin-pgroup-h {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px;
+    border: 0;
+    background: none;
+    text-align: left;
+    font-family: var(--font-body);
+    cursor: pointer;
+}
+
+.pin-pgroup-t {
+    flex: 1;
+    min-width: 0;
+}
+
+.pin-pgroup-t b {
+    display: block;
+    font-size: .86rem;
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.pin-pgroup-t span {
+    display: block;
+    margin-top: 3px;
+    font-size: .72rem;
+    color: var(--s500);
+}
+
+.pin-pchange {
+    flex: 0 0 auto;
+    font-family: var(--font-display);
+    font-size: .88rem;
+    font-weight: 800;
+}
+
+.pin-pchange.up {
+    color: #2f9e5f;
+}
+
+.pin-pchange.down {
+    color: var(--red);
+}
+
+.pin-caret {
+    flex: 0 0 auto;
+    font-size: .68rem;
+    color: var(--s300);
+    transition: transform .16s;
+}
+
+.pin-pgroup.open .pin-caret {
+    transform: rotate(180deg);
+}
+
+.pin-pgroup-b {
+    padding: 0 13px 14px;
+    border-top: 1px solid var(--s100);
+}
+
+
+/* ── the line ──────────────────────────────────────────────────────
+   Points are spaced evenly, not by elapsed time: thirteen of these
+   attempts fall on four dates, and a true time axis would stack them
+   into a smear. The date under each point carries the timing. */
+
+.pin-chart {
+    margin-top: 14px;
+}
+
+.pin-chart svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.pin-grid-l {
+    stroke: var(--s100);
+    stroke-width: 1;
+}
+
+.pin-axis,
+.pin-xlab {
+    font-size: 7px;
+    fill: var(--s400);
+    font-family: var(--font-body);
+}
+
+.pin-path {
+    fill: none;
+    stroke: var(--g500);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.pin-dot {
+    fill: var(--g500);
+}
+
+.pin-dot.best {
+    fill: #2f9e5f;
+    r: 4;
+    stroke: #fff;
+    stroke-width: 1.5;
+}
+
+.pin-chart-k {
+    margin-top: 8px;
+    font-size: .66rem;
+    color: var(--s400);
+}
+
+
+/* ── every attempt, behind a second toggle ─────────────────────── */
+
+.pin-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 14px;
+    padding: 9px;
+    border: 1px solid var(--s200);
+    border-radius: 9px;
+    background: var(--s50);
+    font-family: var(--font-body);
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--s600);
+    cursor: pointer;
+}
+
+.pin-more i {
+    font-size: .66rem;
+    color: var(--s400);
+}
+
+.pin-attempts {
+    display: grid;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.pin-attempt {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 11px 12px;
+    border: 1px solid var(--s200);
+    border-radius: 11px;
+    background: var(--s50);
+}
+
+.pin-attempt-m b {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--g700);
+    line-height: 1;
+}
+
+.pin-attempt-m small {
+    font-size: .66rem;
+    font-weight: 600;
+    color: var(--s400);
+}
+
+.pin-attempt-t {
+    min-width: 0;
+}
+
+.pin-attempt-t b {
+    display: block;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.pin-attempt-t span {
+    display: block;
+    margin-top: 3px;
+    font-size: .7rem;
+    color: var(--s500);
+}
+
+.pin-attempt-s {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 9px;
+    border-top: 1px solid var(--s200);
+}
+
+.pin-ps {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 600;
+    background: var(--s100);
+    color: var(--s600);
+}
+
+.pin-ps b {
+    font-weight: 800;
+}
+
+.pin-ps em {
+    font-style: normal;
+    opacity: .65;
+}
+
+.pin-ps.bio {
+    background: #e8f5ec;
+    color: #1c6b3a;
+}
+
+.pin-ps.phy {
+    background: #eaf1fb;
+    color: var(--g700);
+}
+
+.pin-ps.chem {
+    background: #fdeee6;
+    color: #9c4a1a;
+}
+
+.pin-moves {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--s100);
+}
+
+.pin-move {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pin-move-b {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pin-move-b b {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--s800);
+}
+
+.pin-move-b small {
+    font-size: .7rem;
+    color: var(--s400);
+}
+
+.pin-move-b em {
+    font-style: normal;
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+.pin-move-b em.up {
+    color: #2f9e5f;
+}
+
+.pin-move-b em.down {
+    color: var(--red);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   5 · WHEN THE STUDYING HAPPENS
+   ══════════════════════════════════════════════════════════════════ */
+
+.pin-clock {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 76px;
+    margin-top: 14px;
+}
+
+.pin-hr {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    border-radius: 3px;
+}
+
+/* Late hours are shaded rather than coloured red. The point is to show
+   a parent when the work happens, not to tell them it is wrong. */
+.pin-hr.late {
+    background: var(--s100);
+}
+
+.pin-hr i {
+    display: block;
+    width: 100%;
+    min-height: 2px;
+    border-radius: 3px 3px 0 0;
+    background: var(--g500);
+}
+
+.pin-hr.peak i {
+    background: var(--g700);
+}
+
+.pin-clock-k {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: .6rem;
+    color: var(--s400);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   6 · DO RETAKES HELP
+   ══════════════════════════════════════════════════════════════════ */
+
+.pin-two {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.pin-half {
+    padding: 12px;
+    background: var(--s50);
+    border: 1px solid var(--s200);
+    border-radius: 11px;
+}
+
+.pin-half.up {
+    background: #e8f5ec;
+    border-color: #b6dcc4;
+}
+
+.pin-half.down {
+    background: var(--amber-bg);
+    border-color: #ecd9a8;
+}
+
+.pin-half-k {
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--s500);
+}
+
+.pin-big {
+    margin-top: 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--s900);
+}
+
+.pin-big em {
+    font-family: var(--font-body);
+    font-style: normal;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--s500);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   7 · LEVEL 2 · ONE ROW PER IDEA
+   ══════════════════════════════════════════════════════════════════ */
+
+.pin-chead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pin-chead h3 {
+    margin: 6px 0 0;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--s900);
+    line-height: 1.2;
+}
+
+.pin-yr {
+    margin-left: 6px;
+    font-size: .66rem;
+    color: var(--s500);
+}
+
+.pin-csub {
+    display: block;
+    margin-top: 4px;
+    font-size: .74rem;
+    color: var(--s500);
+}
+
+.pin-counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.pin-counts span {
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+.pin-counts .ok {
+    background: #e8f5ec;
+    color: #1c6b3a;
+}
+
+.pin-counts .bad {
+    background: #fdecec;
+    color: #a32020;
+}
+
+.pin-counts .warn {
+    background: var(--amber-bg);
+    color: #8a5a09;
+}
+
+.pin-counts .flat {
+    background: var(--s100);
+    color: var(--s600);
+}
+
+/* ── the difficulty ladder ────────────────────────────────────────
+   How hard the questions have got, NOT how well they are answered. A
+   chapter sitting on an early step is not a chapter going badly, so the
+   steps BEHIND the current one are filled rather than the ones ahead
+   being marked as failures. */
+.pin-ladder-wrap {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--s100);
+}
+
+.pin-ladder-h {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.pin-ladder-h b {
+    font-size: .82rem;
+    color: var(--s800);
+}
+
+.pin-ladder {
+    display: flex;
+    gap: 4px;
+    margin-top: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+
+.pin-ladder::-webkit-scrollbar {
+    display: none;
+}
+
+.pin-step {
+    flex: 1 0 92px;
+    min-width: 92px;
+}
+
+.pin-step i {
+    display: block;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--s200);
+}
+
+.pin-step.reached i {
+    background: var(--g300);
+}
+
+.pin-step.done i {
+    background: var(--g500);
+}
+
+.pin-step.now i {
+    background: var(--g700);
+}
+
+.pin-step span {
+    display: block;
+    margin-top: 7px;
+    font-size: .66rem;
+    line-height: 1.3;
+    color: var(--s400);
+}
+
+.pin-step.reached span {
+    color: var(--s600);
+}
+
+.pin-step.now span {
+    color: var(--g700);
+    font-weight: 700;
+}
+
+/* The engine's own name for the stage, under the plain one. Quiet on
+   purpose: it is there so a parent can match what they are looking at to
+   a word a teacher or their child used, not because it explains
+   anything by itself. */
+.pin-step em {
+    display: block;
+    margin-top: 2px;
+    font-style: normal;
+    font-size: .58rem;
+    letter-spacing: .02em;
+    color: var(--s300);
+}
+
+.pin-step.reached em {
+    color: var(--s400);
+}
+
+.pin-step.now em {
+    color: var(--g500);
+}
+
+/* The current stage, echoed on the level 1 card. */
+.pin-stage {
+    display: block;
+    margin-top: 3px;
+    font-style: normal;
+    font-size: .66rem;
+    color: var(--g600);
+}
+
+.pin-ideas {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.pin-idea {
+    padding: 13px;
+    border: 1px solid var(--s200);
+    border-left: 3px solid var(--s300);
+    border-radius: 11px;
+    background: #fff;
+}
+
+.pin-idea.solid {
+    border-left-color: #2f9e5f;
+}
+
+.pin-idea.shaky {
+    border-left-color: var(--red);
+}
+
+.pin-idea.middling {
+    border-left-color: var(--amber-600);
+}
+
+.pin-idea-t {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.pin-idea-t b {
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--s800);
+    min-width: 0;
+}
+
+.pin-state {
+    flex: 0 0 auto;
+    font-size: .62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--s400);
+}
+
+.pin-state.solid {
+    color: #2f9e5f;
+}
+
+.pin-state.shaky {
+    color: var(--red);
+}
+
+.pin-state.middling {
+    color: #8a5a09;
+}
+
+/* An idea that has not been asked enough times is deliberately the
+   quietest thing on the card. It is not a problem and it is not a
+   success — it is a gap in what we know, and it should not compete for
+   attention with either. */
+.pin-state.early {
+    color: var(--s400);
+}
+
+.pin-idea.early {
+    border-left-color: var(--s200);
+    background: var(--s50);
+}
+
+.pin-idea-b {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 9px;
+}
+
+.pin-idea-bar {
+    flex: 1;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--s100);
+    overflow: hidden;
+}
+
+.pin-idea-bar i {
+    display: block;
+    height: 100%;
+    background: var(--s400);
+}
+
+.pin-idea.solid .pin-idea-bar i {
+    background: #2f9e5f;
+}
+
+.pin-idea.shaky .pin-idea-bar i {
+    background: var(--red);
+}
+
+.pin-idea.middling .pin-idea-bar i {
+    background: var(--amber-600);
+}
+
+.pin-idea-v {
+    flex: 0 0 auto;
+    min-width: 44px;
+    text-align: right;
+    font-size: .76rem;
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.pin-idea-v em {
+    font-style: normal;
+    font-weight: 500;
+    font-size: .68rem;
+    color: var(--s400);
+}
+
+.pin-idea-s {
+    margin-top: 7px;
+    font-size: .71rem;
+    color: var(--s500);
+}
+
+/* Every fact about one idea sits on its own row. The old tab split
+   these across three separate blocks, so one idea appeared three times
+   each carrying a third of the story. */
+.pin-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 9px;
+}
+
+.pin-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: .66rem;
+    font-weight: 600;
+    background: var(--s100);
+    color: var(--s600);
+}
+
+.pin-chip.stuck {
+    background: #fdecec;
+    color: #a32020;
+}
+
+.pin-chip.up {
+    background: #e8f5ec;
+    color: #1c6b3a;
+}
+
+.pin-chip.down {
+    background: var(--amber-bg);
+    color: #8a5a09;
+}
+
+.pin-chip.retaught {
+    background: var(--purple-bg);
+    color: var(--purple);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   8 · TABLET (>=768px)
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) {
+
+    .pin-cards {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    .pin-ideas {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   9 · DESKTOP (>=1024px)
+
+   portal-desktop.css forces #pt-insights-body into a flat two-column
+   auto-flow grid built for the old tab. `.pin-root` raises specificity
+   from (0,1,1,1) to (0,1,2,1) so this wins on merit rather than with
+   !important.
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    body:not(.is-teacher) #pt-insights-body.pin-root {
+        display: block;
+        grid-template-columns: none;
+        gap: 0;
+        max-width: var(--dsk-content);
+        margin: 0 auto;
+        padding: 0 8px 40px;
+    }
+
+    body:not(.is-teacher) #pt-insights-body.pin-root>.pt-sec {
+        margin: 16px 0 0;
+        grid-column: auto;
+    }
+
+    .pin-grid {
+        display: block;
+    }
+
+    .pin-band {
+        display: block;
+    }
+
+    /* The two small aggregates share a row; everything else takes the
+       full width because cards, a plot and idea rows all need it. */
+    .pin-band.pair {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+        gap: 0 18px;
+        align-items: start;
+    }
+
+    .pin-band.pair>.pin-sec {
+        margin-top: 16px;
+    }
+
+    .pin-sec {
+        margin: 16px 0 0;
+        padding: 18px;
+    }
+
+    .pin-cards {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 10px;
+    }
+
+    .pin-ideas {
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 12px;
+    }
+
+    .pin-line {
+        max-width: 78ch;
+    }
+
+    .pin-big {
+        font-size: 1.75rem;
+    }
+
+    /* Hover only at this breakpoint — on a touch screen it is a
+       highlight stuck under the finger after every tap. */
+    .pin-card,
+    .pin-i,
+    .pin-back {
+        transition: background .14s, border-color .14s, color .14s;
+    }
+
+    .pin-card:hover {
+        background: var(--s50);
+    }
+
+    .pin-i:hover,
+    .pin-back:hover {
+        border-color: var(--g400);
+        color: var(--g600);
+    }
+
+    .pin-i[aria-expanded="true"]:hover {
+        color: #fff;
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   10 · WIDE DESKTOP (>=1440px)
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1440px) {
+
+    .pin-cards,
+    .pin-ideas {
+        grid-template-columns: repeat(auto-fill, minmax(348px, 1fr));
+    }
+
+}

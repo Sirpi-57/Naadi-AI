@@ -1,0 +1,15 @@
+{
+  "appId": "ai.naadi.app",
+  "appName": "NAADI AI",
+  "webDir": "mobile",
+  "backgroundColor": "#0f172a",
+  "android": {
+    "allowMixedContent": true
+  },
+  "ios": {
+    "contentInset": "automatic"
+  },
+  "server": {
+    "androidScheme": "http"
+  }
+}

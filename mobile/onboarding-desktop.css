@@ -1,0 +1,444 @@
+@media (min-width: 1024px) {
+
+    /* ════════════════════════════════════════════════════════════════
+       NAADI AI — ONBOARDING DESKTOP LAYER  (onboarding-desktop.css)
+       ─────────────────────────────────────────────────────────────────
+       Desktop-native (≥1024px) presentation for the onboarding tour —
+       the deck a student sees on first signup, and again from
+       Profile → "Take the tour again" (?replay=1).
+
+       Mobile stacks everything into a 520px column: art on top, then
+       title, sub, and a single column of points. On a widescreen that
+       column floats in the middle of an empty page. This layer turns
+       each content slide into a TWO-COLUMN editorial spread — artwork
+       and headline on the left, the supporting points on the right —
+       while the bookend slides (welcome / enter) and the two form
+       slides (source / goals) stay centred, because those read better
+       as a single focused column.
+
+       MOBILE-SAFETY CONTRACT (same model as libdesk-desktop.css):
+         • The FIRST non-comment token in this file is the @media query
+           above, so every rule lives inside (min-width:1024px).
+         • onboarding.html ALSO loads this with media="(min-width:1024px)",
+           so a phone never even downloads the sheet.
+         • This layer is PRESENTATION ONLY. It adds no classes and needs
+           no JS: it restyles the existing .onb-* markup that
+           onboarding.js already emits. onboarding.js is NOT edited, so
+           every slide, gesture, answer-repaint and save path is
+           untouched — including the swipe handler, which keeps working
+           on a touch-screen laptop.
+         • Slide targeting uses :has() on the structures onboarding.js
+           already produces (.onb-plate for the bookends, .onb-choices /
+           .onb-fields for the forms), so no id or class contract is
+           invented and nothing in the JS has to change.
+         • Delete this file + the one <link> in onboarding.html and the
+           mobile tour is byte-for-byte identical.
+
+       Tokens: reuses the --onb-* tokens from onboarding.css (always
+       loaded first). Local --obd-* tokens are defined scoped here.
+       ════════════════════════════════════════════════════════════════ */
+
+    :root {
+        --obd-col-gap: clamp(40px, 5vw, 76px);
+        --obd-shell-w: min(1180px, 92vw);
+        --obd-art-max: 380px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SHELL — release the 520px phone column
+       ════════════════════════════════════════════════════════════ */
+    .onb-shell {
+        max-width: var(--obd-shell-w);
+        padding-top: 26px;
+        padding-bottom: 26px;
+    }
+
+    /* Head: the progress rail has room to breathe now. */
+    .onb-head {
+        gap: 20px;
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+    .onb-rail {
+        max-width: 620px;
+        margin: 0 auto;
+    }
+
+    .onb-back,
+    .onb-skip {
+        transition: opacity .16s, transform .12s;
+    }
+
+    .onb-back:hover,
+    .onb-skip:hover {
+        opacity: 1;
+        transform: translateY(-1px);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SLIDES — give the inner block the full spread width
+       ════════════════════════════════════════════════════════════ */
+    .onb-slide {
+        padding-left: clamp(24px, 3vw, 48px);
+        padding-right: clamp(24px, 3vw, 48px);
+        /* A desktop viewport is short and wide; centre rather than scroll. */
+        justify-content: center;
+    }
+
+    .onb-slide-inner {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       TWO-COLUMN SPREAD  (the six content slides)
+       Applies to any slide that has BOTH artwork and a points list —
+       studio · opd · arena · pyq · library · pedagogy — plus the
+       coverage slide, whose stat block is injected via the slide's
+       `custom` field (rendered inline, no wrapper class).
+
+       Left column : art + eyebrow + title + sub
+       Right column: the points list (or the stat block)
+
+       Implemented with CSS grid over the EXISTING source order. The
+       art element is pulled into the left column and the points list
+       into the right; everything else follows the left column's flow.
+       ════════════════════════════════════════════════════════════ */
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-slide-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+        column-gap: var(--obd-col-gap);
+        align-items: center;
+        text-align: left;
+    }
+
+    /* Left column: art, eyebrow, title, sub, and the closing help line. */
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-art,
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-eyebrow,
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-title,
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-sub,
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-stat,
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-help {
+        grid-column: 1;
+    }
+
+    /* Right column: the points list, vertically centred against the art. */
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-points {
+        grid-column: 2;
+        grid-row: 1 / -1;
+        align-self: center;
+        margin-top: 0;
+    }
+
+    /* Art: bigger, left-aligned, no longer a centred phone thumbnail. */
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-art {
+        height: auto;
+        max-height: min(300px, 34vh);
+        margin: 0 0 22px;
+        place-items: center start;
+    }
+
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-art img {
+        max-width: 100%;
+        max-height: min(300px, 34vh);
+        width: auto;
+    }
+
+    /* Editorial type scale — the headline can finally be a headline. */
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-title {
+        font-size: clamp(1.9rem, 2.5vw, 2.6rem);
+        line-height: 1.14;
+    }
+
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-sub {
+        font-size: 1rem;
+        line-height: 1.6;
+        max-width: 46ch;
+    }
+
+    /* Points become a single readable column in the right half — one
+       per row, never squeezed into the 2-up phone grid. */
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-points {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-point {
+        padding: 16px 18px;
+        border-radius: 16px;
+        transition: border-color .16s, background .16s, transform .12s;
+    }
+
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-point:hover {
+        background: var(--onb-panel-hi);
+        border-color: rgba(255, 255, 255, .18);
+        transform: translateY(-1px);
+    }
+
+    .onb-slide:has(.onb-art):has(.onb-points) .onb-point-txt strong {
+        font-size: .95rem;
+    }
+
+    /* ── Coverage slide: the stat block anchors the left column ── */
+    .onb-slide:has(.onb-stat) .onb-stat {
+        margin-left: 0;
+        margin-right: 0;
+        text-align: left;
+    }
+
+    .onb-slide:has(.onb-stat) .onb-stat-num {
+        font-size: clamp(2.6rem, 4vw, 3.6rem);
+    }
+
+    .onb-slide:has(.onb-stat) .onb-stat-scope {
+        max-width: 52ch;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       BOOKEND SLIDES  (welcome · enter)
+       These carry .onb-plate and no points. They stay a single centred
+       column — a send-off reads better focused than spread — but the
+       type scales up for the bigger canvas.
+       ════════════════════════════════════════════════════════════ */
+    .onb-slide:has(.onb-plate) .onb-slide-inner {
+        max-width: 720px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    .onb-slide:has(.onb-plate) .onb-title {
+        font-size: clamp(2.1rem, 3vw, 3rem);
+        line-height: 1.12;
+    }
+
+    .onb-slide:has(.onb-plate) .onb-sub {
+        font-size: 1.05rem;
+        line-height: 1.62;
+        max-width: 56ch;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .onb-slide:has(.onb-plate) .onb-help {
+        max-width: 52ch;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .onb-plate {
+        transform: scale(1.12);
+        transform-origin: center;
+        margin-bottom: 30px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       FORM SLIDES  (source · goals)
+       Kept centred and narrow — a form is easier to complete in one
+       column — but the choice grid and the field stack widen, and the
+       goals fields go 2-up so the slide stops scrolling.
+       ════════════════════════════════════════════════════════════ */
+    .onb-slide:has(.onb-choices) .onb-slide-inner,
+    .onb-slide:has(.onb-fields) .onb-slide-inner {
+        max-width: 780px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    .onb-slide:has(.onb-choices) .onb-title,
+    .onb-slide:has(.onb-fields) .onb-title {
+        font-size: clamp(1.9rem, 2.6vw, 2.5rem);
+    }
+
+    .onb-slide:has(.onb-choices) .onb-sub,
+    .onb-slide:has(.onb-fields) .onb-sub {
+        max-width: 54ch;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Attribution: 8 options as a comfortable 2-up board. The two
+       `wide` rows already span both columns via .onb-choice-wide. */
+    .onb-choices {
+        gap: 12px;
+        margin-top: 26px;
+        text-align: left;
+    }
+
+    .onb-choice {
+        padding: 15px 17px;
+        border-radius: 15px;
+        transition: border-color .16s, background .16s, transform .12s;
+    }
+
+    .onb-choice:hover {
+        background: var(--onb-panel-hi);
+        border-color: rgba(255, 255, 255, .2);
+        transform: translateY(-1px);
+    }
+
+    /* Goals: four fields as a 2-up grid instead of a tall stack. */
+    .onb-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px 22px;
+        text-align: left;
+        margin-top: 26px;
+    }
+
+    /* The dream-college field reads better full width — it is the last
+       of the four, and its help line is the emotional close. */
+    .onb-fields> :last-child {
+        grid-column: 1 / -1;
+    }
+
+    .onb-chips {
+        flex-wrap: wrap;
+    }
+
+    .onb-chip {
+        transition: border-color .16s, background .16s, transform .12s;
+    }
+
+    .onb-chip:hover {
+        background: var(--onb-panel-hi);
+        transform: translateY(-1px);
+    }
+
+    .onb-slide .form-input {
+        min-height: 48px;
+        font-size: .95rem;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       FOOT — the CTA stops being a full-width phone button
+       ════════════════════════════════════════════════════════════ */
+    .onb-foot {
+        padding-left: clamp(24px, 3vw, 48px);
+        padding-right: clamp(24px, 3vw, 48px);
+        display: flex;
+        justify-content: center;
+    }
+
+    .onb-cta {
+        width: auto;
+        min-width: 260px;
+        padding-left: 42px;
+        padding-right: 42px;
+        min-height: 54px;
+        font-size: 1rem;
+        transition: transform .14s, box-shadow .16s, filter .16s;
+    }
+
+    .onb-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 44px rgba(31, 88, 150, .58);
+        filter: brightness(1.06);
+    }
+
+    .onb-cta:active {
+        transform: translateY(0);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       KEYBOARD AFFORDANCE
+       Arrow-key navigation already works (onbBindGestures binds it).
+       On desktop that is the primary way to move, so we surface it —
+       purely decorative, added via ::after so no markup changes.
+       ════════════════════════════════════════════════════════════ */
+    .onb-foot::after {
+        content: "Use ← → arrow keys to move through the tour";
+        display: block;
+        text-align: center;
+        width: 100%;
+        margin-top: 14px;
+        font-family: var(--font-body);
+        font-size: .72rem;
+        color: rgba(255, 255, 255, .38);
+        letter-spacing: .01em;
+        order: 2;
+    }
+
+    .onb-foot {
+        flex-wrap: wrap;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SHORT LAPTOP SCREENS (≈768px tall and under)
+       Keep the spread, shrink the vertical rhythm so no slide scrolls.
+       ════════════════════════════════════════════════════════════ */
+    @media (max-height: 800px) {
+        .onb-slide:has(.onb-art):has(.onb-points) .onb-art {
+            max-height: 210px;
+            margin-bottom: 16px;
+        }
+
+        .onb-slide:has(.onb-art):has(.onb-points) .onb-art img {
+            max-height: 210px;
+        }
+
+        .onb-slide:has(.onb-art):has(.onb-points) .onb-title {
+            font-size: clamp(1.6rem, 2.1vw, 2.1rem);
+        }
+
+        .onb-slide:has(.onb-art):has(.onb-points) .onb-point {
+            padding: 13px 16px;
+        }
+
+        .onb-plate {
+            transform: scale(1);
+            margin-bottom: 20px;
+        }
+
+        .onb-fields {
+            gap: 14px 20px;
+        }
+
+        .onb-foot::after {
+            margin-top: 10px;
+        }
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       Between 1024 and 1180 the spread gets tight — narrow the gap
+       and let the art shrink before the text does.
+       ════════════════════════════════════════════════════════════ */
+    @media (max-width: 1180px) {
+        :root {
+            --obd-col-gap: 34px;
+        }
+
+        .onb-slide:has(.onb-art):has(.onb-points) .onb-slide-inner {
+            grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+        }
+
+        .onb-fields {
+            gap: 16px 18px;
+        }
+    }
+
+    /* Respect the same reduced-motion contract as onboarding.css. */
+    @media (prefers-reduced-motion: reduce) {
+
+        .onb-point,
+        .onb-choice,
+        .onb-chip,
+        .onb-cta,
+        .onb-back,
+        .onb-skip {
+            transition: none;
+        }
+
+        .onb-point:hover,
+        .onb-choice:hover,
+        .onb-chip:hover,
+        .onb-cta:hover,
+        .onb-back:hover,
+        .onb-skip:hover {
+            transform: none;
+        }
+    }
+}

@@ -1,0 +1,1172 @@
+/* ════════════════════════════════════════════════════════════════
+   NAADI AI — OPS CONSOLE STYLESHEET (ops.css)
+   ─────────────────────────────────────────────────────────────────
+   Loaded after styles-mobile.css (tokens) + portal.css (pt- grammar:
+   boot, wall, sheet, review questions, empty states, skeletons,
+   charts, icon buttons). This file adds ONLY the console shell and
+   ops widgets: sidebar, KPI strip, tables, drawer, chat. Desktop-
+   first — this is a laptop tool — with a usable <960px fallback.
+   Every colour is a token; if it isn't a token, it isn't used.
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+    --adm-side-w: 232px;
+    --adm-drawer-w: 520px;
+}
+
+.adm-body {
+    background: var(--s50);
+    min-height: 100vh;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.adm-side {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--adm-side-w);
+    background: var(--s900);
+    border-right: 1px solid rgba(255, 255, 255, .06);
+    display: flex;
+    flex-direction: column;
+    z-index: 95;
+}
+
+.adm-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+.adm-brand .pt-logo {
+    border: 1px solid var(--s700);
+}
+
+.adm-brand b {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.02rem;
+    color: #fff;
+    letter-spacing: .2px;
+}
+
+.adm-brand b span {
+    color: var(--g400);
+}
+
+.adm-brand small {
+    display: block;
+    font-size: .58rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--s500);
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.adm-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 0;
+}
+
+.adm-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: calc(100% - 24px);
+    margin: 2px 12px;
+    padding: 10px 13px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: var(--s400);
+    font-family: var(--font-body);
+    font-size: .86rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background .18s, color .18s;
+}
+
+.adm-nav-item i {
+    width: 20px;
+    text-align: center;
+    font-size: .92rem;
+}
+
+.adm-nav-item:hover {
+    background: rgba(255, 255, 255, .06);
+    color: #fff;
+}
+
+.adm-nav-item.active {
+    background: rgba(93, 146, 207, .16);
+    color: var(--g400);
+}
+
+.adm-nav-badge {
+    margin-left: auto;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 99px;
+    background: var(--red);
+    color: #fff;
+    font-size: .6rem;
+    font-weight: 800;
+    font-style: normal;
+    display: grid;
+    place-items: center;
+}
+
+.adm-nav-badge.hidden {
+    display: none;
+}
+
+.adm-side-foot {
+    padding: 10px 0 14px;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+}
+
+.adm-me {
+    padding: 6px 25px 8px;
+    font-size: .72rem;
+    color: var(--s500);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Top bar + main ──────────────────────────────────────────── */
+.adm-top {
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    margin-left: var(--adm-side-w);
+    background: #fff;
+    border-bottom: 1px solid var(--s200);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.adm-top-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--s800);
+}
+
+.adm-top-sub {
+    font-size: .72rem;
+    color: var(--s500);
+    margin-top: 2px;
+}
+
+.adm-refresh {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--s200);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--s500);
+    cursor: pointer;
+    transition: background .16s, color .16s;
+}
+
+.adm-refresh:hover {
+    background: var(--s100);
+    color: var(--s800);
+}
+
+.adm-refresh.spin i {
+    animation: pt-spin .7s linear infinite;
+}
+
+.adm-main {
+    margin-left: var(--adm-side-w);
+    padding: 24px 28px 64px;
+    max-width: 1280px;
+}
+
+/* ── Cards, grids, KPIs ──────────────────────────────────────── */
+.adm-card {
+    background: #fff;
+    border: 1px solid var(--s200);
+    border-radius: 16px;
+    padding: 16px 18px;
+    min-width: 0;
+}
+
+.adm-card-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .92rem;
+    color: var(--s800);
+}
+
+.adm-card-sub {
+    font-size: .72rem;
+    color: var(--s500);
+    margin: 3px 0 14px;
+    line-height: 1.5;
+}
+
+.adm-grid2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
+    margin-top: 18px;
+}
+
+.adm-grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
+    margin-top: 18px;
+}
+
+.adm-span2 {
+    grid-column: 1 / -1;
+}
+
+.adm-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 12px;
+}
+
+.adm-kpi {
+    background: #fff;
+    border: 1px solid var(--s200);
+    border-radius: 14px;
+    padding: 14px 14px 12px;
+    cursor: default;
+}
+
+.adm-kpi.link {
+    cursor: pointer;
+    transition: border-color .16s, transform .12s;
+}
+
+.adm-kpi.link:hover {
+    border-color: var(--g200);
+    transform: translateY(-1px);
+}
+
+.adm-kpi-v {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--s800);
+    line-height: 1.1;
+}
+
+.adm-kpi-v.warn {
+    color: var(--amber);
+}
+
+.adm-kpi-v.bad {
+    color: var(--red);
+}
+
+.adm-kpi-v.good {
+    color: var(--green-600);
+}
+
+.adm-kpi-k {
+    font-size: .6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--s400);
+    margin-top: 4px;
+}
+
+/* ── Toolbar controls ────────────────────────────────────────── */
+.adm-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.adm-input,
+.adm-select {
+    min-height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--s200);
+    background: #fff;
+    padding: 0 12px;
+    font-family: var(--font-body);
+    font-size: .82rem;
+    color: var(--s800);
+    outline: none;
+    transition: border-color .16s;
+}
+
+.adm-input:focus,
+.adm-select:focus {
+    border-color: var(--g400);
+}
+
+.adm-input {
+    width: 240px;
+}
+
+.adm-chip {
+    min-height: 34px;
+    padding: 0 13px;
+    border-radius: 99px;
+    border: 1px solid var(--s200);
+    background: #fff;
+    color: var(--s600);
+    font-family: var(--font-body);
+    font-size: .74rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .16s, border-color .16s, color .16s;
+}
+
+.adm-chip:hover:not(.on) {
+    background: var(--s50);
+    border-color: var(--s300);
+}
+
+.adm-chip.on {
+    background: var(--s900);
+    color: #fff;
+    border-color: var(--s900);
+}
+
+.adm-btn {
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 9px;
+    border: 0;
+    background: var(--g600);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter .16s;
+}
+
+.adm-btn:hover:not(:disabled) {
+    filter: brightness(1.06);
+}
+
+.adm-btn:disabled {
+    opacity: .5;
+    cursor: default;
+}
+
+.adm-btn.ghost {
+    background: #fff;
+    color: var(--s600);
+    border: 1px solid var(--s200);
+}
+
+.adm-btn.ghost:hover {
+    background: var(--s50);
+    filter: none;
+}
+
+.adm-btn.ok {
+    background: var(--green-600);
+}
+
+.adm-btn.no {
+    background: #fff;
+    color: var(--red);
+    border: 1px solid var(--s200);
+}
+
+.adm-btn.no:hover {
+    background: var(--red-bg);
+    filter: none;
+}
+
+/* ── Tables ──────────────────────────────────────────────────── */
+.adm-twrap {
+    overflow-x: auto;
+    border: 1px solid var(--s200);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.adm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .8rem;
+}
+
+.adm-table th {
+    text-align: left;
+    padding: 11px 14px;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--s400);
+    border-bottom: 1px solid var(--s200);
+    white-space: nowrap;
+    background: var(--s50);
+    position: sticky;
+    top: 0;
+}
+
+.adm-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--s100);
+    color: var(--s700);
+    vertical-align: middle;
+}
+
+.adm-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.adm-table tr.click {
+    cursor: pointer;
+    transition: background .12s;
+}
+
+.adm-table tr.click:hover {
+    background: var(--s50);
+}
+
+.adm-t-main {
+    font-weight: 600;
+    color: var(--s800);
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.adm-t-sub {
+    font-size: .68rem;
+    color: var(--s500);
+    margin-top: 2px;
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.adm-num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.adm-pill {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 99px;
+    font-size: .64rem;
+    font-weight: 700;
+    background: var(--s100);
+    color: var(--s600);
+    white-space: nowrap;
+}
+
+.adm-pill.good {
+    background: #e7f6ec;
+    color: var(--green-600);
+}
+
+.adm-pill.warn {
+    background: var(--amber-bg);
+    color: var(--amber);
+}
+
+.adm-pill.bad {
+    background: var(--red-bg);
+    color: var(--red);
+}
+
+.adm-pill.info {
+    background: var(--g50);
+    color: var(--g600);
+}
+
+.adm-pager {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 12px;
+    font-size: .74rem;
+    color: var(--s500);
+}
+
+/* ── Mini bar (mastery inline) ───────────────────────────────── */
+.adm-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+}
+
+.adm-mini i {
+    flex: 1;
+    height: 6px;
+    border-radius: 99px;
+    background: var(--s100);
+    display: block;
+    overflow: hidden;
+    position: relative;
+}
+
+.adm-mini i b {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 99px;
+    background: var(--g500);
+}
+
+.adm-mini i b.warn {
+    background: var(--amber);
+}
+
+.adm-mini i b.bad {
+    background: var(--red);
+}
+
+.adm-mini span {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .76rem;
+    color: var(--s700);
+    min-width: 34px;
+    text-align: right;
+}
+
+/* ── Drawer (student drill-down) ─────────────────────────────── */
+.adm-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 140;
+    background: rgba(15, 23, 42, .45);
+}
+
+.adm-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(var(--adm-drawer-w), 100vw);
+    background: var(--s50);
+    border-left: 1px solid var(--s200);
+    z-index: 145;
+    display: flex;
+    flex-direction: column;
+    animation: adm-slide .2s ease-out;
+    box-shadow: -18px 0 48px rgba(15, 23, 42, .18);
+}
+
+@keyframes adm-slide {
+    from {
+        transform: translateX(24px);
+        opacity: .4;
+    }
+}
+
+.adm-drawer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 13px 16px;
+    background: #fff;
+    border-bottom: 1px solid var(--s200);
+}
+
+.adm-drawer-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--s800);
+}
+
+.adm-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 16px 32px;
+}
+
+.adm-drawer-body .adm-card {
+    margin-bottom: 14px;
+}
+
+.adm-kv {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 0;
+    font-size: .78rem;
+    border-bottom: 1px solid var(--s100);
+}
+
+.adm-kv:last-child {
+    border-bottom: 0;
+}
+
+.adm-kv b {
+    color: var(--s500);
+    font-weight: 600;
+}
+
+.adm-kv span {
+    color: var(--s800);
+    text-align: right;
+    word-break: break-word;
+}
+
+/* ── Support: split inbox + chat ─────────────────────────────── */
+.adm-split {
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 18px;
+    align-items: stretch;
+    height: calc(100vh - 190px);
+    min-height: 480px;
+}
+
+.adm-tickets {
+    background: #fff;
+    border: 1px solid var(--s200);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.adm-tickets-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--s200);
+    display: flex;
+    gap: 8px;
+}
+
+.adm-tickets-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.adm-trow {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    border: 0;
+    border-bottom: 1px solid var(--s100);
+    background: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: background .12s;
+}
+
+.adm-trow:hover {
+    background: var(--s50);
+}
+
+.adm-trow.on {
+    background: var(--g50);
+}
+
+.adm-trow-t {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--s800);
+}
+
+.adm-trow-t .adm-nav-badge {
+    margin-left: auto;
+}
+
+.adm-trow-s {
+    font-size: .68rem;
+    color: var(--s500);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.adm-chat {
+    background: #fff;
+    border: 1px solid var(--s200);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.adm-chat-head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--s200);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.adm-chat-who {
+    min-width: 0;
+    flex: 1;
+}
+
+.adm-chat-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--s800);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.adm-chat-sub {
+    font-size: .68rem;
+    color: var(--s500);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.adm-chat-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.adm-chat-log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--s50);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.adm-msg {
+    max-width: 76%;
+    align-self: flex-start;
+    background: #fff;
+    border: 1px solid var(--s200);
+    border-radius: 14px 14px 14px 4px;
+    padding: 9px 12px;
+    font-size: .82rem;
+    line-height: 1.5;
+    color: var(--s800);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.adm-msg.me {
+    align-self: flex-end;
+    background: var(--s900);
+    border-color: var(--s800);
+    color: #fff;
+    border-radius: 14px 14px 4px 14px;
+}
+
+.adm-msg small {
+    display: block;
+    margin-top: 4px;
+    font-size: .6rem;
+    color: var(--s400);
+}
+
+.adm-msg.me small {
+    color: var(--s500);
+}
+
+.adm-composer {
+    display: flex;
+    gap: 10px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--s200);
+    background: #fff;
+}
+
+.adm-composer textarea {
+    flex: 1;
+    min-height: 44px;
+    max-height: 130px;
+    resize: none;
+    border: 1px solid var(--s200);
+    border-radius: 11px;
+    padding: 11px 12px;
+    font-family: var(--font-body);
+    font-size: .84rem;
+    color: var(--s800);
+    outline: none;
+}
+
+.adm-composer textarea:focus {
+    border-color: var(--g400);
+}
+
+/* ── Toast ───────────────────────────────────────────────────── */
+.adm-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translateX(calc(-50% + var(--adm-side-w) / 2));
+    background: var(--s900);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 600;
+    padding: 11px 18px;
+    border-radius: 11px;
+    z-index: 300;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .3);
+}
+
+/* ── Pointer + focus polish ──────────────────────────────────── */
+::selection {
+    background: var(--g100);
+    color: var(--s900);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--g400);
+    outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--s300);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+/* ── Mobile machinery, base state ────────────────────────────────
+   These elements exist at every width; only the mobile layer shows
+   them. Keeping the base state here means desktop needs no negation. */
+.adm-menu-btn {
+    display: none;
+}
+
+.adm-chat-back {
+    display: none;
+}
+
+.adm-nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+    background: rgba(15, 23, 42, .45);
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   MOBILE LAYER (<960px) — a first-class phone console, not a
+   fallback. Nav becomes a slide-over drawer with full labels;
+   touch targets grow to 44px; inputs hold 16px font so iOS never
+   zooms; tables keep their identity column pinned while the
+   numbers scroll; the student drawer goes full-screen; support
+   becomes a proper master→detail chat with a back button.
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 959px) {
+
+    /* ── Nav: slide-over drawer ─────────────────────────────────── */
+    .adm-side {
+        width: min(300px, 84vw);
+        transform: translateX(-102%);
+        transition: transform .22s ease;
+        box-shadow: 24px 0 60px rgba(15, 23, 42, .35);
+        z-index: 200;
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    .adm-side.open {
+        transform: none;
+    }
+
+    .adm-nav-item {
+        padding: 13px 14px;
+        font-size: .92rem;
+    }
+
+    .adm-side-foot {
+        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .adm-menu-btn {
+        display: grid;
+        place-items: center;
+    }
+
+    /* ── Top bar ────────────────────────────────────────────────── */
+    .adm-top {
+        margin-left: 0;
+        padding: 10px 14px;
+        padding-top: calc(10px + env(safe-area-inset-top, 0px));
+        gap: 10px;
+    }
+
+    .adm-top-title {
+        font-size: .98rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .adm-top-sub {
+        display: none;
+    }
+
+    /* ── Main column ────────────────────────────────────────────── */
+    .adm-main {
+        margin-left: 0;
+        padding: 14px 14px calc(56px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .adm-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .adm-kpi {
+        padding: 12px 12px 10px;
+        border-radius: 12px;
+    }
+
+    .adm-kpi-v {
+        font-size: 1.18rem;
+    }
+
+    .adm-grid2,
+    .adm-grid3 {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-top: 14px;
+    }
+
+    .adm-card {
+        padding: 14px;
+        border-radius: 14px;
+    }
+
+    /* ── Touch targets + iOS anti-zoom ──────────────────────────── */
+    .adm-btn,
+    .adm-select {
+        min-height: 44px;
+    }
+
+    .adm-chip {
+        min-height: 40px;
+        padding: 0 14px;
+    }
+
+    .adm-refresh {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 auto;
+    }
+
+    .adm-input,
+    .adm-select,
+    .adm-composer textarea {
+        font-size: 16px;
+        /* <16px makes iOS Safari zoom the page on focus */
+    }
+
+    .adm-toolbar {
+        gap: 8px;
+    }
+
+    .adm-input {
+        flex: 1 1 100%;
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .adm-select {
+        flex: 1 1 auto;
+        max-width: 100%;
+    }
+
+    /* ── Tables: numbers scroll, identity stays pinned ──────────── */
+    .adm-table th,
+    .adm-table td {
+        padding: 10px 12px;
+    }
+
+    .adm-table th:first-child,
+    .adm-table td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: #fff;
+        box-shadow: 1px 0 0 var(--s100);
+        max-width: 46vw;
+    }
+
+    .adm-table th:first-child {
+        background: var(--s50);
+        z-index: 3;
+    }
+
+    .adm-t-main,
+    .adm-t-sub {
+        max-width: 44vw;
+    }
+
+    .adm-pager {
+        justify-content: center;
+    }
+
+    .adm-pager .adm-btn {
+        min-width: 52px;
+    }
+
+    /* ── Student drawer: full-screen sheet ──────────────────────── */
+    .adm-drawer {
+        width: 100vw;
+        border-left: 0;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .adm-drawer-bar {
+        padding-top: calc(13px + env(safe-area-inset-top, 0px));
+    }
+
+    .adm-drawer-body {
+        padding: 14px 14px 40px;
+    }
+
+    .adm-drawer-body .adm-kpis {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .adm-drawer-body .adm-kpi-v {
+        font-size: 1rem;
+    }
+
+    .adm-kv {
+        flex-wrap: wrap;
+    }
+
+    .adm-kv span {
+        flex: 1 1 100%;
+        text-align: left;
+    }
+
+    /* ── Support: master → detail ───────────────────────────────── */
+    .adm-split {
+        display: block;
+        height: auto;
+        min-height: 0;
+    }
+
+    .adm-tickets {
+        max-height: none;
+    }
+
+    .adm-trow {
+        padding: 14px;
+    }
+
+    /* List first; the chat pane only shows once a ticket is open. */
+    .adm-chat {
+        display: none;
+    }
+
+    .adm-split.chat-open .adm-tickets {
+        display: none;
+    }
+
+    .adm-split.chat-open .adm-chat {
+        display: flex;
+        height: calc(100vh - 140px - env(safe-area-inset-bottom, 0px));
+        min-height: 420px;
+    }
+
+    .adm-chat-back {
+        display: grid;
+        place-items: center;
+    }
+
+    .adm-chat-head {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 12px;
+    }
+
+    /* Row 1: back arrow + student identity (identity gets ALL the
+       remaining width). Row 2: the action buttons, full width, split
+       evenly. This is what stops the one-word-per-line waterfall. */
+    .adm-chat-who {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .adm-chat-actions {
+        flex: 1 1 100%;
+    }
+
+    .adm-chat-actions .adm-btn {
+        flex: 1;
+    }
+
+    .adm-chat-head .adm-btn {
+        min-height: 40px;
+        padding: 0 11px;
+        font-size: .74rem;
+    }
+
+    .adm-msg {
+        max-width: 88%;
+    }
+
+    .adm-composer {
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* ── Toast ──────────────────────────────────────────────────── */
+    .adm-toast {
+        transform: translateX(-50%);
+        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        max-width: calc(100vw - 40px);
+        text-align: center;
+    }
+}

@@ -1,0 +1,749 @@
+/* ════════════════════════════════════════════════════════════════
+   NAADI AI — ONBOARDING DECK (onboarding.css)  ·  v2
+   ─────────────────────────────────────────────────────────────────
+   Loaded LAST, after styles-mobile.css. Adds only .onb-* classes.
+
+   WHAT CHANGED IN v2
+   ──────────────────
+   1. THE BUG. styles-mobile.css sets
+          .auth-page-body { display:flex; align-items:center;
+                            justify-content:center; padding:20px }
+      which made .onb-shell a flex ITEM with no width — so it
+      shrink-wrapped to its content. That is why every title broke
+      one word per line, why the footer looked like a narrow box
+      drawn around the pill, and why every slide scrolled. `.onb-body`
+      now reclaims the body as a plain block. Same class, loaded
+      later, so nothing else on the auth pages is touched.
+
+   2. ONE SLIDE, ONE SCREEN. Every size that affects vertical rhythm
+      is `min(rem, vw, vh)`: the deck shrinks itself to the phone
+      instead of asking the student to scroll. A slide only scrolls
+      if the OS font scale is turned right up — and then it does so
+      silently, with hidden scrollbars, rather than clipping.
+
+   3. THE PILL STANDS ALONE. The footer's gradient panel is gone.
+      The button is the only thing down there.
+
+   4. Swipe. Horizontal drag is tracked in onboarding.js and written
+      to --onb-drag; the active slide follows the thumb.
+
+   PALETTE: unchanged. #2f6cb3 → #1f5896 → #0f6f8c. No red.
+   SIGNATURE: unchanged. The nameplate on slides 1 and 11.
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+    --onb-ink: #f8fafc;
+    --onb-ink-2: rgba(255, 255, 255, .64);
+    --onb-ink-3: rgba(255, 255, 255, .40);
+    --onb-line: rgba(255, 255, 255, .10);
+    --onb-panel: rgba(255, 255, 255, .045);
+    --onb-panel-hi: rgba(255, 255, 255, .075);
+    --onb-grad: linear-gradient(135deg, #2f6cb3 0%, #1f5896 55%, #0f6f8c 100%);
+    --onb-grad-soft: linear-gradient(135deg, rgba(47, 108, 179, .22), rgba(15, 111, 140, .22));
+
+    /* Vertical rhythm, in one place. Every gap below is a multiple. */
+    --onb-unit: min(8px, 1.05vh);
+    --onb-pad-x: clamp(18px, 5.5vw, 30px);
+}
+
+/* ── Shell ─────────────────────────────────────────────────────────
+   .auth-page-body centres its children as flex items. The deck is
+   not a card; it is the whole screen. Take the body back. */
+.onb-body {
+    display: block;
+    padding: 0;
+    min-height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+.onb-shell {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100dvh;
+    max-width: 520px;
+    margin: 0 auto;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+    /* The swipe belongs to the deck, not to the page. */
+    touch-action: pan-y;
+}
+
+/* ── Head: back · rail · skip ──────────────────────────────────── */
+.onb-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+    padding: calc(var(--onb-unit) * 1.5) var(--onb-pad-x) var(--onb-unit);
+}
+
+.onb-back {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border-radius: 50%;
+    border: 1px solid var(--onb-line);
+    background: var(--onb-panel);
+    color: var(--onb-ink-2);
+    font-size: .85rem;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: opacity .2s, background .2s;
+}
+
+.onb-back:active {
+    background: var(--onb-panel-hi);
+}
+
+.onb-back[hidden] {
+    display: none;
+}
+
+/* The rail is a spine: one vertebra per slide. Completion-based, like
+   every other progress surface in NAADI — it never travels backwards
+   on its own. */
+.onb-rail {
+    flex: 1 1 auto;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    min-width: 0;
+}
+
+.onb-vert {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, .10);
+    transition: background .45s ease, box-shadow .45s ease, transform .45s ease;
+}
+
+.onb-vert.done {
+    background: #2f6cb3;
+}
+
+.onb-vert.here {
+    background: var(--onb-grad);
+    transform: scaleY(1.75);
+    box-shadow: 0 0 12px rgba(47, 108, 179, .55);
+}
+
+.onb-skip {
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    padding: 8px 0 8px 10px;
+    color: var(--onb-ink-3);
+    font-family: var(--font-body);
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color .2s;
+}
+
+.onb-skip:active {
+    color: var(--onb-ink);
+}
+
+/* ── Stage ─────────────────────────────────────────────────────── */
+.onb-stage {
+    flex: 1 1 auto;
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.onb-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--onb-pad-x) calc(var(--onb-unit) * 1.5);
+
+    /* Safety valve only. At default font scale nothing reaches it. */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transform: translate3d(var(--onb-enter, 24px), 0, 0);
+    transition: opacity .3s ease, transform .34s cubic-bezier(.2, .8, .2, 1), visibility 0s .34s;
+}
+
+.onb-slide::-webkit-scrollbar {
+    display: none;
+}
+
+/* --onb-enter is written by onboarding.js: slides that sit *before* the
+   current one park on the left, slides *after* it park on the right. So
+   a slide always leaves in the direction the student is travelling, and
+   the one arriving always comes from the far side. */
+.onb-slide.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate3d(var(--onb-drag, 0px), 0, 0);
+    transition: opacity .3s ease, transform .34s cubic-bezier(.2, .8, .2, 1);
+}
+
+/* While a thumb is down the slide tracks it 1:1. No easing in the way. */
+.onb-slide.dragging {
+    transition: none;
+}
+
+/* Vertically centred, but `margin:auto` rather than `justify-content`,
+   so that an over-long slide still scrolls from its true top instead
+   of having its head clipped. */
+.onb-slide-inner {
+    width: 100%;
+    margin: auto 0;
+    padding: calc(var(--onb-unit) * .5) 0;
+}
+
+/* ── Art ───────────────────────────────────────────────────────── */
+.onb-art {
+    height: min(150px, 17vh);
+    margin: 0 auto calc(var(--onb-unit) * 2.25);
+    display: grid;
+    place-items: center;
+    position: relative;
+}
+
+.onb-art img {
+    max-height: 100%;
+    max-width: 62%;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 18px 40px rgba(15, 111, 140, .35));
+}
+
+/* Shown until the artwork file exists (and if it ever fails to load),
+   so the deck is never broken by a missing asset. */
+.onb-art-fallback {
+    width: min(118px, 13.5vh);
+    height: min(118px, 13.5vh);
+    border-radius: 28%;
+    background: var(--onb-grad);
+    display: grid;
+    place-items: center;
+    font-size: min(2.8rem, 6vh);
+    color: #fff;
+    box-shadow: 0 20px 50px rgba(31, 88, 150, .45);
+}
+
+.onb-art-fallback::after {
+    content: '';
+    position: absolute;
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(47, 108, 179, .30), transparent 66%);
+    z-index: -1;
+}
+
+/* ── Type ──────────────────────────────────────────────────────── */
+.onb-eyebrow {
+    font-family: var(--font-body);
+    font-size: min(.7rem, 3vw);
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: rgba(93, 146, 207, .95);
+    margin-bottom: var(--onb-unit);
+}
+
+.onb-title {
+    font-family: var(--font-display);
+    font-size: min(1.72rem, 7.1vw, 3.5vh);
+    line-height: 1.16;
+    font-weight: 800;
+    color: var(--onb-ink);
+    letter-spacing: -.015em;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+}
+
+.onb-title .accent {
+    background: linear-gradient(100deg, #5d92cf, #0f6f8c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.onb-sub {
+    margin-top: calc(var(--onb-unit) * 1.5);
+    font-size: min(.95rem, 3.9vw, 1.95vh);
+    line-height: 1.55;
+    color: var(--onb-ink-2);
+    text-wrap: pretty;
+    overflow-wrap: break-word;
+}
+
+/* ── Point list (slides 2–7) ───────────────────────────────────── */
+.onb-points {
+    list-style: none;
+    margin: calc(var(--onb-unit) * 2.5) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--onb-unit) * 1.25);
+}
+
+.onb-point {
+    display: flex;
+    gap: min(13px, 3.2vw);
+    align-items: flex-start;
+    padding: min(13px, 1.5vh) min(14px, 3.4vw);
+    border-radius: 14px;
+    background: var(--onb-panel);
+    border: 1px solid var(--onb-line);
+    opacity: 0;
+    transform: translateY(10px);
+    animation: onbPointIn .42s ease forwards;
+}
+
+.onb-point:nth-child(1) {
+    animation-delay: .10s;
+}
+
+.onb-point:nth-child(2) {
+    animation-delay: .18s;
+}
+
+.onb-point:nth-child(3) {
+    animation-delay: .26s;
+}
+
+.onb-point:nth-child(4) {
+    animation-delay: .34s;
+}
+
+.onb-point:nth-child(5) {
+    animation-delay: .42s;
+}
+
+@keyframes onbPointIn {
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.onb-point-ico {
+    flex: 0 0 min(34px, 4vh);
+    width: min(34px, 4vh);
+    height: min(34px, 4vh);
+    border-radius: 30%;
+    background: var(--onb-grad-soft);
+    border: 1px solid rgba(93, 146, 207, .28);
+    display: grid;
+    place-items: center;
+    color: #7daadb;
+    font-size: min(.85rem, 1.7vh);
+}
+
+/* min-width:0 is what stops a long word from pushing the card wider
+   than its parent. It is the reason nothing overflows any more. */
+.onb-point-txt {
+    min-width: 0;
+    flex: 1 1 auto;
+    font-size: min(.87rem, 3.5vw, 1.72vh);
+    line-height: 1.45;
+    color: rgba(255, 255, 255, .80);
+    overflow-wrap: break-word;
+    text-wrap: pretty;
+}
+
+.onb-point-txt strong {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: min(.93rem, 3.7vw, 1.85vh);
+    color: var(--onb-ink);
+    margin-bottom: 2px;
+}
+
+/* ── SIGNATURE: the nameplate (slides 1 and 11) ────────────────── */
+.onb-plate {
+    margin: 0 auto calc(var(--onb-unit) * 3.25);
+    max-width: 340px;
+    padding: min(20px, 2.4vh) 22px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .03));
+    border: 1px solid rgba(255, 255, 255, .12);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+    position: relative;
+    overflow: hidden;
+}
+
+.onb-plate::before {
+    /* the pin hole of a real hospital badge */
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 42px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, .14);
+}
+
+.onb-plate-name {
+    margin-top: 16px;
+    font-family: var(--font-display);
+    font-size: min(1.5rem, 6.2vw);
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.01em;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    overflow-wrap: anywhere;
+}
+
+/* "Dr." arrives after a beat, in front of a name the student already
+   owns. This is the one animated moment in the deck. */
+.onb-plate-dr {
+    background: linear-gradient(100deg, #5d92cf, #0f6f8c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+    transform: translateX(-14px);
+    animation: onbDrIn .7s cubic-bezier(.2, .8, .2, 1) .55s forwards;
+}
+
+@keyframes onbDrIn {
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.onb-plate-role {
+    margin-top: 10px;
+    text-align: center;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--onb-ink-3);
+}
+
+.onb-plate-rule {
+    height: 3px;
+    margin: 16px 0 0;
+    border-radius: 2px;
+    background: var(--onb-grad);
+    transform-origin: left;
+    transform: scaleX(0);
+    animation: onbRule .8s cubic-bezier(.2, .8, .2, 1) .9s forwards;
+}
+
+@keyframes onbRule {
+    to {
+        transform: scaleX(1);
+    }
+}
+
+/* ── Stat block (slide 8) ──────────────────────────────────────── */
+.onb-stat {
+    margin: calc(var(--onb-unit) * 2.25) 0 0;
+    padding: min(18px, 2.1vh);
+    border-radius: 16px;
+    background: var(--onb-panel);
+    border: 1px solid var(--onb-line);
+}
+
+.onb-stat-num {
+    font-family: var(--font-display);
+    font-size: min(2.4rem, 9.5vw, 4.6vh);
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(100deg, #5d92cf, #0f6f8c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.onb-stat-label {
+    margin-top: var(--onb-unit);
+    font-size: min(.88rem, 3.6vw, 1.75vh);
+    font-weight: 600;
+    color: rgba(255, 255, 255, .78);
+    line-height: 1.4;
+    text-wrap: pretty;
+}
+
+/* Scope, not fine print: the reader is told exactly what was measured
+   and when. A claim a student can check is worth more than a big
+   number they can't. */
+.onb-stat-scope {
+    margin-top: calc(var(--onb-unit) * 1.25);
+    padding-top: calc(var(--onb-unit) * 1.25);
+    border-top: 1px dashed var(--onb-line);
+    font-size: min(.74rem, 3.1vw, 1.5vh);
+    line-height: 1.45;
+    color: var(--onb-ink-3);
+}
+
+/* ── Choice grid (slide 9) ─────────────────────────────────────────
+   Eight rows never fitted one screen. Two columns do — and the two
+   long labels ("A friend told me", "NAADI team visited my school")
+   claim the full width, which is honest about their length rather
+   than crushing them into a half. */
+.onb-choices {
+    margin-top: calc(var(--onb-unit) * 2.25);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: min(9px, 1.1vh) 9px;
+}
+
+.onb-choice {
+    display: flex;
+    align-items: center;
+    gap: min(11px, 2.6vw);
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+    padding: min(12px, 1.4vh) min(13px, 3.2vw);
+    border-radius: 14px;
+    background: var(--onb-panel);
+    border: 1.5px solid var(--onb-line);
+    color: rgba(255, 255, 255, .82);
+    font-family: var(--font-body);
+    font-size: min(.88rem, 3.5vw, 1.75vh);
+    font-weight: 600;
+    line-height: 1.3;
+    cursor: pointer;
+    transition: border-color .2s, background .2s, transform .12s;
+}
+
+.onb-choice.onb-choice-wide {
+    grid-column: 1 / -1;
+}
+
+.onb-choice:active {
+    transform: scale(.985);
+}
+
+.onb-choice.selected {
+    border-color: #2f6cb3;
+    background: rgba(47, 108, 179, .13);
+    color: #fff;
+}
+
+.onb-choice-ico {
+    flex: 0 0 min(30px, 3.6vh);
+    width: min(30px, 3.6vh);
+    height: min(30px, 3.6vh);
+    border-radius: 30%;
+    display: grid;
+    place-items: center;
+    background: var(--onb-grad-soft);
+    border: 1px solid rgba(93, 146, 207, .25);
+    color: #7daadb;
+    font-size: min(.8rem, 1.6vh);
+}
+
+.onb-choice-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+/* The radio only has room on a full-width row. In a half-width cell
+   the selected border and fill carry the state on their own. */
+.onb-radio {
+    display: none;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, .22);
+    place-items: center;
+    transition: border-color .2s;
+}
+
+.onb-choice-wide .onb-radio {
+    display: grid;
+}
+
+.onb-choice.selected .onb-radio {
+    border-color: #5d92cf;
+}
+
+.onb-choice.selected .onb-radio::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--onb-grad);
+}
+
+.onb-other-wrap {
+    margin-top: calc(var(--onb-unit) * 1.75);
+}
+
+/* ── Fields (slide 10) ─────────────────────────────────────────── */
+.onb-fields {
+    margin-top: calc(var(--onb-unit) * 2.5);
+    display: flex;
+    flex-direction: column;
+    gap: min(18px, 2.2vh);
+}
+
+.onb-field-label {
+    display: block;
+    font-size: min(.76rem, 3.1vw);
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--onb-ink-3);
+    margin-bottom: var(--onb-unit);
+}
+
+.onb-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.onb-chip {
+    padding: min(10px, 1.2vh) 16px;
+    border-radius: 999px;
+    border: 1.5px solid var(--onb-line);
+    background: var(--onb-panel);
+    color: rgba(255, 255, 255, .75);
+    font-family: var(--font-body);
+    font-size: min(.9rem, 3.6vw);
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color .2s, background .2s, color .2s;
+}
+
+.onb-chip.selected {
+    border-color: #2f6cb3;
+    background: rgba(47, 108, 179, .16);
+    color: #fff;
+}
+
+.onb-help {
+    margin-top: var(--onb-unit);
+    font-size: min(.78rem, 3.2vw, 1.55vh);
+    color: var(--onb-ink-3);
+    line-height: 1.45;
+    text-wrap: pretty;
+}
+
+/* ── Foot ──────────────────────────────────────────────────────────
+   No panel, no gradient, no plate. The pill and nothing else. */
+.onb-foot {
+    flex: 0 0 auto;
+    background: none;
+    padding: calc(var(--onb-unit) * 1.5) var(--onb-pad-x) calc(var(--onb-unit) * 2 + var(--safe-bottom));
+}
+
+.onb-cta {
+    width: 100%;
+    min-height: min(54px, 6.6vh);
+    border: none;
+    border-radius: 999px;
+    background: var(--onb-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: min(1rem, 4vw);
+    font-weight: 700;
+    letter-spacing: .01em;
+    cursor: pointer;
+    box-shadow: 0 10px 34px rgba(31, 88, 150, .48);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: transform .12s, box-shadow .2s;
+}
+
+.onb-cta:active {
+    transform: scale(.985);
+}
+
+.onb-cta:disabled {
+    opacity: .55;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* Every slide exists in the DOM from first paint. Without this, the
+   point-list stagger and the nameplate reveal would all fire at once
+   on load and be finished before the student ever reaches the slide. */
+.onb-slide:not(.active) .onb-point,
+.onb-slide:not(.active) .onb-plate-dr,
+.onb-slide:not(.active) .onb-plate-rule {
+    animation-play-state: paused;
+}
+
+/* ── Landscape / very short screens ────────────────────────────────
+   Drop the art rather than shrink everything past legibility. */
+@media (max-height: 560px) {
+    .onb-art {
+        display: none;
+    }
+
+    .onb-plate {
+        margin-bottom: calc(var(--onb-unit) * 2);
+    }
+}
+
+/* Wider than a phone: the point list reads better as two columns than
+   as one very long measure. */
+@media (min-width: 460px) {
+    .onb-points {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .onb-points:has(> :nth-child(3):last-child)> :nth-child(3) {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .onb-slide,
+    .onb-point,
+    .onb-plate-dr,
+    .onb-plate-rule,
+    .onb-vert {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .onb-point,
+    .onb-plate-dr,
+    .onb-plate-rule {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+.onb-cta:focus-visible,
+.onb-choice:focus-visible,
+.onb-chip:focus-visible,
+.onb-back:focus-visible,
+.onb-skip:focus-visible {
+    outline: 2px solid #5d92cf;
+    outline-offset: 2px;
+}

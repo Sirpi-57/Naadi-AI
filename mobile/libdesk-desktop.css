@@ -1,0 +1,716 @@
+@media (min-width: 1024px) {
+
+    /* ════════════════════════════════════════════════════════════════
+       NAADI AI — LIBRARY DESKTOP ADAPTATION LAYER (libdesk-desktop.css)
+       ─────────────────────────────────────────────────────────────────
+       Desktop-native (≥1024px) presentation for the entire Library
+       section: study-material subject picker · chapter list · the
+       full-screen PDF reader workspace · notebook shelf · notebook
+       detail. Third pass in the arena-desktop / opd-desktop pattern.
+
+       MOBILE-SAFETY CONTRACT (identical to opd-desktop.css):
+         • The FIRST non-comment token in this file is the @media query
+           above, so every rule lives inside (min-width:1024px).
+         • app.html ALSO loads this with media="(min-width:1024px)", so
+           a phone never even applies the sheet.
+         • Selectors are namespaced `libdesk-` so they can NEVER collide
+           with the mobile sm- / pdfm- / nb- / lib- classes, nor with
+           te- / omr- / ph- / opddesk- / ad-.
+         • Where a mobile class is reused (sm-subj-card, sm-ch-row,
+           sm-continue, nb-card, nb-page, nb-note-entry, pdfm-*) it is
+           ONLY ever styled *scoped inside* a libdesk- container — never
+           at its own specificity.
+         • Delete this file + the one <link>/<script> line in app.html
+           and the mobile app is byte-for-byte identical.
+
+       Tokens: reuses the global --g* / --s* / --font-* / --amber / --red
+       from styles-mobile.css (always loaded). Local --ld-* tokens are
+       defined scoped here, no global collision.
+       ════════════════════════════════════════════════════════════════ */
+
+    :root {
+        --ld-line: #e2e8f0;
+        --ld-card: #ffffff;
+        --ld-navy: #0b1220;
+        --ld-ink: #0f172a;
+        --ld-muted: #64748b;
+        --ld-radius: 16px;
+        --ld-gap: 22px;
+        --ld-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px -12px rgba(15, 23, 42, .12);
+        --ld-shadow-lift: 0 14px 40px -16px rgba(15, 23, 42, .28);
+        --ld-rail-w: 300px;
+        --ld-nav-w: 190px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       RELEASE THE 760px CAP
+       styles-desktop.css §9 caps #view-study-material /
+       #view-study-chapters / #view-notebook-detail .m-picker-wrap at
+       760px (and .m-picker-wrap globally at 880). Our boards go wider,
+       so we release it — but ONLY when our own wrapper is present, so
+       the mobile markup path is untouched if this layer is inert.
+       ════════════════════════════════════════════════════════════ */
+    #view-study-material .m-picker-wrap.libdesk-wrap,
+    #view-study-chapters .m-picker-wrap.libdesk-wrap,
+    #view-revision-notes .m-picker-wrap.libdesk-wrap,
+    #view-notebook-detail .m-picker-wrap.libdesk-wrap {
+        max-width: 1240px;
+        padding: 26px 36px 64px;
+    }
+
+    /* The Library switcher holder sits above our boards — widen it to
+       match so the pill is centred over the same column. */
+    #view-study-material .lib-switch-holder,
+    #view-revision-notes .lib-switch-holder {
+        max-width: 1240px;
+        padding: 0 36px;
+    }
+
+    /* ── Shared section furniture ───────────────────────────────── */
+    .libdesk-hero {
+        padding: 4px 0 18px;
+        border-bottom: 1px solid var(--ld-line);
+        margin-bottom: 22px;
+    }
+
+    .libdesk-hero-kicker {
+        font-size: .68rem;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--ld-muted);
+        margin-bottom: 8px;
+    }
+
+    .libdesk-hero h1 {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--ld-ink);
+        line-height: 1.1;
+    }
+
+    .libdesk-hero p {
+        margin-top: 7px;
+        color: var(--ld-muted);
+        font-size: .9rem;
+        max-width: 62ch;
+    }
+
+    .libdesk-sec-label {
+        font-size: .7rem;
+        font-weight: 800;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: var(--ld-muted);
+        margin: 26px 0 12px;
+    }
+
+    /* Header row: title block on the left, controls hard right. */
+    .libdesk-headrow {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        flex-wrap: wrap;
+    }
+
+    .libdesk-backbtn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 16px;
+        border-radius: 10px;
+        border: 1px solid var(--ld-line);
+        background: var(--ld-card);
+        color: var(--ld-ink);
+        font-family: var(--font-body);
+        font-size: .82rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: border-color .16s, box-shadow .16s, transform .12s;
+    }
+
+    .libdesk-backbtn:hover {
+        border-color: var(--g200);
+        box-shadow: var(--ld-shadow);
+        transform: translateY(-1px);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       A · SUBJECT / CLASS PICKER
+       Wide hero + class toggle, resume as a full-width banner, then
+       subjects as a 3-up board. Reuses .sm-subj-card / .sm-continue
+       markup verbatim, scoped inside .libdesk-* containers.
+       ════════════════════════════════════════════════════════════ */
+    .libdesk-picker-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    /* Class toggle: keep the mobile sliding-pill component but stop it
+       stretching to the full board width. */
+    .libdesk-clswrap .sm-cls-toggle {
+        max-width: 320px;
+        margin: 0;
+    }
+
+    /* Resume banner — the mobile .sm-continue card, given the full
+       board width and a little more presence. */
+    .libdesk-resume {
+        margin-top: 20px;
+    }
+
+    .libdesk-resume .sm-continue {
+        margin: 0;
+        padding: 20px 24px;
+        border-radius: var(--ld-radius);
+        transition: box-shadow .16s, transform .12s;
+    }
+
+    .libdesk-resume .sm-continue:hover {
+        box-shadow: var(--ld-shadow-lift);
+        transform: translateY(-2px);
+    }
+
+    .libdesk-resume .sm-continue-t {
+        font-size: 1.15rem;
+    }
+
+    /* 3-up subject board */
+    .libdesk-subjboard {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--ld-gap);
+    }
+
+    .libdesk-subjboard .sm-subj-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 24px;
+        border-radius: var(--ld-radius);
+        min-height: 190px;
+        transition: border-color .16s, box-shadow .16s, transform .12s;
+    }
+
+    .libdesk-subjboard .sm-subj-card:not(.locked):hover {
+        border-color: var(--g200);
+        box-shadow: var(--ld-shadow-lift);
+        transform: translateY(-2px);
+    }
+
+    .libdesk-subjboard .sm-subj-ico {
+        width: 52px;
+        height: 52px;
+        font-size: 1.3rem;
+    }
+
+    .libdesk-subjboard .sm-subj-info {
+        flex: 1;
+        width: 100%;
+    }
+
+    .libdesk-subjboard .sm-subj-info h3 {
+        font-size: 1.15rem;
+    }
+
+    /* The chevron is a mobile row affordance — a column card doesn't
+       need it. Hidden only inside our board. */
+    .libdesk-subjboard .sm-subj-chev {
+        display: none;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       B · CHAPTER LIST
+       Sticky subject header + 2-up chapter grid. Reuses .sm-ch-row.
+       ════════════════════════════════════════════════════════════ */
+    .libdesk-chhead {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: rgba(255, 255, 255, .92);
+        backdrop-filter: blur(8px);
+        padding: 18px 0 16px;
+        margin-bottom: 6px;
+        border-bottom: 1px solid var(--ld-line);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .libdesk-chhead-t h2 {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--ld-ink);
+    }
+
+    .libdesk-chhead-t p {
+        color: var(--ld-muted);
+        font-size: .82rem;
+        margin-top: 3px;
+    }
+
+    .libdesk-chgrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .libdesk-chgrid .sm-ch-row {
+        border-radius: 14px;
+        padding: 18px 20px;
+        transition: border-color .16s, box-shadow .16s, transform .12s;
+    }
+
+    .libdesk-chgrid .sm-ch-row:hover {
+        border-color: var(--g200);
+        box-shadow: var(--ld-shadow);
+        transform: translateY(-1px);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       C · PDF READER WORKSPACE — the centrepiece
+       Mobile stacks: topbar → page → floating bar → toolbar → drawer.
+       Desktop is a three-column grid inside the SAME #pdfm-wrap node
+       (applyReadingMode targets #pdfm-wrap by id, so it must remain
+       the outermost element or reading modes silently break):
+
+         ┌──────────────── .pdfm-topbar (full width) ─────────────┐
+         │ nav rail │      #pdfm-stage (page)      │  side rail   │
+         └──────────────── .pdfm-toolbar (full width) ────────────┘
+
+       The drawer (.pdfm-sidebar-overlay) is re-homed into the right
+       column as a persistent rail — same #pdfm-sb-body / .pdfm-sb-tabs
+       nodes, so renderSidebarTab works untouched.
+       ════════════════════════════════════════════════════════════ */
+    .libdesk-reader#pdfm-wrap {
+        height: 100vh;
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: var(--ld-nav-w) minmax(0, 1fr) var(--ld-rail-w);
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "top  top   top"
+            "nav  stage rail"
+            "tool tool  tool";
+        overflow: hidden;
+    }
+
+    /* ── Top bar spans all three columns ── */
+    .libdesk-reader .pdfm-topbar {
+        grid-area: top;
+        position: static;
+        padding: 12px 20px;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .libdesk-reader .pdfm-title b {
+        font-size: 1rem;
+    }
+
+    .libdesk-reader .pdfm-title span {
+        font-size: .72rem;
+    }
+
+    /* ── Left rail: page navigator ── */
+    .libdesk-nav {
+        grid-area: nav;
+        overflow-y: auto;
+        background: var(--ld-navy);
+        border-right: 1px solid rgba(255, 255, 255, .08);
+        padding: 14px 10px 20px;
+    }
+
+    .libdesk-nav-title {
+        font-size: .62rem;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: #94a3b8;
+        padding: 0 8px 10px;
+    }
+
+    .libdesk-pglist {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .libdesk-pgitem {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 9px 12px;
+        border: 1px solid transparent;
+        border-radius: 9px;
+        background: transparent;
+        color: #cbd5e1;
+        font-family: var(--font-body);
+        font-size: .8rem;
+        font-weight: 600;
+        text-align: left;
+        cursor: pointer;
+        transition: background .14s, color .14s, border-color .14s;
+    }
+
+    .libdesk-pgitem:hover {
+        background: rgba(255, 255, 255, .07);
+        color: #fff;
+    }
+
+    .libdesk-pgitem.on {
+        background: rgba(255, 255, 255, .12);
+        border-color: rgba(255, 255, 255, .22);
+        color: #fff;
+    }
+
+    .libdesk-pgitem .libdesk-pgmarks {
+        margin-left: auto;
+        display: flex;
+        gap: 5px;
+        font-size: .6rem;
+        opacity: .95;
+    }
+
+    .libdesk-pgitem .libdesk-pgmarks .bm {
+        color: var(--amber);
+    }
+
+    .libdesk-pgitem .libdesk-pgmarks .hl {
+        color: #fde047;
+    }
+
+    /* ── Centre: the page stage ──
+       renderPdfPage sizes the canvas from stage.clientWidth - 16, so
+       the grid column width IS the zoom baseline. Generous padding
+       gives the comfortable desktop margin + a larger natural page. */
+    .libdesk-reader .pdfm-stage {
+        grid-area: stage;
+        padding: 28px 32px 36px;
+        align-items: flex-start;
+    }
+
+    .libdesk-reader .pdfm-page-wrap {
+        box-shadow: 0 10px 40px -12px rgba(0, 0, 0, .55);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    /* ── Right rail: the re-homed Highlights/Bookmarks/Notes drawer ──
+       The overlay wrapper loses its fixed/backdrop behaviour and simply
+       becomes the grid cell; the inner .pdfm-sidebar becomes a static
+       full-height panel. Both keep their ids so every handler and
+       renderSidebarTab() work untouched. */
+    .libdesk-reader .pdfm-sidebar-overlay {
+        grid-area: rail;
+        position: static;
+        inset: auto;
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        background: none;
+        backdrop-filter: none;
+        z-index: auto;
+        overflow: hidden;
+    }
+
+    .libdesk-reader .pdfm-sidebar {
+        position: static;
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        max-height: none;
+        transform: none;
+        border-radius: 0;
+        border-left: 1px solid var(--ld-line);
+        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+        background: var(--ld-card);
+    }
+
+    .libdesk-reader .pdfm-sb-tabs {
+        flex-shrink: 0;
+    }
+
+    .libdesk-reader .pdfm-sb-body {
+        flex: 1;
+        overflow-y: auto;
+        max-height: none;
+    }
+
+    .libdesk-reader .pdfm-sb-row {
+        cursor: pointer;
+        transition: background .14s;
+    }
+
+    .libdesk-reader .pdfm-sb-row:hover {
+        background: var(--g50);
+    }
+
+    /* ── Bottom toolbar spans all three columns ── */
+    .libdesk-reader .pdfm-toolbar {
+        grid-area: tool;
+        position: static;
+        padding: 12px 24px;
+        justify-content: center;
+        gap: 28px;
+        border-top: 1px solid var(--ld-line);
+    }
+
+    /* Selection action bar stays floating over the stage. */
+    .libdesk-reader .pdfm-hl-bar {
+        z-index: 120;
+    }
+
+    /* ── Reading modes theme the WHOLE workspace ──
+       applyReadingMode toggles .mode-* on #pdfm-wrap; the mobile rules
+       only recolour .pdfm-stage / #pdfm-canvas, so we extend them to
+       the rails here (scoped to our container only). */
+    .libdesk-reader.mode-sepia .libdesk-nav {
+        background: #3b352d;
+        border-right-color: rgba(255, 255, 255, .09);
+    }
+
+    .libdesk-reader.mode-sepia .pdfm-sidebar {
+        background: #f4ecdd;
+        border-left-color: #ddd0b8;
+    }
+
+    .libdesk-reader.mode-sepia .pdfm-toolbar {
+        background: #f4ecdd;
+        border-top-color: #ddd0b8;
+    }
+
+    .libdesk-reader.mode-dark .libdesk-nav {
+        background: #070d18;
+    }
+
+    .libdesk-reader.mode-dark .pdfm-sidebar {
+        background: #0f172a;
+        border-left-color: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .libdesk-reader.mode-dark .pdfm-sb-body {
+        color: #e2e8f0;
+    }
+
+    .libdesk-reader.mode-dark .pdfm-sb-row:hover {
+        background: #1e293b;
+    }
+
+    .libdesk-reader.mode-dark .pdfm-sb-snippet {
+        color: #e2e8f0;
+    }
+
+    .libdesk-reader.mode-dark .pdfm-toolbar {
+        background: #0f172a;
+        border-top-color: #1e293b;
+    }
+
+    /* Narrower desktops: drop the page navigator, keep the notes rail
+       (the rail is the feature that matters — reading + your notes at
+       once). The nav rail's job is covered by the toolbar's goto. */
+    @media (max-width: 1279px) {
+        .libdesk-reader#pdfm-wrap {
+            grid-template-columns: minmax(0, 1fr) var(--ld-rail-w);
+            grid-template-areas:
+                "top   top"
+                "stage rail"
+                "tool  tool";
+        }
+
+        .libdesk-nav {
+            display: none;
+        }
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       D · NOTEBOOK SHELF
+       Wider multi-column shelf of spines + inline add tile.
+       ════════════════════════════════════════════════════════════ */
+    .libdesk-nbshelf {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+    }
+
+    .libdesk-nbshelf .nb-card {
+        min-height: 172px;
+        border-radius: var(--ld-radius);
+        padding: 20px;
+        transition: border-color .16s, box-shadow .16s, transform .12s;
+    }
+
+    .libdesk-nbshelf .nb-card:hover {
+        box-shadow: var(--ld-shadow-lift);
+        transform: translateY(-2px);
+    }
+
+    .libdesk-nbshelf .nb-card h4 {
+        font-size: 1.05rem;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       E · NOTEBOOK DETAIL
+       Two columns: sticky summary + Download on the left, the note
+       stream as a wide readable column on the right. Reuses .nb-page
+       and noteEntryHtml() markup verbatim.
+       ════════════════════════════════════════════════════════════ */
+    .libdesk-nbdetail {
+        display: grid;
+        grid-template-columns: 300px minmax(0, 1fr);
+        gap: 32px;
+        align-items: start;
+    }
+
+    .libdesk-nbside {
+        position: sticky;
+        top: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .libdesk-nbsummary {
+        background: var(--ld-card);
+        border: 1px solid var(--ld-line);
+        border-radius: var(--ld-radius);
+        padding: 22px;
+        box-shadow: var(--ld-shadow);
+    }
+
+    .libdesk-nbsummary h2 {
+        font-family: var(--font-display);
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--ld-ink);
+        line-height: 1.25;
+    }
+
+    .libdesk-nbsummary p {
+        color: var(--ld-muted);
+        font-size: .82rem;
+        margin-top: 6px;
+    }
+
+    .libdesk-nbstats {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    .libdesk-nbstat {
+        flex: 1;
+        background: var(--g50);
+        border-radius: 11px;
+        padding: 11px 12px;
+        text-align: center;
+    }
+
+    .libdesk-nbstat b {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--ld-ink);
+    }
+
+    .libdesk-nbstat span {
+        font-size: .64rem;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        color: var(--ld-muted);
+    }
+
+    .libdesk-nbactions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .libdesk-nbactions .nb-download-btn {
+        flex: 1;
+        justify-content: center;
+        min-height: 46px;
+    }
+
+    /* The ruled page: wider, no artificial phone width. */
+    .libdesk-nbstream .nb-page {
+        border-radius: var(--ld-radius);
+        box-shadow: var(--ld-shadow);
+    }
+
+    .libdesk-nbstream .nb-note-entry {
+        transition: box-shadow .16s;
+    }
+
+    .libdesk-nbstream .nb-note-entry:hover {
+        box-shadow: var(--ld-shadow);
+    }
+
+    /* Tag filter chips (desktop-only affordance, reuses NOTE_TAG_META
+       colours passed in as --tag). */
+    .libdesk-tagfilter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+
+    .libdesk-tagchip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--ld-line);
+        background: var(--ld-card);
+        color: var(--ld-muted);
+        font-family: var(--font-body);
+        font-size: .76rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: border-color .14s, color .14s, background .14s;
+    }
+
+    .libdesk-tagchip:hover {
+        border-color: var(--g200);
+        color: var(--ld-ink);
+    }
+
+    .libdesk-tagchip.on {
+        background: var(--tag, var(--ld-ink));
+        border-color: var(--tag, var(--ld-ink));
+        color: #fff;
+    }
+
+    /* Narrower desktops: collapse the notebook detail to one column. */
+    @media (max-width: 1179px) {
+        .libdesk-nbdetail {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 20px;
+        }
+
+        .libdesk-nbside {
+            position: static;
+        }
+
+        .libdesk-nbshelf {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .libdesk-subjboard {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+}

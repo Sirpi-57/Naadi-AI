@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" data-bars="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NAADI AI — Ops Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <style>
+        /* Self-contained: the login must render even if the app sheets move. */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'DM Sans', sans-serif;
+            background:
+                radial-gradient(90% 70% at 50% 0%, #10233f 0%, #0B1220 62%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 20px;
+        }
+
+        .al-card {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, .035);
+            border: 1px solid rgba(255, 255, 255, .09);
+            border-radius: 22px;
+            padding: 34px 32px 30px;
+            backdrop-filter: blur(6px);
+        }
+
+        .al-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .al-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            background: #0f1e33;
+            border: 1px solid rgba(125, 179, 236, .35);
+            display: grid;
+            place-items: center;
+            color: #7db3ec;
+            font-size: 1.05rem;
+        }
+
+        .al-brand b {
+            font-family: 'Sora', sans-serif;
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: #fff;
+            letter-spacing: .3px;
+        }
+
+        .al-brand b span {
+            color: #7db3ec;
+        }
+
+        .al-brand small {
+            display: block;
+            font-size: .64rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: #5a7089;
+            font-weight: 700;
+            margin-top: 3px;
+        }
+
+        .al-note {
+            font-size: .78rem;
+            color: #8fa3ba;
+            line-height: 1.55;
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            font-size: .66rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #5a7089;
+            margin: 14px 0 6px;
+        }
+
+        input {
+            width: 100%;
+            min-height: 46px;
+            border-radius: 11px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(11, 18, 32, .7);
+            color: #eaf1f9;
+            padding: 0 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+            outline: none;
+            transition: border-color .16s;
+        }
+
+        input:focus {
+            border-color: #5d92cf;
+        }
+
+        .al-btn {
+            width: 100%;
+            min-height: 48px;
+            margin-top: 22px;
+            border: 0;
+            border-radius: 12px;
+            background: #2f6cb3;
+            color: #fff;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .92rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: filter .16s;
+        }
+
+        .al-btn:hover:not(:disabled) {
+            filter: brightness(1.08);
+        }
+
+        .al-btn:disabled {
+            opacity: .55;
+            cursor: wait;
+        }
+
+        .al-err {
+            display: none;
+            margin-top: 14px;
+            padding: 11px 13px;
+            border-radius: 10px;
+            background: rgba(196, 61, 61, .14);
+            border: 1px solid rgba(196, 61, 61, .4);
+            color: #f0b3b3;
+            font-size: .78rem;
+            line-height: 1.5;
+        }
+
+        .al-err.show {
+            display: block;
+        }
+
+        .al-foot {
+            margin-top: 20px;
+            text-align: center;
+            font-size: .72rem;
+            color: #5a7089;
+        }
+
+        .al-foot a {
+            color: #7db3ec;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="al-card">
+        <div class="al-brand">
+            <div class="al-logo"><i class="fa-solid fa-brain"></i></div>
+            <div>
+                <b>NAADI <span>OPS</span></b>
+                <small>Admin console</small>
+            </div>
+        </div>
+        <p class="al-note">Restricted door. Admin accounts are granted server-side —
+            a student, teacher, or parent login will be turned away here even with
+            a correct password.</p>
+
+        <label for="al-email">Email</label>
+        <input id="al-email" type="email" autocomplete="username" placeholder="you@naadi.ai">
+
+        <label for="al-pass">Password</label>
+        <input id="al-pass" type="password" autocomplete="current-password" placeholder="••••••••"
+            onkeydown="if(event.key==='Enter')alSignIn()">
+
+        <button class="al-btn" id="al-btn" onclick="alSignIn()">
+            <i class="fa-solid fa-lock-open"></i>&nbsp; Enter console
+        </button>
+
+        <div class="al-err" id="al-err"></div>
+
+        <div class="al-foot">Not an admin? <a href="login.html">Go to the app login</a></div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const $al = id => document.getElementById(id);
+
+        function alFail(msg) {
+            const e = $al('al-err');
+            e.textContent = msg;
+            e.classList.add('show');
+            $al('al-btn').disabled = false;
+        }
+
+        async function alGate() {
+            /* Signed in — but is this an admin? The server decides. */
+            try {
+                await apiCall('/api/admin/whoami');
+                location.replace('ops.html');
+            } catch (err) {
+                await auth.signOut();
+                alFail(err.message && err.message.includes('Not permitted')
+                    ? 'This account exists, but it is not an admin account.'
+                    : (err.message || 'Could not verify this account.'));
+            }
+        }
+
+        async function alSignIn() {
+            $al('al-err').classList.remove('show');
+            const email = $al('al-email').value.trim();
+            const pass = $al('al-pass').value;
+            if (!email || !pass) return alFail('Email and password, both.');
+            $al('al-btn').disabled = true;
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
+                await alGate();
+            } catch (err) {
+                const code = err.code || '';
+                alFail(code.includes('wrong-password') || code.includes('invalid-credential')
+                    ? 'Wrong email or password.'
+                    : code.includes('user-not-found')
+                        ? 'No account with that email.'
+                        : (err.message || 'Sign-in failed.'));
+            }
+        }
+
+        /* Already signed in from a previous session? Gate straight through. */
+        auth.onAuthStateChanged(u => { if (u) alGate(); });
+    </script>
+</body>
+
+</html>

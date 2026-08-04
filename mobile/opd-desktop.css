@@ -1,0 +1,859 @@
+@media (min-width: 1024px) {
+
+    /* ════════════════════════════════════════════════════════════════
+       NAADI AI — OPD DESKTOP ADAPTATION LAYER  (opd-desktop.css)
+       ─────────────────────────────────────────────────────────────────
+       Desktop-native (≥1024px) presentation for the entire OPD section:
+       hub · chapter case-file · results dashboard · past-test analysis ·
+       V3 intervention cascade modal. The in-test screen (view-opd-test)
+       is styled by arena-desktop.css and is NOT touched here.
+
+       MOBILE-SAFETY CONTRACT (identical to arena-desktop.css):
+         • The FIRST non-comment token in this file is the @media query
+           above, so every rule lives inside (min-width:1024px).
+         • app.html ALSO loads this with media="(min-width:1024px)", so a
+           phone never even applies the sheet.
+         • Selectors are namespaced `opddesk-` so they can NEVER collide
+           with the ~170 mobile opd- / te- / omr- / ph- / pv2- classes.
+           Where a mobile class is reused (opd-case-row, opd-tile,
+           opd-concept-row, opd-fchip, opd-int-*, omr-m-*, ph-chip) it is
+           ONLY ever styled *scoped inside* an opddesk- container — never
+           at its own specificity.
+         • Delete this file + the one <link>/<script> line in app.html and
+           the mobile app is byte-for-byte identical.
+
+       Tokens: reuses the global --g* / --s* / --font-* / --amber / --red /
+       --green-600 from styles-mobile.css (always loaded). A few local
+       --od-* tokens are defined here, scoped, no global collision.
+       ════════════════════════════════════════════════════════════════ */
+
+    :root {
+        --od-line: #e2e8f0;
+        --od-card: #ffffff;
+        --od-navy: #0b1220;
+        --od-ink: #0f172a;
+        --od-muted: #64748b;
+        --od-radius: 16px;
+        --od-gap: 22px;
+        --od-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px -12px rgba(15, 23, 42, .12);
+        --od-shadow-lift: 0 14px 40px -16px rgba(15, 23, 42, .28);
+    }
+
+    /* ── 0 · PAGE FRAME ────────────────────────────────────────────
+       Every OPD desktop screen sits in the 248px-offset main column
+       (styles-desktop.css handles .m-main). We give it a wide surface
+       and a comfortable page gutter — SUPERSEDING the 880/760px
+       .m-picker-wrap caps. Our screens never use .m-picker-wrap, so
+       there's no double-constraint; the id-scoped overrides below just
+       neutralise the cap if a mobile wrapper ever slips through. */
+    .opddesk-page {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 26px 40px 72px;
+    }
+
+    /* Defensive: if any OPD view still contains a .m-picker-wrap (it
+       won't, on desktop, because our overrides replace the renderers),
+       release the styles-desktop.css cap so nothing looks
+       double-constrained. Higher specificity (id + descendant). */
+    #view-opd .opddesk-page .m-picker-wrap,
+    #view-opd-chapter .opddesk-page .m-picker-wrap,
+    #view-opd-results .opddesk-page .m-picker-wrap,
+    #view-opd-analysis .opddesk-page .m-picker-wrap {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .opddesk-backbar {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--od-line);
+        background: #fff;
+        border-radius: 10px;
+        padding: 9px 15px;
+        font-family: var(--font-display);
+        font-size: .82rem;
+        font-weight: 600;
+        color: var(--s600);
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+
+    .opddesk-backbar:hover {
+        border-color: var(--g400);
+        color: var(--g600);
+    }
+
+    .opddesk-seclabel {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-family: var(--font-display);
+        font-size: .82rem;
+        font-weight: 700;
+        letter-spacing: .02em;
+        color: var(--s600);
+        text-transform: uppercase;
+        margin: 22px 0 12px;
+    }
+
+    .opddesk-seclabel i {
+        color: var(--g500);
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       A · HUB
+       ════════════════════════════════════════════════════════════════ */
+
+    .opddesk-hero {
+        background: var(--od-navy);
+        border-radius: 20px;
+        padding: 30px 34px;
+        color: #e2e8f0;
+        margin-bottom: 22px;
+    }
+
+    .opddesk-hero-kicker {
+        font-family: var(--font-display);
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        color: #7fb0e6;
+        margin-bottom: 10px;
+    }
+
+    .opddesk-hero h1 {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 8px;
+        line-height: 1.05;
+    }
+
+    .opddesk-hero p {
+        font-size: .95rem;
+        color: #94a3b8;
+        margin: 0;
+        max-width: 60ch;
+    }
+
+    /* Sticky toolbar */
+    .opddesk-toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 6;
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+        background: var(--s50);
+        padding: 12px 0 14px;
+        margin-bottom: 6px;
+    }
+
+    /* Class 11 / 12 segmented control — hoisted out of the subject cards
+       into the toolbar so it filters the whole board at once (mirrors the
+       mobile .opd-classseg and Concept Studio's .cs2-seg). */
+    .opddesk-classseg {
+        position: relative;
+        display: flex;
+        flex: 0 0 auto;
+        background: var(--s100);
+        border-radius: 12px;
+        padding: 3px;
+    }
+
+    .opddesk-classseg-ind {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: calc(50% - 3px);
+        height: calc(100% - 6px);
+        background: #fff;
+        border-radius: 9px;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, .1);
+        transition: transform .24s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .opddesk-classseg-ind.right {
+        transform: translateX(100%);
+    }
+
+    .opddesk-classseg button {
+        position: relative;
+        z-index: 1;
+        border: none;
+        background: none;
+        padding: 9px 22px;
+        font-family: var(--font-display);
+        font-size: .8rem;
+        font-weight: 600;
+        color: var(--s600);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: color .2s;
+    }
+
+    .opddesk-classseg button.on {
+        color: var(--s900);
+        font-weight: 700;
+    }
+
+
+    .opddesk-search {
+        position: relative;
+        flex: 1;
+        min-width: 320px;
+        display: flex;
+        align-items: center;
+    }
+
+    .opddesk-search>i {
+        position: absolute;
+        left: 16px;
+        color: var(--s400);
+        font-size: .95rem;
+        pointer-events: none;
+    }
+
+    .opddesk-search input {
+        width: 100%;
+        border: 1px solid var(--od-line);
+        border-radius: 12px;
+        background: #fff;
+        padding: 13px 44px 13px 42px;
+        font-family: var(--font-body);
+        font-size: .95rem;
+        color: var(--s800);
+        transition: border-color .16s, box-shadow .16s;
+    }
+
+    .opddesk-search input:focus {
+        outline: none;
+        border-color: var(--g400);
+        box-shadow: 0 0 0 3px var(--g50);
+    }
+
+    .opddesk-search-clear {
+        position: absolute;
+        right: 10px;
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--s400);
+        cursor: pointer;
+        display: none;
+    }
+
+    .opddesk-search-clear.show {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .opddesk-search-clear:hover {
+        background: var(--s100);
+        color: var(--s600);
+    }
+
+    .opddesk-filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* opd-fchip is a mobile class — styled ONLY here, scoped inside the
+       desktop toolbar, so the mobile chip is untouched at its own
+       specificity. Same for the review filters further down. */
+    .opddesk-toolbar .opd-fchip,
+    .opddesk-results .opd-fchip {
+        border: 1px solid var(--od-line);
+        background: #fff;
+        border-radius: 999px;
+        padding: 9px 16px;
+        font-family: var(--font-display);
+        font-size: .8rem;
+        font-weight: 600;
+        color: var(--s600);
+        cursor: pointer;
+        transition: border-color .16s, background .16s, color .16s;
+    }
+
+    .opddesk-toolbar .opd-fchip:hover,
+    .opddesk-results .opd-fchip:hover {
+        border-color: var(--g400);
+    }
+
+    .opddesk-toolbar .opd-fchip.on,
+    .opddesk-results .opd-fchip.on {
+        background: var(--s900);
+        border-color: var(--s900);
+        color: #fff;
+    }
+
+    /* Subject board — 1 / 2 / 3 columns responsive */
+    .opddesk-board {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--od-gap);
+        align-items: start;
+        margin-top: 10px;
+    }
+
+    .opddesk-subject {
+        background: var(--od-card);
+        border: 1px solid var(--od-line);
+        border-radius: var(--od-radius);
+        padding: 18px;
+        box-shadow: var(--od-shadow);
+    }
+
+    .opddesk-subject-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .opddesk-subject-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 11px;
+        background: var(--g50);
+        color: var(--g600);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        flex-shrink: 0;
+    }
+
+    .opddesk-subject-title {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .opddesk-subject-title h3 {
+        font-family: var(--font-display);
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: var(--s900);
+        margin: 0;
+        line-height: 1.15;
+    }
+
+    .opddesk-subject-title em {
+        font-style: normal;
+        font-size: .76rem;
+        color: var(--s500);
+    }
+
+    .opddesk-subject-pct {
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .opddesk-subject-pct b {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--g600);
+        line-height: 1;
+    }
+
+    .opddesk-subject-pct em {
+        font-style: normal;
+        font-size: .62rem;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: var(--s400);
+    }
+
+    .opddesk-subject-bar {
+        height: 6px;
+        border-radius: 6px;
+        background: var(--s100);
+        overflow: hidden;
+        margin-bottom: 14px;
+    }
+
+    .opddesk-subject-bar>div {
+        height: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, var(--g500), var(--g400));
+        transition: width .7s cubic-bezier(.2, .7, .2, 1);
+    }
+
+    .opddesk-subject-toggle {
+        margin-bottom: 12px;
+    }
+
+    /* Case grid: a comfortable stack inside each card, and the rows
+       themselves reuse the mobile opd-case-row markup (scoped). */
+    .opddesk-casegrid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* opd-case-row is mobile — restyled only within our grid. */
+    .opddesk-casegrid .opd-case-row {
+        transition: border-color .16s, box-shadow .16s, transform .12s;
+    }
+
+    .opddesk-casegrid .opd-case-row:not(.locked):hover {
+        border-color: var(--g200);
+        box-shadow: 0 6px 18px -10px rgba(23, 63, 111, .3);
+        transform: translateY(-1px);
+    }
+
+    /* Search results laid out wide */
+    .opddesk-searchcount {
+        font-family: var(--font-display);
+        font-size: .84rem;
+        font-weight: 600;
+        color: var(--s500);
+        margin: 8px 0 12px;
+    }
+
+    .opddesk-searchwrap {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .opddesk-searchgroup .opd-class-label {
+        margin-bottom: 10px;
+    }
+
+    .opddesk-searchgroup .opddesk-casegrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       B · CHAPTER / CASE-FILE — two-pane
+       ════════════════════════════════════════════════════════════════ */
+
+    .opddesk-chapter-grid {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        gap: 28px;
+        align-items: start;
+    }
+
+    .opddesk-chapter-side {
+        position: sticky;
+        top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .opddesk-chapter-main {
+        min-width: 0;
+    }
+
+    .opddesk-chapter-head {
+        background: var(--od-card);
+        border: 1px solid var(--od-line);
+        border-radius: var(--od-radius);
+        padding: 22px;
+        box-shadow: var(--od-shadow);
+    }
+
+    .opddesk-chapter-head h2 {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--s900);
+        margin: 0 0 6px;
+        line-height: 1.1;
+    }
+
+    .opddesk-chapter-head>p {
+        font-size: .85rem;
+        color: var(--s500);
+        margin: 0 0 16px;
+    }
+
+    .opddesk-chapter-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .opddesk-chapter-stats>div {
+        background: var(--s50);
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+    }
+
+    .opddesk-chapter-stats b {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--s900);
+        line-height: 1;
+    }
+
+    .opddesk-chapter-stats span {
+        display: block;
+        margin-top: 6px;
+        font-size: .68rem;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: var(--s400);
+    }
+
+    /* The hero action card (opd-hero, mobile) sits in the sticky side
+       column. It's reused verbatim; here we just make sure it fills the
+       column and reads on the light surface. Scoped to our side column
+       so the mobile hero is untouched. */
+    .opddesk-chapter-side .opd-hero {
+        margin: 0;
+    }
+
+    /* Journey: reuse renderOpdJourney markup (opd-journey-*). On desktop
+       let the phase rows wrap into a comfortable tile grid instead of a
+       horizontal scroller. Scoped to .opddesk-journey. */
+    .opddesk-journey .opd-journey-scroll {
+        overflow: visible;
+    }
+
+    .opddesk-journey .opd-journey-row {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    /* opd-tile hover lift (mobile class, scoped) */
+    .opddesk-journey .opd-tile:hover,
+    .opddesk-chapter-main .opd-tile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -8px rgba(23, 63, 111, .28);
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       C · RESULTS DASHBOARD + ANALYSIS
+       ════════════════════════════════════════════════════════════════ */
+
+    .opddesk-res-grid {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        gap: 26px;
+        align-items: start;
+    }
+
+    .opddesk-res-summary {
+        position: sticky;
+        top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .opddesk-res-main {
+        min-width: 0;
+    }
+
+    /* Score hero on a dark card. Reuses opdScoreRing (opd-ring SVG) — we
+       recolour the ring for the dark surface, scoped so the mobile
+       light-card ring is untouched. */
+    .opddesk-res-hero {
+        background: var(--od-navy);
+        border-radius: 18px;
+        padding: 26px;
+        color: #e2e8f0;
+        text-align: center;
+    }
+
+    .opddesk-res-hero .opd-res-phase {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        font-size: .82rem;
+        color: #94a3b8;
+        margin-bottom: 16px;
+    }
+
+    .opddesk-res-hero .opd-res-ringwrap {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 14px;
+    }
+
+    .opddesk-res-hero .opd-ring {
+        width: 150px;
+        height: 150px;
+    }
+
+    /* Ring recolour for dark — scoped to the dark hero only. The mobile
+       opdScoreRing draws .opd-ring-track / .opd-ring-arc / .opd-ring-tick.
+       Track → faint white; the "%" centre label lives in the HTML
+       (.opd-res-ringinner) so no SVG text recolour needed. */
+    .opddesk-res-hero .opd-ring-track {
+        stroke: rgba(255, 255, 255, .16);
+    }
+
+    .opddesk-res-hero .opd-ring-tick {
+        stroke: #fbbf24;
+    }
+
+    /* arc colour by tone, bright against navy */
+    .opddesk-res-hero.good .opd-ring-arc {
+        stroke: #4ade80;
+    }
+
+    .opddesk-res-hero.warm .opd-ring-arc {
+        stroke: #fbbf24;
+    }
+
+    .opddesk-res-hero.bad .opd-ring-arc {
+        stroke: #f87171;
+    }
+
+    .opddesk-res-hero .opd-res-ringinner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .opddesk-res-hero .opd-res-ringinner b {
+        font-family: var(--font-display);
+        font-size: 2.1rem;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1;
+    }
+
+    .opddesk-res-hero .opd-res-ringinner span {
+        margin-top: 4px;
+        font-size: .84rem;
+        color: #94a3b8;
+    }
+
+    .opddesk-res-hero .opd-res-line {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .opddesk-res-hero .opd-res-passline {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: .78rem;
+        color: #cbd5e1;
+        background: rgba(255, 255, 255, .08);
+        border-radius: 999px;
+        padding: 5px 12px;
+    }
+
+    /* delta chip (opd-delta) reads on dark */
+    .opddesk-res-hero .opd-delta {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: .78rem;
+        font-weight: 600;
+    }
+
+    .opddesk-res-hero .opd-delta.up {
+        color: #4ade80;
+    }
+
+    .opddesk-res-hero .opd-delta.down {
+        color: #f87171;
+    }
+
+    .opddesk-res-hero .opd-delta.flat {
+        color: #cbd5e1;
+    }
+
+    .opddesk-res-hero .opd-res-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin: 10px 0 4px;
+    }
+
+    .opddesk-res-hero .opd-res-meta {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(255, 255, 255, .1);
+    }
+
+    /* opd-res-meta children have 2 or 3 cells depending on analysis */
+    .opddesk-res-hero .opd-res-meta>div {
+        text-align: center;
+    }
+
+    .opddesk-res-hero .opd-res-meta b {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1;
+    }
+
+    .opddesk-res-hero .opd-res-meta span {
+        display: block;
+        margin-top: 5px;
+        font-size: .64rem;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #64748b;
+    }
+
+    /* The outcome host keeps its id (#opd-res-outcome) and holds the
+       mobile opd-hero card — reused verbatim, refreshed in place. */
+    #opd-res-outcome .opd-hero {
+        margin: 0;
+    }
+
+    /* review filters spacing in the main column */
+    .opddesk-res-main .opd-revfilters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       D · V3 INTERVENTION CASCADE — centred desktop modal.
+       The overlay/card/rail/content ids are the SAME as mobile; opdIntSwap
+       / opdIntRail / every step renderer keep working. We only restyle the
+       overlay shell (scoped to .opddesk-int-modal) into a wide, centred,
+       two-column card with the progress rail as a real left side rail.
+       Step INTERNALS reuse the mobile opd-int-* markup verbatim.
+       ════════════════════════════════════════════════════════════════ */
+
+    /* Only when our JS tagged the overlay .opddesk-int-modal (desktop).
+       If the mobile overlay ever exists without the tag (it won't, on
+       desktop, since we override the builder), the mobile CSS applies. */
+    .opd-int-overlay.opddesk-int-modal {
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+    }
+
+    .opddesk-int-modal .opd-int-card {
+        width: min(920px, 94vw);
+        max-width: 920px;
+        max-height: 88vh;
+        border-radius: 22px;
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        overflow: hidden;
+        box-shadow: 0 30px 90px -24px rgba(15, 23, 42, .55);
+    }
+
+    /* Rail becomes a real vertical side rail */
+    .opddesk-int-modal .opd-int-rail {
+        background: var(--od-navy);
+        color: #e2e8f0;
+        padding: 26px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .opddesk-int-modal .opd-int-rail .opd-int-segs {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .opddesk-int-modal .opd-int-rail .opd-int-seg {
+        height: 8px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, .14);
+        width: 100%;
+    }
+
+    .opddesk-int-modal .opd-int-rail .opd-int-seg.done {
+        background: #4ade80;
+    }
+
+    .opddesk-int-modal .opd-int-rail .opd-int-seg.now {
+        background: #5d92cf;
+    }
+
+    .opddesk-int-modal .opd-int-rail .opd-int-railtext {
+        font-family: var(--font-display);
+        font-size: .82rem;
+        font-weight: 600;
+        color: #94a3b8;
+        margin-top: 6px;
+    }
+
+    /* Content column: comfortable reading width + its own scroll */
+    .opddesk-int-modal #opd-int-content {
+        padding: 30px 34px;
+        overflow-y: auto;
+        max-height: 88vh;
+    }
+
+    /* Options can sit in two columns when they're short — but keep them
+       single-column for readability of long NEET options. We leave the
+       mobile opd-int-opt layout intact (scoped hover only). */
+    .opddesk-int-modal .opd-int-opt {
+        transition: border-color .16s, background .16s;
+    }
+
+    .opddesk-int-modal .opd-int-opt:hover {
+        border-color: var(--g400);
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       RESPONSIVE — 1024–1200px: collapse the two-pane layouts so the
+       narrower desktop window doesn't cramp. Nothing here leaks below
+       1024px (whole file is inside the outer @media).
+       ════════════════════════════════════════════════════════════════ */
+    @media (max-width: 1200px) {
+        .opddesk-board {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .opddesk-chapter-grid,
+        .opddesk-res-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .opddesk-chapter-side,
+        .opddesk-res-summary {
+            position: static;
+        }
+
+        .opddesk-searchgroup .opddesk-casegrid {
+            grid-template-columns: 1fr;
+        }
+
+        .opddesk-int-modal .opd-int-card {
+            grid-template-columns: 210px 1fr;
+        }
+    }
+}

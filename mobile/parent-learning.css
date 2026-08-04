@@ -1,0 +1,864 @@
+/* ══════════════════════════════════════════════════════════════════
+   NAADI AI — PARENT LEARNING  (parent-learning.css)
+   ───────────────────────────────────────────────────────────────────
+   Pairs with parent-learning.js. Loaded after portal-desktop.css so it
+   can override the flat two-column auto-flow grid that file forces onto
+   every parent tab body.
+
+   THE DETAIL PANEL IS ONE COMPONENT
+
+   Docked as a sticky right-hand column above 1024px; a fixed bottom
+   sheet below it. Same markup either way. Building it twice is how the
+   two versions drift until one of them shows the wrong chapter.
+
+   THE MAP CARRIES NO NUMBERS
+
+   Tiles are state only. That is what lets eighty-three chapters stay
+   scannable — a parent is looking for one chapter by name, not reading
+   eighty-three percentages.
+
+   ───────────────────────────────────────────────────────────────────
+   WHY THE PREFIX IS `pal-`
+
+   `ph-` belongs to the student app's Arena screens in
+   styles-mobile.css. `pah-` is the parent Home tab. `pal-` is checked
+   clean across every stylesheet portal.html loads. Sharing a prefix
+   across two pages in one document is the CSS version of a duplicate
+   Flask route: wrong output, no error, found in production.
+   ══════════════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════════════════
+   1 · SHELL
+   ══════════════════════════════════════════════════════════════════ */
+
+.pal-grid,
+.pal-band,
+.pal-row {
+    display: contents;
+}
+
+/* No height limit on a phone: the page scrolls, as it always did. The
+   cap arrives only at the desktop breakpoint. */
+.pal-map-scroll {
+    display: block;
+}
+
+.pal-sec {
+    margin: 12px 0 0;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   2 · THE (i) BUTTON — same contract as the Home tab
+   ══════════════════════════════════════════════════════════════════ */
+
+.pal-sec-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pal-sec-t {
+    min-width: 0;
+}
+
+.pal-i {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--s300);
+    background: #fff;
+    color: var(--s500);
+    font-size: .62rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.pal-i[aria-expanded="true"] {
+    background: var(--g600);
+    border-color: var(--g600);
+    color: #fff;
+}
+
+.pal-info {
+    margin: 10px 0 2px;
+    padding: 11px 13px;
+    background: var(--g50);
+    border: 1px solid var(--g100);
+    border-radius: 10px;
+}
+
+.pal-info-h {
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--g600);
+}
+
+.pal-info p {
+    margin: 5px 0 0;
+    font-size: .78rem;
+    line-height: 1.6;
+    color: var(--s700);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   3 · FILTERS
+   ══════════════════════════════════════════════════════════════════ */
+
+.pal-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 12px 0 4px;
+}
+
+.pal-pill {
+    padding: 6px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--s200);
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: .74rem;
+    font-weight: 600;
+    color: var(--s600);
+    cursor: pointer;
+}
+
+.pal-pill.on {
+    background: var(--g600);
+    border-color: var(--g600);
+    color: #fff;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   4 · THE MAP
+
+   auto-fill with a minimum, so the tile count per row follows the
+   viewport with no breakpoint list to maintain: about three on a
+   phone, six to eight on a laptop.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pal-group {
+    margin-top: 16px;
+}
+
+.pal-group-h {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.pal-group-h b {
+    font-size: .82rem;
+    color: var(--s800);
+    margin-left: 6px;
+}
+
+.pal-group-h em {
+    font-style: normal;
+    font-size: .62rem;
+    font-weight: 600;
+    color: var(--g600);
+    margin-left: 5px;
+}
+
+.pal-group-n {
+    flex: 0 0 auto;
+    font-size: .7rem;
+    color: var(--s500);
+}
+
+.pal-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: 6px;
+}
+
+.pal-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-height: 52px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--s200);
+    background: var(--s50);
+    text-align: left;
+    font-family: var(--font-body);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.pal-tile-n {
+    font-size: .58rem;
+    font-weight: 700;
+    color: var(--s400);
+}
+
+.pal-tile-t {
+    font-size: .68rem;
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--s700);
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* State is carried by colour AND by the tile's own label in the title
+   attribute, so it is not colour-only information. */
+.pal-tile.finished {
+    background: #e8f5ec;
+    border-color: #b6dcc4;
+}
+
+.pal-tile.finished .pal-tile-t {
+    color: #1c6b3a;
+}
+
+.pal-tile.testing {
+    background: var(--g50);
+    border-color: var(--g100);
+}
+
+.pal-tile.testing .pal-tile-t {
+    color: var(--g700);
+}
+
+.pal-tile.read_only {
+    background: #fdf4e3;
+    border-color: #ecd9a8;
+}
+
+.pal-tile.read_only .pal-tile-t {
+    color: #8a5a09;
+}
+
+.pal-tile.reading {
+    background: #fff;
+    border-color: var(--s300);
+}
+
+.pal-tile.not_started {
+    background: var(--s100);
+    border-color: var(--s200);
+}
+
+.pal-tile.not_started .pal-tile-n,
+.pal-tile.not_started .pal-tile-t {
+    color: var(--s400);
+}
+
+.pal-tile.on {
+    outline: 2px solid var(--g600);
+    outline-offset: 1px;
+}
+
+.pal-key {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 3px;
+    flex: 0 0 auto;
+}
+
+.pal-key.finished {
+    background: #2f9e5f;
+}
+
+.pal-key.testing {
+    background: var(--g500);
+}
+
+.pal-key.read_only {
+    background: #e2b13c;
+}
+
+.pal-key.reading {
+    background: var(--s400);
+}
+
+.pal-key.not_started {
+    background: var(--s200);
+}
+
+.pal-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 14px;
+    padding-top: 11px;
+    border-top: 1px solid var(--s100);
+    font-size: .66rem;
+    color: var(--s500);
+}
+
+.pal-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pal-tag {
+    flex: 0 0 auto;
+    font-size: .6rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--s100);
+    color: var(--s600);
+}
+
+.pal-tag.bio {
+    background: #e8f5ec;
+    color: #1c6b3a;
+}
+
+.pal-tag.phy {
+    background: #eaf1fb;
+    color: var(--g700);
+}
+
+.pal-tag.chem {
+    background: #fdeee6;
+    color: #9c4a1a;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   5 · OPEN RIGHT NOW
+   ══════════════════════════════════════════════════════════════════ */
+
+.pal-open-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: 100%;
+    padding: 11px 0;
+    border: 0;
+    border-bottom: 1px solid var(--s100);
+    background: none;
+    text-align: left;
+    font-family: var(--font-body);
+    cursor: pointer;
+}
+
+.pal-open-row:last-child {
+    border-bottom: 0;
+}
+
+.pal-open-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.pal-open-t {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: .84rem;
+    font-weight: 600;
+    color: var(--s800);
+}
+
+.pal-open-s {
+    margin-top: 3px;
+    font-size: .73rem;
+    line-height: 1.4;
+    color: var(--s500);
+}
+
+.pal-open-r {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--s300);
+    font-size: .72rem;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   6 · TIME
+   ══════════════════════════════════════════════════════════════════ */
+
+.pal-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 118px;
+    margin-top: 14px;
+}
+
+.pal-barcol {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.pal-bar-track {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+}
+
+.pal-bar-track i {
+    display: block;
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: var(--g500);
+}
+
+.pal-barcol span {
+    margin-top: 6px;
+    font-size: .58rem;
+    color: var(--s400);
+    white-space: nowrap;
+}
+
+.pal-bars-k {
+    margin-top: 8px;
+    font-size: .66rem;
+    color: var(--s400);
+}
+
+.pal-cards-line {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--s100);
+    font-size: .76rem;
+    line-height: 1.5;
+    color: var(--s600);
+}
+
+.pal-cards-line b {
+    color: var(--s800);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   7 · THE DETAIL PANEL — mobile: a bottom sheet
+   ══════════════════════════════════════════════════════════════════ */
+
+.pal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 59;
+    background: rgba(15, 23, 42, .38);
+}
+
+.pal-detail {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    max-height: 76vh;
+    overflow-y: auto;
+    margin: 0;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, .18);
+    padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+}
+
+.pal-d-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--s100);
+}
+
+.pal-d-title {
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+}
+
+.pal-d-title h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--s900);
+    line-height: 1.2;
+}
+
+.pal-d-yr {
+    font-size: .66rem;
+    color: var(--s500);
+}
+
+.pal-close {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--s200);
+    background: #fff;
+    color: var(--s500);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pal-d-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 12px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: var(--s100);
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--s700);
+}
+
+.pal-d-block {
+    margin-top: 15px;
+    padding-top: 13px;
+    border-top: 1px solid var(--s100);
+}
+
+.pal-d-block:first-of-type {
+    border-top: 0;
+}
+
+.pal-d-k {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--s500);
+}
+
+.pal-d-bar {
+    height: 8px;
+    margin: 9px 0 8px;
+    border-radius: 999px;
+    background: var(--s100);
+    overflow: hidden;
+}
+
+.pal-d-bar i {
+    display: block;
+    height: 100%;
+}
+
+.pal-d-bar i.read {
+    background: #e2b13c;
+}
+
+.pal-d-bar i.test {
+    background: var(--g500);
+}
+
+.pal-d-line {
+    margin-top: 5px;
+    font-size: .8rem;
+    line-height: 1.5;
+    color: var(--s700);
+}
+
+.pal-d-line b {
+    color: var(--s900);
+    font-weight: 700;
+}
+
+.pal-d-line.quiet {
+    color: var(--s500);
+    font-size: .76rem;
+}
+
+.pal-d-note {
+    margin-top: 8px;
+    padding: 9px 11px;
+    background: var(--s50);
+    border-radius: 9px;
+    font-size: .74rem;
+    line-height: 1.5;
+    color: var(--s600);
+}
+
+.pal-d-stage {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 9px 11px;
+    background: var(--g50);
+    border-radius: 9px;
+    font-size: .76rem;
+    font-weight: 600;
+    color: var(--g700);
+}
+
+.pal-hist {
+    margin-top: 9px;
+}
+
+.pal-hrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--s100);
+    font-size: .76rem;
+}
+
+.pal-hrow:last-child {
+    border-bottom: 0;
+}
+
+.pal-hday {
+    flex: 0 0 58px;
+    color: var(--s500);
+    font-weight: 600;
+}
+
+.pal-hmain {
+    flex: 1;
+    min-width: 0;
+    color: var(--s700);
+}
+
+.pal-hpct {
+    flex: 0 0 auto;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--s800);
+}
+
+.pal-hpct.low {
+    color: var(--red);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   8 · TABLET (>=768px)
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) {
+    .pal-tiles {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 8px;
+    }
+
+    .pal-detail {
+        max-height: 70vh;
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   9 · DESKTOP (>=1024px)
+
+   portal-desktop.css forces #pt-learning-body into a flat two-column
+   auto-flow grid built for the old tab, whose children were a loose
+   list of .pt-sec cards. `.pal-root` raises specificity from (0,1,1,1)
+   to (0,1,2,1) so this wins on merit rather than with !important.
+
+   The detail panel stops being a sheet and becomes a sticky right-hand
+   column — same markup, so there is no second panel to drift.
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    body:not(.is-teacher) #pt-learning-body.pal-root {
+        display: block;
+        grid-template-columns: none;
+        gap: 0;
+        max-width: var(--dsk-content);
+        margin: 0 auto;
+        padding: 0 8px 40px;
+    }
+
+    body:not(.is-teacher) #pt-learning-body.pal-root>.pt-sec {
+        margin: 16px 0 0;
+        grid-column: auto;
+    }
+
+    .pal-grid {
+        display: block;
+    }
+
+    .pal-band {
+        display: block;
+    }
+
+    .pal-sec {
+        margin: 16px 0 0;
+        padding: 18px;
+    }
+
+    /* ── THE MAP FILLS THE SCREEN ─────────────────────────────────
+       Full width, and as tall as the viewport allows. The card itself
+       is a flex column so the header, the filters and the legend stay
+       fixed while only the chapters scroll — with eighty-three of them
+       the alternative was scrolling the whole page past the filters
+       every time you wanted to change subject.
+
+       92px is the nav bar plus this card's own top margin; the extra
+       24px keeps the legend clear of the bottom edge. */
+    .pal-map {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 92px);
+        min-height: 420px;
+        overflow: hidden;
+    }
+
+    .pal-map-scroll {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding-right: 4px;
+        margin-right: -4px;
+    }
+
+    .pal-map-scroll::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .pal-map-scroll::-webkit-scrollbar-thumb {
+        background: var(--s200);
+        border-radius: 999px;
+    }
+
+    .pal-map .pal-legend {
+        flex: 0 0 auto;
+        margin-top: 0;
+        padding-top: 12px;
+    }
+
+    /* ── THE PAIR ROW ─────────────────────────────────────────────
+       These two were stranded in a half-width column with dead space
+       beside them. Side by side, across the full width, they now use
+       the room the map is not using. */
+    .pal-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 0 18px;
+        align-items: start;
+    }
+
+    .pal-tiles {
+        grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    }
+
+    .pal-tile {
+        transition: border-color .14s, transform .1s;
+    }
+
+    .pal-tile:hover {
+        border-color: var(--g400);
+        transform: translateY(-1px);
+    }
+
+    /* ── THE DETAIL IS A MODAL, NOT A COLUMN ──────────────────────
+       Docking it beside the map meant that choosing a chapter halfway
+       down the list sent you back to the top of the page to read it,
+       and back down again to choose the next one. Over the top, the
+       map never moves.
+
+       Same markup as the phone's bottom sheet — only the positioning
+       differs, so there is no second panel to fall out of sync. */
+    .pal-detail {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        bottom: auto;
+        transform: translate(-50%, -50%);
+        width: min(620px, calc(100vw - 64px));
+        max-height: min(78vh, 760px);
+        overflow-y: auto;
+        border-radius: 16px;
+        box-shadow: 0 24px 64px rgba(15, 23, 42, .28);
+        padding: 22px;
+        z-index: 60;
+    }
+
+    /* As a modal it MUST be dismissible — this is the only way out
+       besides the backdrop and Escape. It was hidden when the panel
+       was a permanently docked column, where there was nothing to
+       close. */
+    .pal-detail .pal-close {
+        display: inline-flex;
+    }
+
+    .pal-open-row {
+        margin: 0 -8px;
+        padding: 11px 8px;
+        border-radius: 9px;
+        transition: background .14s;
+    }
+
+    .pal-open-row:hover {
+        background: var(--s50);
+    }
+
+    .pal-pill,
+    .pal-i {
+        transition: background .14s, border-color .14s, color .14s;
+    }
+
+    .pal-pill:hover {
+        border-color: var(--g400);
+        color: var(--g600);
+    }
+
+    .pal-pill.on:hover {
+        color: #fff;
+    }
+
+    .pal-i:hover {
+        border-color: var(--g400);
+        color: var(--g600);
+    }
+
+    .pal-i[aria-expanded="true"]:hover {
+        color: #fff;
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   10 · WIDE DESKTOP (>=1440px)
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1440px) {
+    .pal-grid {
+        gap: 22px;
+    }
+
+    .pal-tiles {
+        grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+    }
+}

@@ -1,0 +1,2122 @@
+/* ════════════════════════════════════════════════════════════════
+   NAADI AI — PRACTICE v2 (practice-v2.css)
+   NEET Arena · PYQ Vault · shared test engine · results analytics.
+   ─────────────────────────────────────────────────────────────────
+   Load order: styles-mobile.css → concept-studio-v2.css → THIS FILE.
+   • New components are prefixed `pv2-`.
+   • Reuses cs2- utilities (cs2-chip, cs2-micro, cs2-ring, cs2-back,
+     cs2-grad tokens) from concept-studio-v2.css for one visual
+     language across the whole app.
+   • The test-taking screen keeps its original te-/omr-m-/ph-sheet
+     markup (shared with OPD) — restyled here by overriding the same
+     selectors later in the cascade. No logic depends on CSS.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ════ HUB SWITCHER (Arena · Vault · AIR) ════ */
+.ph-switch {
+    display: flex;
+    gap: 4px;
+    background: var(--s100);
+    border-radius: 999px;
+    padding: 4px;
+    margin: calc(10px + 0px) 16px 4px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+}
+
+.ph-switch-pill {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    padding: 10px 6px;
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--s500);
+    cursor: pointer;
+    min-height: 40px;
+    transition: color .2s;
+    white-space: nowrap;
+}
+
+.ph-switch-pill i {
+    font-size: .68rem;
+    margin-right: 3px;
+}
+
+.ph-switch-pill.active {
+    color: #fff;
+    background: var(--cs-grad);
+    box-shadow: 0 4px 12px -4px rgba(31, 88, 150, .5);
+}
+
+/* ════ LANDING HERO ════ */
+.pv2-wrap {
+    padding: 10px 16px calc(24px + var(--tabbar-h) + var(--safe-bottom));
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.pv2-hero {
+    position: relative;
+    border-radius: 22px;
+    padding: 22px 20px;
+    background: var(--s900);
+    color: #fff;
+    overflow: hidden;
+    box-shadow: var(--cs-shadow-lift);
+    margin-bottom: 14px;
+    animation: cs2-fade-up .32s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.pv2-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 90% 90% at 110% -20%, rgba(93, 146, 207, .35) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 90% at -10% 120%, rgba(15, 111, 140, .3) 0%, transparent 55%);
+    pointer-events: none;
+}
+
+.pv2-hero>* {
+    position: relative;
+}
+
+.pv2-hero .kicker {
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #9fc3e8;
+    margin-bottom: 8px;
+}
+
+.pv2-hero h2 {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+}
+
+.pv2-hero p {
+    font-size: .8rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-top: 7px;
+    max-width: 44ch;
+}
+
+.pv2-hero .stats {
+    display: flex;
+    gap: 18px;
+    margin-top: 14px;
+}
+
+.pv2-hero .stats>div b {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 800;
+    display: block;
+    background: linear-gradient(135deg, #9fc3e8, #7dd0e0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.pv2-hero .stats>div span {
+    font-size: .64rem;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.pv2-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.pv2-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 12px;
+    border: 1px solid var(--cs-line);
+    border-radius: 14px;
+    background: var(--cs-card);
+    color: var(--s600);
+    font-family: var(--font-display);
+    font-size: .76rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 46px;
+    box-shadow: var(--cs-shadow);
+}
+
+.pv2-action:active {
+    transform: scale(.97);
+}
+
+.pv2-action i {
+    color: var(--indigo);
+}
+
+/* ════ PAPER CARDS ════ */
+.pv2-year {
+    margin: 20px 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pv2-year .ln {
+    flex: 1;
+    height: 1px;
+    background: var(--cs-line);
+}
+
+.pv2-paper {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 18px;
+    padding: 15px;
+    cursor: pointer;
+    box-shadow: var(--cs-shadow);
+    transition: transform .12s;
+    animation: cs2-fade-up .3s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.pv2-paper:active {
+    transform: scale(.985);
+}
+
+.pv2-paper-code {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: var(--cs-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 6px 16px -6px rgba(31, 88, 150, .55);
+}
+
+.pv2-paper h4 {
+    font-family: var(--font-display);
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+}
+
+.pv2-paper .meta {
+    font-size: .74rem;
+    color: var(--cs-mute);
+    margin-top: 3px;
+}
+
+.pv2-paper .chips {
+    display: flex;
+    gap: 5px;
+    margin-top: 7px;
+    flex-wrap: wrap;
+}
+
+/* ════ PYQ SUB-TABS + CUSTOM BUILDER ════ */
+.ph-subtabs {
+    display: flex;
+    gap: 8px;
+    margin: 4px 0 16px;
+}
+
+.ph-subtab {
+    flex: 1;
+    border: 1px solid var(--cs-line);
+    background: var(--cs-card);
+    color: var(--s500);
+    padding: 12px;
+    border-radius: 14px;
+    font-family: var(--font-display);
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 46px;
+    box-shadow: var(--cs-shadow);
+}
+
+.ph-subtab.active {
+    border: 0;
+    background: var(--cs-grad);
+    color: #fff;
+    box-shadow: 0 8px 20px -8px rgba(31, 88, 150, .55);
+}
+
+.pv2-builder {
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 20px;
+    padding: 18px 16px;
+    box-shadow: var(--cs-shadow);
+}
+
+.pv2-bgroup {
+    margin-bottom: 18px;
+}
+
+.pv2-bgroup:last-of-type {
+    margin-bottom: 0;
+}
+
+.pv2-bgroup>label {
+    display: block;
+    margin-bottom: 9px;
+}
+
+.ph-fchip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.ph-fchip {
+    border: 1.5px solid var(--cs-line);
+    background: #fff;
+    color: var(--s600);
+    padding: 8px 15px;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 38px;
+    transition: all .15s;
+}
+
+.ph-fchip.sm {
+    padding: 6px 12px;
+    font-size: .72rem;
+    min-height: 34px;
+}
+
+.ph-fchip.active {
+    border-color: transparent;
+    background: var(--cs-grad);
+    color: #fff;
+    box-shadow: 0 5px 14px -5px rgba(31, 88, 150, .5);
+}
+
+.ph-chapter-box {
+    max-height: 190px;
+    overflow-y: auto;
+    padding: 2px;
+}
+
+.ph-preview {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 16px;
+    padding: 13px 15px;
+    border-radius: 14px;
+    background: var(--cs-grad-soft);
+    border: 1px solid rgba(15, 111, 140, .18);
+    font-size: .8rem;
+    color: var(--s700);
+    line-height: 1.5;
+    flex-wrap: wrap;
+}
+
+.ph-start-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin-top: 14px;
+    padding: 15px;
+    border: 0;
+    border-radius: 16px;
+    background: var(--cs-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: .88rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 52px;
+    box-shadow: 0 10px 24px -8px rgba(31, 88, 150, .55);
+    transition: opacity .2s, transform .1s;
+}
+
+.ph-start-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.ph-start-btn:active:not(:disabled) {
+    transform: scale(.98);
+}
+
+.ph-start-btn.danger {
+    background: linear-gradient(135deg, #c43d3d, #a03030);
+    box-shadow: 0 10px 24px -8px rgba(196, 61, 61, .5);
+}
+
+.ph-fineprint {
+    font-size: .7rem;
+    color: var(--cs-mute);
+    line-height: 1.55;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* ════ LEADERBOARDS · HISTORY · AIR ════ */
+.pv2-lb-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 16px;
+    padding: 13px 14px;
+    box-shadow: var(--cs-shadow);
+    animation: cs2-fade-up .3s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.pv2-lb-row.me {
+    border-color: var(--g400);
+    box-shadow: 0 0 0 3px rgba(31, 88, 150, .1);
+}
+
+.pv2-lb-rank {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: var(--s100);
+    color: var(--s500);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: .82rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pv2-lb-rank.gold {
+    background: var(--cs-grad);
+    color: #fff;
+    box-shadow: 0 6px 14px -5px rgba(31, 88, 150, .6);
+}
+
+.pv2-lb-rank.silver {
+    background: var(--s800);
+    color: #f1f5f9;
+}
+
+.pv2-lb-rank.bronze {
+    background: var(--cs-grad-soft);
+    color: var(--indigo);
+    border: 1.5px solid rgba(15, 111, 140, .3);
+}
+
+.pv2-lb-row h4 {
+    font-family: var(--font-display);
+    font-size: .86rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pv2-lb-row p {
+    font-size: .72rem;
+    color: var(--cs-mute);
+    margin-top: 2px;
+}
+
+.pv2-lb-marks {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.pv2-lb-marks b {
+    font-family: var(--font-display);
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: var(--cs-ink);
+    display: block;
+}
+
+.pv2-lb-marks span {
+    font-size: .64rem;
+    color: var(--cs-mute);
+    font-weight: 600;
+}
+
+.ph-you-tag {
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--cs-grad);
+    color: #fff;
+}
+
+.pv2-mycard {
+    position: relative;
+    border-radius: 20px;
+    padding: 18px;
+    background: var(--s900);
+    color: #fff;
+    overflow: hidden;
+    box-shadow: var(--cs-shadow-lift);
+    margin-bottom: 16px;
+}
+
+.pv2-mycard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 90% 100% at 100% 0%, rgba(93, 146, 207, .3) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.pv2-mycard>* {
+    position: relative;
+}
+
+.pv2-mycard .kicker {
+    font-size: .6rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #9fc3e8;
+    margin-bottom: 10px;
+}
+
+.pv2-mystats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.pv2-mystats>div {
+    text-align: center;
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 12px;
+    padding: 10px 4px;
+}
+
+.pv2-mystats b {
+    font-family: var(--font-display);
+    font-size: .95rem;
+    font-weight: 800;
+    display: block;
+    color: #f1f5f9;
+}
+
+.pv2-mystats span {
+    font-size: .58rem;
+    color: #64748b;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+.pv2-mycard>p {
+    font-size: .72rem;
+    color: #64748b;
+    margin-top: 10px;
+}
+
+/* ════ BOTTOM SHEET (shared with test engine) ════ */
+.ph-sheet-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background: rgba(15, 23, 42, .5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    transition: opacity .22s;
+}
+
+.ph-sheet-overlay.open {
+    opacity: 1;
+}
+
+.ph-sheet {
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: var(--s50);
+    border-radius: 26px 26px 0 0;
+    padding: 10px 18px calc(20px + var(--safe-bottom));
+    transform: translateY(10%);
+    transition: transform .28s cubic-bezier(.22, 1, .36, 1);
+    box-shadow: 0 -18px 50px -12px rgba(15, 23, 42, .35);
+}
+
+.ph-sheet-overlay.open .ph-sheet {
+    transform: translateY(0);
+}
+
+.ph-sheet-handle {
+    width: 42px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--s300);
+    margin: 4px auto 14px;
+}
+
+.ph-sheet-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--cs-ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ph-sheet-sub {
+    font-size: .8rem;
+    color: var(--cs-body);
+    line-height: 1.6;
+    margin-top: 6px;
+    margin-bottom: 12px;
+}
+
+/* ════ TEST ENGINE — shell restyle (same markup as v1) ════ */
+.te-topbar {
+    background: var(--s900);
+    box-shadow: 0 6px 22px -8px rgba(15, 23, 42, .5);
+}
+
+.te-icon-btn {
+    border-radius: 13px;
+    background: rgba(255, 255, 255, .07);
+    border: 1px solid rgba(255, 255, 255, .07);
+}
+
+.te-timer {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: .82rem;
+    padding: 8px 13px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .07);
+    border: 1px solid rgba(255, 255, 255, .1);
+    color: #e2e8f0;
+    flex-shrink: 0;
+}
+
+.te-timer.warning {
+    background: rgba(196, 61, 61, .2);
+    border-color: rgba(196, 61, 61, .5);
+    color: #fca5a5;
+    animation: cs2-breathe 1.4s ease-in-out infinite;
+}
+
+.te-subject-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 4px 10px 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.te-subject-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.te-subject-tab {
+    border: 1px solid rgba(255, 255, 255, .1);
+    background: rgba(255, 255, 255, .05);
+    color: #94a3b8;
+    padding: 7px 15px;
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-size: .72rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-height: 34px;
+}
+
+.te-subject-tab.active {
+    border-color: transparent;
+    background: var(--cs-grad);
+    color: #fff;
+}
+
+/* thin gradient progress under the top bar (new element) */
+.te-progtrack {
+    height: 3px;
+    background: rgba(255, 255, 255, .08);
+}
+
+.te-progtrack>i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--g400), #7dd0e0);
+    transition: width .4s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* ── QUESTION PANEL ──────────────────────────────────────────────
+   The panel is ONE surface, not a card sitting on a page. It used to be
+   four nested layers of chrome — grey page, bordered white card, four
+   bordered option boxes, a bordered note box — which is what read as
+   cheap. Chrome is removed and the hierarchy is carried by type and
+   whitespace instead.
+
+   SCOPING: every rule below is scoped under .te-q-card, which is unique
+   to this screen (test-engine.js:504). .te-option / .te-opt-letter /
+   .te-options / .te-q-text are SHARED with the results-review screen
+   (test-engine.js:1361, 1390), so an unscoped rule here would silently
+   restyle review too. Do not unscope these.
+   ──────────────────────────────────────────────────────────────── */
+
+/* The sheet reaches the edges; the page is no longer a tray. */
+.te-wrap {
+    background: var(--cs-card);
+}
+
+/* .te-body carried padding (styles-mobile.css) AND .te-q-card carried a
+   margin, so every inset was doubled — and the bottom stacked 96px of
+   padding under 110px of margin, which is the dead white gap under the
+   question. The card owns its spacing now; the body owns none. */
+.te-body {
+    padding: 0;
+}
+
+.te-q-card {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0 auto;
+    padding: 22px 18px calc(124px + var(--safe-bottom));
+    max-width: 680px;
+    animation: cs2-fade-up .28s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.te-q-card .te-q-meta {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+}
+
+.te-q-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: .78rem;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: var(--cs-grad);
+    color: #fff;
+}
+
+.te-q-chapter {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--cs-mute);
+    margin: 10px 0 2px;
+}
+
+.te-q-text {
+    font-family: var(--font-display);
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: var(--cs-ink);
+    line-height: 1.55;
+    margin-top: 8px;
+}
+
+/* The question is the loudest thing on the screen — it is what they are
+   here to read. Optical tracking pulled in slightly; Sora runs wide at
+   display sizes and untracked it reads like a heading, not a sentence. */
+.te-q-card .te-q-text {
+    font-size: 1.12rem;
+    line-height: 1.62;
+    letter-spacing: -.011em;
+    margin-top: 12px;
+}
+
+.te-q-card .te-q-img {
+    border-radius: 12px;
+    border: 1px solid var(--cs-line);
+    margin: 14px 0 0;
+}
+
+.te-options {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.te-option {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 13px;
+    border-radius: 14px;
+    border: 1.5px solid var(--cs-line);
+    background: #fff;
+    font-size: .87rem;
+    color: var(--s700);
+    line-height: 1.55;
+}
+
+.te-option.committed {
+    border-color: var(--g500);
+    background: var(--cs-grad-soft);
+}
+
+/* Options are a READ-ONLY list here — committing happens on the OMR sheet
+   (test-engine.js:437). Four bordered, filled rectangles looked exactly
+   like tappable answer buttons, which fought that rule and made students
+   tap them expecting something to happen. A hairline-separated list reads
+   as "these are the choices, go shade one" instead of "press me". */
+.te-q-card .te-options {
+    display: block;
+    margin-top: 22px;
+    border-top: 1px solid var(--cs-line);
+}
+
+/* padding-inline is 0 so the letter badges hang on the same optical left
+   edge as the question text above them. Anything else and the list looks
+   nudged inwards for no reason. */
+.te-q-card .te-option {
+    gap: 14px;
+    padding: 15px 0;
+    border: 0;
+    border-bottom: 1px solid var(--cs-line);
+    border-radius: 0;
+    background: transparent;
+}
+
+/* The locked choice is the one place a fill is earned. The negative margin
+   lets the tint bleed past the text column instead of indenting the row —
+   the letter stays on the same edge as every other option, which is what
+   stops the locked state from looking like a layout shift. */
+.te-q-card .te-option.committed {
+    background: var(--cs-grad-soft);
+    border-bottom-color: transparent;
+    border-radius: 12px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: -12px;
+    margin-right: -12px;
+}
+
+/* A circle, not a rounded square: it quotes the OMR bubble the student is
+   about to shade, so the list and the sheet speak the same language. */
+.te-q-card .te-opt-letter {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1.5px solid var(--cs-line);
+    color: var(--s500);
+    font-size: .72rem;
+    margin-top: 1px;
+}
+
+.te-q-card .te-option.committed .te-opt-letter {
+    background: var(--cs-grad);
+    border-color: transparent;
+    color: #fff;
+}
+
+.te-q-card .te-opt-text {
+    font-size: .95rem;
+    font-weight: 500;
+    line-height: 1.55;
+    color: var(--s700);
+}
+
+.te-opt-letter {
+    width: 26px;
+    height: 26px;
+    border-radius: 9px;
+    background: var(--s100);
+    color: var(--s500);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .74rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.te-option.committed .te-opt-letter {
+    background: var(--cs-grad);
+    color: #fff;
+}
+
+.te-opt-lock {
+    color: var(--indigo);
+    font-size: .78rem;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.te-locked-note,
+.te-commit-note {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: .76rem;
+    line-height: 1.6;
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+}
+
+.te-commit-note {
+    background: var(--cs-grad-soft);
+    border: 1px solid rgba(15, 111, 140, .16);
+    color: var(--s600);
+}
+
+.te-commit-note i {
+    color: var(--indigo);
+    margin-top: 2px;
+}
+
+.te-locked-note {
+    background: var(--s100);
+    border: 1px solid var(--cs-line);
+    color: var(--s600);
+}
+
+.te-locked-note i {
+    color: var(--indigo);
+    margin-top: 2px;
+}
+
+/* The note was the fourth stacked box on a screen that only needed one
+   surface, and it was shouting a housekeeping rule at the same volume as
+   the options. It is a footnote. It now looks like one. The committed row
+   tint, the lock glyph and the footer's "Locked · B" already carry the
+   state three times over. */
+.te-q-card .te-commit-note,
+.te-q-card .te-locked-note {
+    margin-top: 20px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    font-size: .74rem;
+    line-height: 1.55;
+    color: var(--cs-mute);
+}
+
+/* These two rules are the guard rail for the column-split bug. The markup
+   (test-engine.js:518) now wraps the sentence in a <span> so the flex
+   container has exactly two children; `flex:1;min-width:0` keeps that span
+   wrapping as a paragraph instead of overflowing. If anyone ever drops the
+   <span> again, this at least keeps the icon from stealing width. */
+.te-q-card .te-commit-note>i,
+.te-q-card .te-locked-note>i {
+    flex-shrink: 0;
+    margin-top: 3px;
+    color: var(--cs-mute);
+    font-size: .78rem;
+}
+
+.te-q-card .te-commit-note>span,
+.te-q-card .te-locked-note>span {
+    flex: 1;
+    min-width: 0;
+}
+
+.te-q-card .te-commit-note b,
+.te-q-card .te-locked-note b {
+    color: var(--cs-body);
+    font-weight: 700;
+}
+
+.te-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 95;
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px calc(10px + var(--safe-bottom));
+    background: rgba(248, 250, 252, .92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid var(--cs-line);
+}
+
+.te-nav-btn {
+    width: 50px;
+    min-height: 50px;
+    border-radius: 14px;
+    border: 1px solid var(--cs-line);
+    background: #fff;
+    color: var(--s600);
+    font-size: .9rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.te-nav-btn:disabled {
+    opacity: .35;
+}
+
+.te-nav-btn.marked {
+    border-color: var(--amber);
+    color: var(--amber);
+    background: var(--amber-bg);
+}
+
+/* Sizing note: this is Sora (--font-display) and the option text next to it
+   is DM Sans. Sora has a markedly larger x-height and wider metrics, so at
+   .86rem it rendered visually LARGER than .95rem option text — that is the
+   disproportion, not the box. Dropped to .8rem so it matches optically
+   rather than numerically, plus real side padding (it had none, so the
+   label ran to the edges of a flex:1 button on narrow screens).
+   display:flex is restated because this rule was relying on it cascading
+   in from styles-mobile.css. */
+.te-mark-answer-btn {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    border-radius: 14px;
+    background: var(--cs-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .005em;
+    cursor: pointer;
+    min-height: 50px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+    box-shadow: 0 8px 20px -8px rgba(31, 88, 150, .55);
+}
+
+.te-mark-answer-btn i {
+    font-size: .78rem;
+}
+
+.te-mark-answer-btn.locked {
+    background: #fff;
+    color: var(--indigo);
+    border: 1.5px solid var(--g200);
+    box-shadow: none;
+}
+
+/* ════ OMR SHEET — exam-paper moment ════ */
+.omr-m-sheet {
+    background: #fdfbf5;
+    border: 1px solid #e8e0cd;
+    border-radius: 18px;
+    padding: 16px;
+    background-image: linear-gradient(rgba(31, 88, 150, .045) 1px, transparent 1px);
+    background-size: 100% 26px;
+}
+
+.omr-m-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: .8rem;
+    letter-spacing: .18em;
+    text-align: center;
+    color: var(--s800);
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--s800);
+    margin-bottom: 10px;
+}
+
+.omr-m-instructions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--s500);
+    margin-bottom: 12px;
+}
+
+.omr-m-recent {
+    opacity: .55;
+    margin-bottom: 6px;
+}
+
+.omr-m-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 6px;
+}
+
+.omr-m-row.live {
+    background: rgba(31, 88, 150, .06);
+    border: 1.5px dashed rgba(31, 88, 150, .35);
+    border-radius: 12px;
+    padding: 12px 10px;
+}
+
+.omr-m-qnum {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: .82rem;
+    color: var(--s700);
+    min-width: 30px;
+    text-align: right;
+}
+
+.omr-m-bubbles {
+    display: flex;
+    gap: 14px;
+    flex: 1;
+    justify-content: center;
+}
+
+.omr-m-bubble {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 2px solid var(--s700);
+    background: transparent;
+    color: var(--s700);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .82rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .18s;
+}
+
+.omr-m-bubble.mini {
+    width: 26px;
+    height: 26px;
+    font-size: .6rem;
+    border-width: 1.5px;
+}
+
+.omr-m-bubble.filled {
+    background: var(--s900);
+    border-color: var(--s900);
+    color: rgba(255, 255, 255, .25);
+    transform: scale(1.05);
+}
+
+.omr-m-bubble.locked {
+    cursor: default;
+}
+
+.omr-m-lockicon {
+    color: var(--s400);
+    font-size: .7rem;
+}
+
+.omr-m-mapping {
+    font-family: var(--font-display);
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--s700);
+}
+
+.omr-m-note {
+    text-align: center;
+    font-size: .72rem;
+    color: var(--s500);
+    line-height: 1.55;
+    margin-top: 12px;
+}
+
+.omr-m-note.locked {
+    color: var(--indigo);
+    font-weight: 700;
+}
+
+.omr-m-matchgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.omr-m-matchrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1.5px solid var(--s300);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.omr-m-matchrow.set {
+    border-color: var(--g500);
+    background: var(--cs-grad-soft);
+}
+
+.omr-m-matchval {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--indigo);
+}
+
+/* submit counts inside confirm sheet */
+.te-submit-counts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 12px 0 4px;
+}
+
+.te-submit-counts>div {
+    text-align: center;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 14px;
+    padding: 12px 4px;
+}
+
+.te-submit-counts b {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--cs-ink);
+    display: block;
+}
+
+.te-submit-counts span {
+    font-size: .62rem;
+    color: var(--cs-mute);
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+/* ════ PALETTE DRAWER ════ */
+.te-pal-legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: .68rem;
+    color: var(--s500);
+    margin: 10px 0;
+}
+
+.te-pal-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 4px;
+    margin-right: 4px;
+    vertical-align: -1px;
+    background: var(--s200);
+}
+
+.te-pal-dot.answered {
+    background: var(--cs-grad);
+}
+
+.te-pal-dot.unanswered {
+    background: #fff;
+    border: 1.5px solid var(--s400);
+}
+
+.te-pal-dot.marked {
+    background: var(--amber);
+}
+
+.te-pal-scroll {
+    max-height: 44vh;
+    overflow-y: auto;
+}
+
+.te-pal-subject {
+    font-family: var(--font-display);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--cs-mute);
+    margin: 12px 0 8px;
+}
+
+.te-pal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    gap: 7px;
+}
+
+.te-pal-cell {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    border: 1.5px solid var(--s300);
+    background: #fff;
+    color: var(--s600);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .74rem;
+    cursor: pointer;
+}
+
+.te-pal-cell.answered {
+    border-color: transparent;
+    background: var(--cs-grad);
+    color: #fff;
+}
+
+.te-pal-cell.marked {
+    border-color: var(--amber);
+    background: var(--amber-bg);
+    color: var(--amber);
+}
+
+.te-pal-cell.answered.marked {
+    background: var(--cs-grad);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--amber);
+    border-color: transparent;
+}
+
+.te-pal-cell.notvisited {
+    opacity: .5;
+}
+
+/* ════ RESULTS — analytics ════ */
+.pv2-res-hero {
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 22px;
+    padding: 20px 18px;
+    box-shadow: var(--cs-shadow);
+    animation: cs2-fade-up .32s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.pv2-res-top {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.pv2-res-marks {
+    flex: 1;
+    min-width: 0;
+}
+
+.pv2-res-marks .label {
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--cs-mute);
+}
+
+.pv2-res-marks .big {
+    font-family: var(--font-display);
+    font-size: 2.3rem;
+    font-weight: 800;
+    letter-spacing: -.03em;
+    color: var(--cs-ink);
+    line-height: 1.05;
+    margin-top: 4px;
+}
+
+.pv2-res-marks .big span {
+    font-size: 1.05rem;
+    color: var(--cs-mute);
+    font-weight: 700;
+}
+
+.pv2-res-marks .sub {
+    font-size: .74rem;
+    color: var(--cs-body);
+    margin-top: 5px;
+}
+
+.pv2-res-counts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.pv2-res-counts>div {
+    text-align: center;
+    border-radius: 14px;
+    padding: 11px 4px;
+    border: 1px solid var(--cs-line);
+    background: var(--s50);
+}
+
+.pv2-res-counts b {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 800;
+    display: block;
+}
+
+.pv2-res-counts span {
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--cs-mute);
+}
+
+.pv2-res-counts .c b {
+    color: var(--indigo);
+}
+
+.pv2-res-counts .w b {
+    color: var(--red);
+}
+
+.pv2-res-counts .u b {
+    color: var(--s500);
+}
+
+/* insight chips */
+.pv2-insights {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.pv2-insight {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 15px;
+    padding: 12px;
+    box-shadow: var(--cs-shadow);
+}
+
+.pv2-insight .ic {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    background: var(--cs-grad-soft);
+    color: var(--indigo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .82rem;
+    flex-shrink: 0;
+}
+
+.pv2-insight.bad .ic {
+    background: var(--red-bg);
+    color: var(--red);
+}
+
+.pv2-insight b {
+    font-family: var(--font-display);
+    font-size: .88rem;
+    font-weight: 800;
+    color: var(--cs-ink);
+    display: block;
+    line-height: 1.2;
+}
+
+.pv2-insight span {
+    font-size: .62rem;
+    color: var(--cs-mute);
+    font-weight: 600;
+}
+
+/* chart cards */
+.pv2-chart-card {
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: var(--cs-shadow);
+    animation: cs2-fade-up .32s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.pv2-legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 10px;
+    font-size: .7rem;
+    color: var(--s500);
+    font-weight: 600;
+}
+
+.pv2-legend i {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+.pv2-legend .lg-c i {
+    background: var(--cs-grad);
+}
+
+.pv2-legend .lg-w i {
+    background: var(--red);
+}
+
+.pv2-legend .lg-u i {
+    background: var(--s300);
+}
+
+.pv2-chart-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.pv2-chart-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+/* donut center label */
+.pv2-donut-wrap {
+    position: relative;
+    width: 168px;
+    margin: 6px auto;
+}
+
+.pv2-donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.pv2-donut-center b {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--cs-ink);
+}
+
+.pv2-donut-center span {
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--cs-mute);
+}
+
+/* subject rows */
+.pv2-subj {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 16px;
+    padding: 13px 14px;
+    box-shadow: var(--cs-shadow);
+}
+
+.pv2-subj h4 {
+    font-family: var(--font-display);
+    font-size: .86rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+}
+
+.pv2-subj .nums {
+    font-size: .7rem;
+    color: var(--cs-mute);
+    margin-top: 3px;
+}
+
+.pv2-subj .bar {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--s100);
+    overflow: hidden;
+    display: flex;
+    margin-top: 8px;
+}
+
+.pv2-subj .bar .c {
+    background: var(--cs-grad);
+}
+
+.pv2-subj .bar .w {
+    background: var(--red);
+    opacity: .75;
+}
+
+.pv2-subj .marks {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.pv2-subj .marks b {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--cs-ink);
+    display: block;
+}
+
+.pv2-subj .marks span {
+    font-size: .62rem;
+    color: var(--cs-mute);
+    font-weight: 600;
+}
+
+/* AIR card */
+.pv2-air {
+    position: relative;
+    margin-top: 12px;
+    border-radius: 20px;
+    padding: 20px 18px;
+    background: var(--s900);
+    color: #fff;
+    overflow: hidden;
+    box-shadow: var(--cs-shadow-lift);
+    text-align: center;
+}
+
+.pv2-air::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 100% 90% at 50% -30%, rgba(93, 146, 207, .35) 0%, transparent 65%);
+    pointer-events: none;
+}
+
+.pv2-air>* {
+    position: relative;
+}
+
+.pv2-air .kicker {
+    font-size: .6rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: #9fc3e8;
+}
+
+.pv2-air .range {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    margin-top: 8px;
+    background: linear-gradient(135deg, #cfe3f7, #8fd8e6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.pv2-air>p {
+    font-size: .74rem;
+    color: #94a3b8;
+    margin-top: 5px;
+}
+
+.pv2-air .cats {
+    margin-top: 14px;
+}
+
+.pv2-air .cats .cs2-micro {
+    color: #64748b;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.pv2-air .ph-fchip {
+    background: rgba(255, 255, 255, .06);
+    border-color: rgba(255, 255, 255, .14);
+    color: #cbd5e1;
+}
+
+.pv2-air .ph-fchip.active {
+    background: var(--cs-grad);
+    border-color: transparent;
+    color: #fff;
+}
+
+.pv2-qualify {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-size: .74rem;
+    font-weight: 700;
+}
+
+.pv2-qualify.yes {
+    background: rgba(93, 146, 207, .16);
+    border: 1px solid rgba(93, 146, 207, .4);
+    color: #9fc3e8;
+}
+
+.pv2-qualify.no {
+    background: rgba(196, 61, 61, .16);
+    border: 1px solid rgba(196, 61, 61, .45);
+    color: #fca5a5;
+}
+
+/* colleges */
+.pv2-college {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 16px;
+    padding: 13px 14px;
+    box-shadow: var(--cs-shadow);
+}
+
+.pv2-college h4 {
+    font-family: var(--font-display);
+    font-size: .84rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+    line-height: 1.35;
+}
+
+.pv2-college p {
+    font-size: .72rem;
+    color: var(--cs-mute);
+    margin-top: 3px;
+    line-height: 1.5;
+}
+
+.pv2-college .cutoff {
+    color: var(--indigo);
+    font-weight: 600;
+}
+
+/* weak chapters */
+.pv2-weak {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-left: 3px solid var(--red);
+    border-radius: 6px 16px 16px 6px;
+    padding: 12px 14px;
+    box-shadow: var(--cs-shadow);
+}
+
+.pv2-weak i {
+    color: var(--red);
+    margin-top: 3px;
+    font-size: .82rem;
+}
+
+.pv2-weak h4 {
+    font-family: var(--font-display);
+    font-size: .84rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+}
+
+.pv2-weak p {
+    font-size: .72rem;
+    color: var(--cs-mute);
+    margin-top: 2px;
+}
+
+.pv2-ctx-note {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    padding: 11px 13px;
+    border-radius: 12px;
+    background: var(--cs-grad-soft);
+    border: 1px solid rgba(15, 111, 140, .16);
+    font-size: .74rem;
+    color: var(--s600);
+    line-height: 1.55;
+    margin-bottom: 10px;
+}
+
+.pv2-ctx-note i {
+    color: var(--indigo);
+    margin-top: 2px;
+}
+
+/* ════ QUESTION REVIEW (restyle of existing res-rev markup) ════ */
+.res-review-filters {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.res-rev-item {
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 16px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    box-shadow: var(--cs-shadow);
+}
+
+.res-rev-item.wrong {
+    border-left: 3px solid var(--red);
+}
+
+.res-rev-item.correct {
+    border-left: 3px solid var(--indigo);
+}
+
+.res-rev-item.unattempted {
+    border-left: 3px solid var(--s300);
+}
+
+.res-rev-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 13px 14px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+
+.res-rev-state {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.res-rev-item.correct .res-rev-state {
+    color: var(--indigo);
+}
+
+.res-rev-item.wrong .res-rev-state {
+    color: var(--red);
+}
+
+.res-rev-item.unattempted .res-rev-state {
+    color: var(--s400);
+}
+
+.res-rev-head h4 {
+    font-family: var(--font-display);
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+}
+
+.res-rev-head p {
+    font-size: .7rem;
+    color: var(--cs-mute);
+    margin-top: 2px;
+}
+
+.res-rev-marks {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: .82rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--s100);
+    color: var(--s500);
+    flex-shrink: 0;
+}
+
+.res-rev-marks.pos {
+    background: var(--cs-grad-soft);
+    color: var(--indigo);
+}
+
+.res-rev-marks.neg {
+    background: var(--red-bg);
+    color: var(--red);
+}
+
+.res-rev-caret {
+    color: var(--s300);
+    font-size: .72rem;
+    transition: transform .25s;
+    flex-shrink: 0;
+}
+
+.res-rev-item.open .res-rev-caret {
+    transform: rotate(180deg);
+}
+
+.res-rev-body {
+    display: none;
+    padding: 2px 14px 16px;
+    border-top: 1px dashed var(--cs-line);
+}
+
+.res-rev-item.open .res-rev-body {
+    display: block;
+    animation: cs2-fade-up .25s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.res-rev-opt {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    padding: 11px 12px;
+    border-radius: 12px;
+    border: 1.5px solid var(--cs-line);
+    background: #fff;
+    font-size: .82rem;
+    color: var(--s700);
+    line-height: 1.55;
+    margin-bottom: 7px;
+}
+
+.res-rev-opt.correct {
+    border-color: var(--indigo);
+    background: var(--cs-grad-soft);
+}
+
+.res-rev-opt.mine-wrong {
+    border-color: var(--red);
+    background: var(--red-bg);
+}
+
+.res-rev-optexp {
+    font-size: .72rem;
+    color: var(--s500);
+    margin-top: 5px;
+    line-height: 1.5;
+}
+
+.res-rev-answers {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: .76rem;
+    color: var(--s600);
+    margin: 10px 0;
+}
+
+.res-rev-block {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--s50);
+    border: 1px solid var(--cs-line);
+}
+
+.res-rev-block h5 {
+    font-family: var(--font-body);
+    font-size: .64rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--indigo);
+    margin-bottom: 6px;
+}
+
+.res-rev-block.mistakes h5 {
+    color: var(--red);
+}
+
+.res-rev-block p,
+.res-rev-block li {
+    font-size: .8rem;
+    color: var(--s700);
+    line-height: 1.6;
+}
+
+.res-rev-block ul {
+    padding-left: 18px;
+}
+
+/* history rows */
+.pv2-hist {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    background: var(--cs-card);
+    border: 1px solid var(--cs-line);
+    border-radius: 16px;
+    padding: 13px 14px;
+    cursor: pointer;
+    box-shadow: var(--cs-shadow);
+    transition: transform .12s;
+}
+
+.pv2-hist:active {
+    transform: scale(.985);
+}
+
+.pv2-hist h4 {
+    font-family: var(--font-display);
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--cs-ink);
+}
+
+.pv2-hist p {
+    font-size: .72rem;
+    color: var(--cs-mute);
+    margin-top: 2px;
+}
+
+/* opd chips row keeps working on the dark topbar */
+.te-opd-chips {
+    display: flex;
+    gap: 6px;
+    padding: 4px 10px 10px;
+    flex-wrap: wrap;
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .pv2-hero,
+    .pv2-paper,
+    .pv2-lb-row,
+    .te-q-card,
+    .pv2-res-hero,
+    .pv2-chart-card,
+    .res-rev-item.open .res-rev-body {
+        animation: none !important;
+    }
+
+    .te-timer.warning {
+        animation: none !important;
+    }
+
+    .te-progtrack>i,
+    .res-rev-caret {
+        transition: none !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   OVERFLOW FIXES (mobile, narrow + display-zoom / large-font devices)
+   practice-v2.css is the LAST stylesheet loaded, so these win.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Hub switcher: `flex:1` gives a 0 flex-basis, but the default
+      `min-width:auto` meant a nowrap pill could never shrink below its
+      text, pushing the third pill past the track. Allow the shrink and
+      ellipsise as a last resort. (The AIR pill label is also shortened
+      to "AIR" in practice-hub.js.) ── */
+.ph-switch-pill {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── 2. OPD case-file sheet: the CTA inherits `width:100%` from
+      .ph-start-btn, which in a flex footer means "as wide as the whole
+      footer" — it then overlapped the completion % and ran off the sheet.
+      Make it a shrinkable flex item sized to its own label. ── */
+.opd-sheet-footer {
+    min-width: 0;
+}
+
+.opd-sheet-footer>div {
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.opd-sheet-footer .opd-sheet-cta {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 14px 16px;
+    white-space: nowrap;
+}
+
+/* ── 3. OMR sheet: four 42px bubbles + three 14px gaps need 210px. On a
+      360px phone that only just fits — and on a device with display zoom
+      or a large font scale (effective viewport ~320px) the last bubble
+      (D) spilled through the dashed box. Size the bubbles and gaps to the
+      viewport so the row always fits, with a 34px floor so the tap target
+      stays usable. ── */
+.omr-m-bubbles {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: clamp(6px, 2.5vw, 14px);
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+.omr-m-bubble {
+    flex: 0 0 auto;
+    width: clamp(34px, 11vw, 44px);
+    height: clamp(34px, 11vw, 44px);
+    aspect-ratio: 1;
+    padding: 0;
+}
+
+.omr-m-bubble.mini {
+    width: clamp(22px, 7vw, 26px);
+    height: clamp(22px, 7vw, 26px);
+}
+
+.omr-m-row.live {
+    padding: 12px 8px;
+    gap: 8px;
+}
+
+.omr-m-qnum {
+    flex: 0 0 auto;
+}

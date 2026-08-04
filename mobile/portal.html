@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-bars="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NAADI AI — Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles-mobile.css">
+    <link rel="stylesheet" href="portal.css">
+    <link rel="stylesheet" href="teacher.css">
+    <link rel="stylesheet" href="teacher-home.css">
+    <link rel="stylesheet" href="teacher-class.css">
+    <link rel="stylesheet" href="teacher-students.css">
+    <link rel="stylesheet" href="teacher-student.css">
+    <link rel="stylesheet" href="teacher-concepts.css">
+    <link rel="stylesheet" href="portal-desktop.css">
+    <!-- PARENT HOME v2. Must load after portal-desktop.css: that file
+         forces #pt-home-body into a flat two-column grid built for the
+         old home page. The .pah-root specificity trick inside is the
+         real guarantee, this order is the belt to its braces. -->
+    <link rel="stylesheet" href="parent-home.css">
+    <link rel="stylesheet" href="parent-learning.css">
+    <link rel="stylesheet" href="parent-tests.css">
+    <link rel="stylesheet" href="parent-insights.css">
+    <!-- DOUBTS: shared verbatim with the student app (app.html). Mobile
+         rules and the >=1024px two-pane layout both live inside it.
+         Loaded LAST: source order is what reveals the .dsk-only sidebar
+         item that renderTabbar() emits for Doubts. -->
+    <link rel="stylesheet" href="doubts.css">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+
+<body class="portal-body">
+
+    <!-- ── Boot gate ─────────────────────────────────────────────── -->
+    <div id="pt-boot" class="pt-boot">
+        <i class="fa-solid fa-brain"></i>
+        <div class="pt-boot-spin"></div>
+    </div>
+
+    <!-- ── Wrong-role wall ───────────────────────────────────────── -->
+    <div id="pt-wall" class="pt-wall hidden">
+        <i class="fa-solid fa-door-closed"></i>
+        <h2>This isn't your door</h2>
+        <p id="pt-wall-body">This portal is for parents and teachers.</p>
+        <button class="pt-btn" onclick="location.replace('app.html')">Go to my app</button>
+        <button class="pt-btn ghost" onclick="portalLogout()">Log out</button>
+    </div>
+
+    <!-- ── Top bar ───────────────────────────────────────────────── -->
+    <header class="pt-topbar hidden" id="pt-topbar">
+        <div class="pt-topbar-l">
+            <div class="pt-logo"><i class="fa-solid fa-brain"></i></div>
+            <div>
+                <div class="pt-welcome">Welcome,</div>
+                <div class="pt-name" id="pt-user-name">—</div>
+            </div>
+        </div>
+        <div class="pt-topbar-r">
+            <button class="pt-chip-btn hidden" id="pt-class-switch" onclick="openClassSwitcher()"></button>
+            <button class="pt-icon-btn dbt-topbtn" onclick="goTab('doubts')" aria-label="Doubts">
+                <i class="fa-solid fa-comments"></i>
+                <em class="dbt-topbtn-badge hidden" id="dbt-badge"></em>
+            </button>
+            <button class="pt-icon-btn" onclick="goTab('profile')" aria-label="Profile">
+                <i class="fa-regular fa-user"></i>
+            </button>
+            <button class="pt-icon-btn" onclick="portalLogout()" aria-label="Log out">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ── Screens ───────────────────────────────────────────────── -->
+    <main class="pt-main hidden" id="pt-main">
+
+        <!-- HOME -->
+        <section class="pt-screen" id="screen-home">
+            <div id="pt-deck-wrap"></div>
+            <div id="pt-home-body"></div>
+        </section>
+
+        <!-- LEARNING -->
+        <section class="pt-screen hidden" id="screen-learning">
+            <div id="pt-learning-body"></div>
+        </section>
+
+        <!-- TESTS -->
+        <section class="pt-screen hidden" id="screen-tests">
+            <div id="pt-tests-body"></div>
+        </section>
+
+        <!-- INSIGHTS -->
+        <section class="pt-screen hidden" id="screen-insights">
+            <div id="pt-insights-body"></div>
+        </section>
+
+        <!-- CLASS (teacher) -->
+        <section class="pt-screen hidden" id="screen-class">
+            <div id="pt-class-body"></div>
+        </section>
+
+        <!-- STUDENTS (teacher) -->
+        <section class="pt-screen hidden" id="screen-students">
+            <div id="pt-students-body"></div>
+        </section>
+
+        <!-- CONCEPTS (teacher) -->
+        <section class="pt-screen hidden" id="screen-concepts">
+            <div id="pt-concepts-body"></div>
+        </section>
+
+        <!-- DOUBTS (teacher) -->
+        <!-- Shares doubts.js with the student app. Today: the thread with
+             the NAADI team. Part 2 adds the threads with students. -->
+        <section class="pt-screen hidden" id="screen-doubts">
+            <div id="pt-doubts-body"></div>
+        </section>
+
+        <!-- PROFILE -->
+        <section class="pt-screen hidden" id="screen-profile">
+            <div id="pt-profile-body"></div>
+        </section>
+
+    </main>
+
+    <!-- ── Full-screen sheet (test review) ───────────────────────── -->
+    <div class="pt-sheet hidden" id="pt-sheet">
+        <header class="pt-sheet-bar">
+            <button class="pt-icon-btn" onclick="closeSheet()" aria-label="Back">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div class="pt-sheet-title" id="pt-sheet-title">Review</div>
+            <div style="width:40px"></div>
+        </header>
+        <div class="pt-sheet-body" id="pt-sheet-body"></div>
+    </div>
+
+    <!-- ── Bottom nav ────────────────────────────────────────────── -->
+    <!-- Built in JS: parent and teacher have different tabs -->
+    <nav class="m-tabbar hidden" id="pt-tabbar"></nav>
+
+    <script src="shared.js"></script>
+    <script src="system-bars.js"></script>
+    <script src="portal.js"></script>
+    <!-- PARENT HOME v2. Loads after portal.js because it wraps
+         renderParentTab and renderDeck at import time. Deleting this
+         one line restores the old parent home page exactly. -->
+    <script src="parent-home.js"></script>
+    <!-- PARENT LEARNING. Wraps renderParentTab in turn, so both tabs
+         are handled and neither file knows about the other. -->
+    <script src="parent-learning.js"></script>
+    <script src="parent-tests.js"></script>
+    <script src="parent-insights.js"></script>
+    <script src="teacher.js"></script>
+    <script src="teacher-home.js"></script>
+    <script src="teacher-class.js"></script>
+    <script src="teacher-students.js"></script>
+    <script src="teacher-student.js"></script>
+    <script src="teacher-concepts.js"></script>
+    <!-- DOUBTS: shared verbatim with app.html. Depends only on shared.js. -->
+    <script src="doubts.js"></script>
+    <link rel="stylesheet" href="nia.css">
+    <script src="nia.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" data-bars="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Set your password - NAADI AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles-mobile.css">
+    <style>
+        .claim-child {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--s100);
+            border: 1px solid var(--s200);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 22px;
+        }
+
+        .claim-child .ini {
+            width: 40px;
+            height: 40px;
+            flex: 0 0 40px;
+            border-radius: 50%;
+            background: var(--g100);
+            color: var(--g700);
+            display: grid;
+            place-items: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: .9rem;
+        }
+
+        .claim-child .who {
+            font-size: .68rem;
+            color: var(--s500);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            font-weight: 700;
+        }
+
+        .claim-child .nm {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: .95rem;
+            color: var(--s800);
+        }
+
+        .claim-state {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .claim-state i {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .claim-state.err i {
+            color: var(--red);
+        }
+
+        .claim-state.ok i {
+            color: var(--green-600);
+        }
+
+        .claim-state h2 {
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            margin-bottom: 8px;
+            color: var(--s800);
+        }
+
+        .claim-state p {
+            font-size: .84rem;
+            color: var(--s500);
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .pw-req {
+            font-size: .72rem;
+            color: var(--s500);
+            margin-top: 6px;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+</head>
+
+<body class="auth-page-body">
+    <div class="auth-bg">
+        <div class="auth-bg-gradient"></div>
+        <div class="auth-bg-grid"></div>
+        <div class="auth-orb auth-orb-1"></div>
+        <div class="auth-orb auth-orb-2"></div>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="auth-logo-icon"><i class="fa-solid fa-brain"></i></div>
+                <span class="auth-logo-text">NAADI AI</span>
+            </div>
+
+            <div id="loading" class="claim-state">
+                <i class="fa-solid fa-circle-notch fa-spin" style="color:var(--g500)"></i>
+                <p>Checking your invite…</p>
+            </div>
+
+            <div id="error" class="claim-state err hidden">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <h2 id="error-title">This link doesn't work</h2>
+                <p id="error-body"></p>
+            </div>
+
+            <div id="done" class="claim-state ok hidden">
+                <i class="fa-solid fa-circle-check"></i>
+                <h2>You're all set</h2>
+                <p id="done-body"></p>
+                <p style="margin-top:18px;font-weight:600;color:var(--s700)">
+                    Open the NAADI AI app and sign in with this email.
+                </p>
+            </div>
+
+            <div id="form-wrap" class="hidden">
+                <h1 class="auth-heading">Set your password</h1>
+                <p class="auth-subheading">One step, and you're in.</p>
+
+                <div class="claim-child">
+                    <div class="ini" id="child-ini">?</div>
+                    <div>
+                        <div class="who">You'll be tracking</div>
+                        <div class="nm" id="child-name">—</div>
+                    </div>
+                </div>
+
+                <form onsubmit="submitClaim(event)">
+                    <div class="form-group">
+                        <label class="form-label">Your email</label>
+                        <div class="form-input-wrap">
+                            <input type="email" class="form-input" id="email" disabled>
+                            <i class="fa-regular fa-envelope"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Choose a password</label>
+                        <div class="form-input-wrap">
+                            <input type="password" class="form-input" id="pw" placeholder="At least 6 characters"
+                                required autocomplete="new-password" minlength="6">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <div class="pw-req">Use something only you would guess.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirm password</label>
+                        <div class="form-input-wrap">
+                            <input type="password" class="form-input" id="pw2" placeholder="Type it again" required
+                                autocomplete="new-password">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-login" id="btn">
+                        <i class="fa-solid fa-check"></i> Create my account
+                    </button>
+                </form>
+
+                <div class="msg-box error" id="msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const token = new URLSearchParams(location.search).get('token') || '';
+
+        function show(id) { document.getElementById(id).classList.remove('hidden'); }
+        function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function fail(title, body) {
+            hide('loading'); hide('form-wrap');
+            document.getElementById('error-title').textContent = title;
+            document.getElementById('error-body').textContent = body;
+            show('error');
+        }
+
+        function initials(name) {
+            const p = String(name || '').trim().split(/\s+/).filter(Boolean);
+            return p.slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+        }
+
+        // Public endpoints — no token, so a plain fetch, not apiCall().
+        async function pub(path, method, body) {
+            const res = await fetch(`${API_BASE}${path}`, {
+                method: method || 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : undefined
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) throw Object.assign(new Error(json.error || 'Request failed'),
+                { code: json.code, status: res.status });
+            return json;
+        }
+
+        (async function load() {
+            if (!token) return fail("This link doesn't work", 'The invite link is missing its token. Ask your child to resend the invite.');
+            try {
+                const inv = await pub(`/api/parent/invite/${encodeURIComponent(token)}`);
+                document.getElementById('child-name').textContent = inv.student_name;
+                document.getElementById('child-ini').textContent = initials(inv.student_name);
+                document.getElementById('email').value = inv.guardian_email;
+                hide('loading'); show('form-wrap');
+            } catch (e) {
+                const titles = {
+                    CLAIMED: 'This invite was already used',
+                    EXPIRED: 'This invite has expired',
+                    BAD_TOKEN: "This link doesn't work"
+                };
+                fail(titles[e.code] || "This link doesn't work",
+                    e.message || 'Ask your child to resend the invite from their Profile screen.');
+            }
+        })();
+
+        async function submitClaim(ev) {
+            ev.preventDefault();
+            const pw = document.getElementById('pw').value;
+            const pw2 = document.getElementById('pw2').value;
+            const msg = document.getElementById('msg');
+            const btn = document.getElementById('btn');
+
+            msg.classList.remove('show');
+            if (pw !== pw2) {
+                msg.textContent = "Those passwords don't match.";
+                msg.classList.add('show');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = 'Creating your account…';
+            try {
+                const res = await pub('/api/parent/claim', 'POST', { token, password: pw });
+                hide('form-wrap');
+                document.getElementById('done-body').textContent = res.message;
+                show('done');
+            } catch (e) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Create my account';
+                msg.textContent = e.message;
+                msg.classList.add('show');
+            }
+        }
+    </script>
+</body>
+
+</html>

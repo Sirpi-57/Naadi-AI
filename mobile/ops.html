@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-bars="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NAADI AI — Ops Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles-mobile.css">
+    <link rel="stylesheet" href="portal.css">
+    <link rel="stylesheet" href="ops.css">
+    <link rel="stylesheet" href="ops-ai.css">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+
+<body class="adm-body">
+
+    <!-- ── Boot gate ─────────────────────────────────────────────── -->
+    <div id="adm-boot" class="pt-boot">
+        <i class="fa-solid fa-brain"></i>
+        <div class="pt-boot-spin"></div>
+    </div>
+
+    <!-- ── Wrong-role wall ───────────────────────────────────────── -->
+    <div id="adm-wall" class="pt-wall hidden">
+        <i class="fa-solid fa-door-closed"></i>
+        <h2>This isn't your door</h2>
+        <p id="adm-wall-body">This console is for NAADI administrators only.</p>
+        <button class="pt-btn" onclick="location.replace('ops-login.html')">Back to login</button>
+    </div>
+
+    <!-- ── Sidebar ───────────────────────────────────────────────── -->
+    <aside class="adm-side hidden" id="adm-side">
+        <div class="adm-brand">
+            <div class="pt-logo"><i class="fa-solid fa-brain"></i></div>
+            <div>
+                <b>NAADI <span>OPS</span></b>
+                <small>Admin console</small>
+            </div>
+        </div>
+        <nav class="adm-nav" id="adm-nav"></nav>
+        <div class="adm-side-foot">
+            <div class="adm-me" id="adm-me">—</div>
+            <button class="adm-nav-item" onclick="admLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Log out</span>
+            </button>
+        </div>
+    </aside>
+    <div class="adm-nav-backdrop hidden" id="adm-nav-backdrop" onclick="admNav(false)"></div>
+
+    <!-- ── Top bar + main ────────────────────────────────────────── -->
+    <header class="adm-top hidden" id="adm-top">
+        <button class="adm-refresh adm-menu-btn" onclick="admNav(true)" aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div style="flex:1;min-width:0">
+            <div class="adm-top-title" id="adm-top-title">Overview</div>
+            <div class="adm-top-sub" id="adm-top-sub"></div>
+        </div>
+        <button class="adm-refresh" id="adm-refresh" onclick="admRefresh()" title="Refresh">
+            <i class="fa-solid fa-rotate"></i>
+        </button>
+    </header>
+
+    <main class="adm-main hidden" id="adm-main">
+        <section class="adm-screen" id="adm-screen-overview"></section>
+        <section class="adm-screen hidden" id="adm-screen-schools"></section>
+        <section class="adm-screen hidden" id="adm-screen-students"></section>
+        <section class="adm-screen hidden" id="adm-screen-teachers"></section>
+        <section class="adm-screen hidden" id="adm-screen-parents"></section>
+        <section class="adm-screen hidden" id="adm-screen-tests"></section>
+        <section class="adm-screen hidden" id="adm-screen-joining"></section>
+        <section class="adm-screen hidden" id="adm-screen-payments"></section>
+        <section class="adm-screen hidden" id="adm-screen-support"></section>
+        <!-- Safety: reports raised from student <-> teacher conversations. -->
+        <section class="adm-screen hidden" id="adm-screen-safety"></section>
+        <section class="adm-screen hidden" id="adm-screen-aicost"></section>
+    </main>
+
+    <!-- ── Student drawer ────────────────────────────────────────── -->
+    <div class="adm-drawer-backdrop hidden" id="adm-drawer-backdrop" onclick="closeDrawer()"></div>
+    <aside class="adm-drawer hidden" id="adm-drawer">
+        <header class="adm-drawer-bar">
+            <div class="adm-drawer-title" id="adm-drawer-title">Student</div>
+            <button class="pt-icon-btn" onclick="closeDrawer()" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
+        <div class="adm-drawer-body" id="adm-drawer-body"></div>
+    </aside>
+
+    <!-- ── Test review sheet (reuses the portal's .pt-sheet grammar) ── -->
+    <div class="pt-sheet hidden" id="adm-sheet">
+        <header class="pt-sheet-bar">
+            <button class="pt-icon-btn" onclick="closeSheet()" aria-label="Back">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div class="pt-sheet-title" id="adm-sheet-title">Review</div>
+            <div style="width:40px"></div>
+        </header>
+        <div class="pt-sheet-body" id="adm-sheet-body"></div>
+    </div>
+
+    <div class="adm-toast hidden" id="adm-toast"></div>
+
+    <script src="shared.js"></script>
+    <script src="ops.js"></script>
+    <script src="ops-ai.js"></script>
+</body>
+
+</html>

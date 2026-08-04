@@ -1,0 +1,481 @@
+/* ════════════════════════════════════════════════════════════════
+   NAADI AI — PROFILE (profile.css)
+   ─────────────────────────────────────────────────────────────────
+   Loaded LAST in app.html, after practice-v2.css. Adds only .pf-*
+   classes — nothing here overrides an existing selector.
+
+   SURFACE: the app shell is light (white cards on --s50), so Profile
+   is light too. The one dark element is the gradient hero at the top,
+   which is the same blue→teal ramp used everywhere else. No new
+   colours. Red appears nowhere: it stays reserved for traps and
+   wrong answers.
+   ════════════════════════════════════════════════════════════════ */
+
+.pf-wrap {
+    padding-bottom: 96px;
+    /* room for the sticky save bar */
+}
+
+/* ── Hero ──────────────────────────────────────────────────────── */
+.pf-hero {
+    position: relative;
+    margin: 0 0 18px;
+    padding: 26px 20px 24px;
+    background: linear-gradient(135deg, #2f6cb3 0%, #1f5896 55%, #0f6f8c 100%);
+    color: #fff;
+    text-align: center;
+    overflow: hidden;
+}
+
+.pf-hero::after {
+    content: '';
+    position: absolute;
+    right: -60px;
+    top: -70px;
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .07);
+}
+
+.pf-avatar-btn {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    margin: 0 auto;
+    border: none;
+    padding: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    display: block;
+    background: rgba(255, 255, 255, .16);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .28);
+}
+
+.pf-avatar-btn img,
+.pf-avatar-initials {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    border: 3px solid rgba(255, 255, 255, .30);
+}
+
+.pf-avatar-edit {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--g600);
+    display: grid;
+    place-items: center;
+    font-size: .78rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .3);
+}
+
+.pf-hero-name {
+    margin-top: 14px;
+    font-family: var(--font-display);
+    font-size: 1.32rem;
+    font-weight: 800;
+    letter-spacing: -.01em;
+}
+
+.pf-hero-mail {
+    margin-top: 4px;
+    font-size: .84rem;
+    color: rgba(255, 255, 255, .72);
+    word-break: break-all;
+}
+
+.pf-hero-chips {
+    margin-top: 14px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.pf-hero-chip {
+    padding: 6px 13px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .15);
+    border: 1px solid rgba(255, 255, 255, .22);
+    font-size: .76rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pf-upload-bar {
+    margin-top: 12px;
+    font-size: .78rem;
+    color: rgba(255, 255, 255, .85);
+}
+
+/* ── Cards ─────────────────────────────────────────────────────── */
+.pf-card {
+    margin: 0 14px 14px;
+    background: #fff;
+    border: 1px solid var(--s200);
+    border-radius: 16px;
+    padding: 16px 16px 18px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+.pf-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.pf-card-ico {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 9px;
+    background: var(--indigo-bg);
+    color: var(--indigo);
+    display: grid;
+    place-items: center;
+    font-size: .8rem;
+}
+
+.pf-card-title {
+    font-family: var(--font-display);
+    font-size: .98rem;
+    font-weight: 700;
+    color: var(--s900);
+}
+
+.pf-card-note {
+    margin: 2px 0 14px 40px;
+    font-size: .78rem;
+    line-height: 1.5;
+    color: var(--s500);
+}
+
+/* ── Fields ────────────────────────────────────────────────────── */
+.pf-field {
+    margin-top: 14px;
+}
+
+.pf-label {
+    display: block;
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--s500);
+    margin-bottom: 7px;
+}
+
+.pf-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 11px;
+    border: 1.5px solid var(--s200);
+    background: var(--s50);
+    font-family: var(--font-body);
+    font-size: .94rem;
+    color: var(--s900);
+    outline: none;
+    transition: border-color .18s, background .18s, box-shadow .18s;
+}
+
+.pf-input::placeholder {
+    color: var(--s400);
+}
+
+.pf-input:focus {
+    border-color: var(--g400);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(93, 146, 207, .16);
+}
+
+.pf-input:disabled,
+.pf-input[readonly] {
+    background: var(--s100);
+    color: var(--s500);
+    cursor: not-allowed;
+}
+
+.pf-hint {
+    margin-top: 6px;
+    font-size: .74rem;
+    line-height: 1.45;
+    color: var(--s400);
+}
+
+.pf-row {
+    display: flex;
+    gap: 10px;
+}
+
+.pf-row>* {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Segmented picker (class level, attempt) ───────────────────── */
+.pf-seg {
+    display: flex;
+    gap: 6px;
+    background: var(--s100);
+    padding: 4px;
+    border-radius: 12px;
+}
+
+.pf-seg button {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 4px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: .84rem;
+    font-weight: 700;
+    color: var(--s500);
+    cursor: pointer;
+    transition: background .18s, color .18s, box-shadow .18s;
+}
+
+.pf-seg button.on {
+    background: #fff;
+    color: var(--g600);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, .10);
+}
+
+/* ── Stars ─────────────────────────────────────────────────────── */
+.pf-stars {
+    display: flex;
+    gap: 8px;
+    margin: 6px 0 2px;
+}
+
+.pf-star {
+    background: none;
+    border: none;
+    padding: 4px;
+    font-size: 1.75rem;
+    line-height: 1;
+    color: var(--s300);
+    cursor: pointer;
+    transition: color .15s, transform .12s;
+}
+
+.pf-star.on {
+    color: var(--amber);
+}
+
+.pf-star:active {
+    transform: scale(1.18);
+}
+
+/* ── Buttons ───────────────────────────────────────────────────── */
+.pf-btn {
+    width: 100%;
+    min-height: 46px;
+    border-radius: 12px;
+    border: 1.5px solid var(--s200);
+    background: #fff;
+    color: var(--s700);
+    font-family: var(--font-body);
+    font-size: .9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    transition: background .18s, border-color .18s;
+}
+
+.pf-btn:active {
+    transform: scale(.985);
+}
+
+.pf-btn-primary {
+    border: none;
+    color: #fff;
+    background: linear-gradient(135deg, #2f6cb3 0%, #1f5896 100%);
+    box-shadow: 0 4px 16px rgba(47, 108, 179, .32);
+}
+
+.pf-btn-quiet {
+    background: var(--s50);
+}
+
+.pf-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+/* ── Sticky save bar (only when something has changed) ─────────── */
+.pf-savebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--tabbar-h) + var(--safe-bottom));
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, .96);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--s200);
+    transform: translateY(130%);
+    transition: transform .26s cubic-bezier(.2, .8, .2, 1);
+    z-index: 40;
+}
+
+.pf-savebar.up {
+    transform: none;
+}
+
+/* ── Modal (password change) ───────────────────────────────────── */
+.pf-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(15, 23, 42, .55);
+}
+
+.pf-modal.open {
+    display: flex;
+}
+
+.pf-sheet {
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 18px calc(20px + var(--safe-bottom));
+    animation: pfSheetUp .28s cubic-bezier(.2, .8, .2, 1);
+}
+
+@keyframes pfSheetUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: none;
+    }
+}
+
+.pf-sheet-title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--s900);
+    margin-bottom: 4px;
+}
+
+.pf-sheet-sub {
+    font-size: .82rem;
+    color: var(--s500);
+    line-height: 1.5;
+    margin-bottom: 6px;
+}
+
+.pf-sheet-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .pf-savebar,
+    .pf-sheet,
+    .pf-star {
+        transition: none;
+        animation: none;
+    }
+}
+
+.pf-btn:focus-visible,
+.pf-input:focus-visible,
+.pf-seg button:focus-visible,
+.pf-star:focus-visible,
+.pf-avatar-btn:focus-visible {
+    outline: 2px solid var(--g500);
+    outline-offset: 2px;
+}
+
+.pf-btn {
+    width: 100%;
+    min-height: 46px;
+    margin-top: 6px;
+    border: 0;
+    border-radius: 12px;
+    cursor: pointer;
+    background: var(--g600, #1f5896);
+    color: #fff;
+    font-family: inherit;
+    font-size: .9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.pf-btn:disabled {
+    opacity: .6;
+}
+
+.pf-linkrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.pf-linkrow-t {
+    font-size: .86rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.pf-linkrow-s {
+    font-size: .72rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.pf-linkrow-x {
+    margin-left: auto;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #c43d3d;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: .74rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pf-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: .84rem;
+    color: #334155;
+}

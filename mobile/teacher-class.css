@@ -1,0 +1,1691 @@
+/* ════════════════════════════════════════════════════════════════
+   NAADI AI — CLASS TAB  (teacher-class.css)
+   ─────────────────────────────────────────────────────────────────
+   Loads after teacher-home.css. Only .tcl-* classes are defined
+   here; .th-* and .pt-* are reused, not redefined. Tokens come from
+   styles-mobile.css.
+
+   THE BAR CHART ARGUMENT
+
+   Nothing here uses a charting library. Two reasons:
+
+     A histogram of five bands and a progress bar are both readable
+     as plain divs, and a div renders in 0ms with no bundle cost.
+
+     More importantly, a chart library invites charts nobody reads —
+     the radar plot, the donut, the sparkline with no axis. Every
+     visual in this file answers one question and is labelled with
+     that question in words.
+   ════════════════════════════════════════════════════════════════ */
+
+
+/* ════════════════════════════════════════════════════════════════
+   1 · FILTERS + VIEW TABS
+   ════════════════════════════════════════════════════════════════ */
+
+.tcl-filters {
+    padding: 12px 14px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tcl-fgroup {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+}
+
+.tcl-fgroup::-webkit-scrollbar {
+    display: none;
+}
+
+.tcl-chip {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--s200);
+    background: #fff;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: .78rem;
+    color: var(--s600);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.tcl-chip.sm {
+    padding: 6px 12px;
+    font-size: .72rem;
+}
+
+.tcl-chip.on {
+    border-color: var(--g600);
+    background: var(--g600);
+    color: #fff;
+}
+
+.tcl-locked {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: .72rem;
+    color: var(--s500);
+}
+
+.tcl-vtabs {
+    display: flex;
+    gap: 4px;
+    margin: 12px 14px 0;
+    padding: 4px;
+    background: var(--s100);
+    border-radius: 12px;
+}
+
+.tcl-vtab {
+    flex: 1;
+    padding: 9px 6px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: .78rem;
+    color: var(--s500);
+    cursor: pointer;
+}
+
+.tcl-vtab.on {
+    background: #fff;
+    color: var(--s900);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .09);
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   2 · NUMBERS AND BARS
+   ════════════════════════════════════════════════════════════════ */
+
+.tcl-two {
+    display: flex;
+    gap: 20px;
+    margin: 4px 0 6px;
+}
+
+.tcl-two>div {
+    flex: 1;
+    min-width: 0;
+}
+
+.tcl-big {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.7rem;
+    line-height: 1.05;
+    color: var(--s900);
+}
+
+.tcl-big span {
+    font-size: .84rem;
+    color: var(--s400);
+}
+
+.tcl-lbl {
+    font-size: .68rem;
+    color: var(--s500);
+    margin-top: 3px;
+    line-height: 1.35;
+}
+
+.tcl-bar {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--s100);
+    overflow: hidden;
+    min-width: 40px;
+}
+
+.tcl-bar-f {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--g500);
+}
+
+/* Coverage and mastery get DIFFERENT colours on purpose. They are
+   different questions, and a teacher scanning the page should never
+   have to check the label to know which one she is looking at. */
+.tcl-bar-f.cov {
+    background: var(--g400);
+}
+
+.tcl-bar-f.mas {
+    background: #2f9e5f;
+}
+
+.tcl-bar-f.studio {
+    background: #e2b13c;
+}
+
+.tcl-bar-f.bad {
+    background: var(--red);
+}
+
+.tcl-rows {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+}
+
+.tcl-row,
+.tcl-concept {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--s100);
+}
+
+.tcl-row:last-child,
+.tcl-concept:last-child {
+    border-bottom: 0;
+}
+
+.tcl-concept {
+    cursor: pointer;
+}
+
+.tcl-row-n {
+    flex: 0 0 auto;
+    max-width: 44%;
+    min-width: 0;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--s800);
+}
+
+.tcl-row-s {
+    display: block;
+    font-size: .66rem;
+    font-weight: 500;
+    color: var(--s500);
+    margin-top: 2px;
+}
+
+.tcl-row-v {
+    flex: 0 0 46px;
+    text-align: right;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .82rem;
+    color: var(--s700);
+}
+
+.tcl-row-v.low {
+    color: var(--red);
+}
+
+
+/* ── the two-number metric block ──────────────────────────────── */
+
+.tcl-subj {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--s100);
+}
+
+.tcl-subj:last-child {
+    border-bottom: 0;
+}
+
+.tcl-subj-h {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 9px;
+}
+
+.tcl-subj-meta {
+    font-size: .68rem;
+    color: var(--s500);
+    margin-left: auto;
+}
+
+.tcl-metric {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.tcl-metric-l {
+    flex: 0 0 92px;
+    font-size: .7rem;
+    color: var(--s600);
+}
+
+.tcl-metric-v {
+    flex: 0 0 44px;
+    text-align: right;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .8rem;
+    color: var(--s800);
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   3 · ARENA PAPERS
+   ════════════════════════════════════════════════════════════════ */
+
+.tcl-paper {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--s100);
+}
+
+.tcl-paper:last-child {
+    border-bottom: 0;
+}
+
+.tcl-paper-h {
+    display: flex;
+    justify-content: space-between;
+    font-size: .74rem;
+    color: var(--s700);
+}
+
+.tcl-paper-h span {
+    color: var(--s500);
+    font-size: .68rem;
+}
+
+.tcl-paper-r {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.tcl-paper-avg {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--s900);
+}
+
+.tcl-paper-avg i,
+.tcl-psub i {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--s400);
+    font-size: .74rem;
+}
+
+.tcl-paper-span {
+    font-size: .68rem;
+    color: var(--s500);
+}
+
+.tcl-psubs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 7px;
+}
+
+.tcl-psub {
+    font-size: .68rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 7px;
+    background: var(--s100);
+    color: var(--s700);
+}
+
+.tcl-psub.bio {
+    background: #e8f5ec;
+    color: #1c6b3a;
+}
+
+.tcl-psub.phy {
+    background: #eaf1fb;
+    color: var(--g700);
+}
+
+.tcl-psub.chem {
+    background: #fdeee6;
+    color: #9c4a1a;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   4 · ENGAGEMENT
+   ════════════════════════════════════════════════════════════════ */
+
+.tcl-eng {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 10px;
+}
+
+.tcl-eng-i {
+    padding: 10px 8px;
+    border-radius: 11px;
+    background: var(--s50);
+    text-align: center;
+}
+
+.tcl-eng-i.warn {
+    background: #fdf3ec;
+}
+
+.tcl-eng-v {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--s900);
+}
+
+.tcl-eng-i.warn .tcl-eng-v {
+    color: #9c4a1a;
+}
+
+.tcl-eng-k {
+    font-size: .64rem;
+    color: var(--s500);
+    margin-top: 2px;
+    line-height: 1.3;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   5 · STUDIO vs TESTED
+   ════════════════════════════════════════════════════════════════ */
+
+.tcl-split {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--s100);
+}
+
+.tcl-split:last-child {
+    border-bottom: 0;
+}
+
+.tcl-split .tcl-row-n {
+    max-width: none;
+}
+
+.tcl-splitbar,
+.tcl-states {
+    display: flex;
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--s100);
+    margin: 8px 0 6px;
+}
+
+.tcl-seg {
+    height: 100%;
+    min-width: 0;
+}
+
+.tcl-seg.done {
+    background: #2f9e5f;
+}
+
+.tcl-seg.doing {
+    background: var(--g500);
+}
+
+.tcl-seg.read {
+    background: #e2b13c;
+}
+
+.tcl-seg.none {
+    background: var(--s200);
+}
+
+.tcl-split-n {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: .68rem;
+    color: var(--s500);
+}
+
+.tcl-split-n .amber {
+    color: #9c4a1a;
+    font-weight: 600;
+}
+
+.tcl-split-n .blue {
+    color: var(--g600);
+    font-weight: 600;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   6 · CHAPTERS
+   ════════════════════════════════════════════════════════════════ */
+
+.tcl-ch {
+    padding: 11px 8px;
+    margin: 0 -8px;
+    border-bottom: 1px solid var(--s100);
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.tcl-ch:last-child {
+    border-bottom: 0;
+}
+
+.tcl-ch-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tcl-ch-top .tcl-row-n {
+    max-width: none;
+    flex: 1;
+}
+
+/* Both numbers, always adjacent, always labelled. The label is what
+   stops "44%" being read as a grade. */
+.tcl-ch-nums {
+    display: flex;
+    gap: 14px;
+    flex: 0 0 auto;
+}
+
+.tcl-ch-nums span {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .88rem;
+    color: var(--s800);
+    text-align: right;
+}
+
+.tcl-ch-nums span.low {
+    color: var(--red);
+}
+
+.tcl-ch-nums i {
+    display: block;
+    font-style: normal;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: .6rem;
+    color: var(--s500);
+    margin-top: 1px;
+}
+
+.tcl-ch-s {
+    font-size: .66rem;
+    color: var(--s500);
+}
+
+.tcl-pick {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.tcl-pickb {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px;
+    border-radius: 13px;
+    border: 1.5px solid var(--s200);
+    background: #fff;
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+
+.tcl-pickb b {
+    display: block;
+    font-family: var(--font-display);
+    font-size: .92rem;
+    color: var(--s900);
+}
+
+.tcl-pickb span {
+    font-size: .72rem;
+    color: var(--s500);
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   7 · HISTOGRAM
+   ════════════════════════════════════════════════════════════════ */
+
+.tcl-hist {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 168px;
+    margin: 6px 0 4px;
+}
+
+.tcl-hbar {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+    gap: 5px;
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+
+.tcl-hbar.empty {
+    cursor: default;
+    opacity: .45;
+}
+
+.tcl-hcount {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .84rem;
+    color: var(--s800);
+    text-align: center;
+}
+
+.tcl-hfill {
+    background: var(--g500);
+    border-radius: 7px 7px 3px 3px;
+    min-height: 3px;
+    transition: opacity .14s;
+}
+
+.tcl-hbar.bad .tcl-hfill {
+    background: var(--red);
+}
+
+.tcl-hbar.good .tcl-hfill {
+    background: #2f9e5f;
+}
+
+.tcl-hlabel {
+    font-size: .62rem;
+    color: var(--s500);
+    text-align: center;
+}
+
+.tcl-bandlist {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--s100);
+}
+
+.tcl-bandhead {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--s700);
+    margin-bottom: 6px;
+}
+
+.tcl-names {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.tcl-names span {
+    font-size: .72rem;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--s100);
+    color: var(--s700);
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   8 · GRID  (single column on a phone)
+   ════════════════════════════════════════════════════════════════ */
+
+.tcl-grid {
+    display: block;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   9 · TABLET (≥768px)
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) {
+
+    .tcl-filters {
+        flex-direction: row;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
+    }
+
+    .tcl-vtabs {
+        max-width: 420px;
+    }
+
+    .tcl-hist {
+        height: 200px;
+        gap: 14px;
+    }
+}
+
+
+
+/* ════════════════════════════════════════════════════════════════
+   9b · INFO BUTTONS, LEVELS, LOST-IT, CHAPTER PICKER
+   ════════════════════════════════════════════════════════════════ */
+
+/* Every metric carries an "i". A teacher should never have to guess
+   what a number counts, and a legend she has to hunt for is the same
+   as no explanation at all. */
+.tcl-i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-left: 5px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--s300);
+    background: #fff;
+    color: var(--s500);
+    font-family: var(--font-display);
+    font-size: .62rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.tcl-i:hover {
+    border-color: var(--g500);
+    color: var(--g600);
+    background: var(--g50);
+}
+
+.tcl-h {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tcl-h-meta {
+    font-size: .68rem;
+    color: var(--s500);
+    white-space: nowrap;
+}
+
+.tcl-tip {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(15, 23, 42, .5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 16px;
+}
+
+.tcl-tip.hidden {
+    display: none;
+}
+
+.tcl-tip-box {
+    background: #fff;
+    border-radius: 18px;
+    padding: 20px;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, .22);
+}
+
+.tcl-tip-body {
+    font-size: .82rem;
+    line-height: 1.6;
+    color: var(--s700);
+}
+
+.tcl-tip-x {
+    margin-top: 16px;
+    width: 100%;
+    padding: 11px;
+    border: 0;
+    border-radius: 11px;
+    background: var(--g600);
+    color: #fff;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: .82rem;
+    cursor: pointer;
+}
+
+/* Per-year rows inside a subject. Indented so the year reads as a
+   subdivision of the subject rather than a sibling of it. */
+.tcl-lvlnote {
+    font-size: .66rem;
+    color: var(--s500);
+    margin: 8px 0 4px;
+}
+
+.tcl-lvl {
+    padding: 8px 0 4px 10px;
+    border-left: 2px solid var(--s100);
+    margin-bottom: 6px;
+}
+
+.tcl-lvl-h {
+    display: flex;
+    justify-content: space-between;
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--s700);
+    margin-bottom: 6px;
+}
+
+.tcl-lvl-h span {
+    font-weight: 500;
+    color: var(--s500);
+}
+
+.tcl-sample {
+    font-size: .62rem;
+    color: var(--s400);
+}
+
+/* What was lost, not just who lost it. */
+.tcl-lost {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--s100);
+}
+
+.tcl-lost:last-child {
+    border-bottom: 0;
+}
+
+.tcl-lost-h {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: 700;
+    font-size: .8rem;
+    color: var(--s900);
+}
+
+.tcl-lost-q {
+    font-size: .74rem;
+    line-height: 1.5;
+    color: var(--s600);
+    background: var(--s50);
+    border-radius: 9px;
+    padding: 9px 11px;
+    margin: 7px 0;
+}
+
+/* Chapter picker: ~20 per subject per year, so grouped with counts
+   rather than one 40-wide scroll strip. */
+.tcl-chapsel {
+    padding: 0 14px 4px;
+}
+
+.tcl-chapgrp {
+    margin-top: 10px;
+}
+
+.tcl-chapgrp-h {
+    font-size: .66rem;
+    font-weight: 600;
+    color: var(--s500);
+    margin-bottom: 6px;
+}
+
+.tcl-fgroup.wrap {
+    flex-wrap: wrap;
+    overflow: visible;
+}
+
+.tcl-fgroup.wrap .tcl-chip {
+    max-width: 190px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+
+/* A visible, explainable gap beats a silent zero. When Studio reading
+   cannot be tied to a syllabus chapter, say so in the card rather than
+   folding it into 0% — that silence is what hid the id mismatch. */
+.tcl-warnbox {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-top: 12px;
+    padding: 11px 12px;
+    border-radius: 11px;
+    background: #fdf3ec;
+    border: 1px solid #f2d9c4;
+    font-size: .72rem;
+    line-height: 1.5;
+    color: #7c3d13;
+}
+
+.tcl-warnbox i {
+    color: #c07c12;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.tcl-warnbox b {
+    display: block;
+    margin-bottom: 2px;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   9c · SENTENCES + QUESTION DETAIL
+   ════════════════════════════════════════════════════════════════ */
+
+/* One sentence instead of four counts. "0 both · 0 read only · 2 tested
+   only · 0 neither" is three zeros and a fact; this is the fact. */
+.tcl-sentence {
+    font-size: .72rem;
+    line-height: 1.5;
+    color: var(--s600);
+}
+
+/* ── the convergence headline ─────────────────────────────────────
+   Deliberately the loudest thing in the sheet. "22 students all chose
+   C" is the finding; the question text below it is the evidence. */
+.tcl-converge {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #fdf3ec, #fdeee6);
+    border-color: #f2d9c4;
+}
+
+.tcl-conv-big {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2.4rem;
+    line-height: 1;
+    color: #9c4a1a;
+    flex: 0 0 auto;
+}
+
+.tcl-conv-txt {
+    font-size: .82rem;
+    line-height: 1.5;
+    color: #7c3d13;
+}
+
+.tcl-conv-txt b {
+    font-weight: 700;
+}
+
+.tcl-conv-txt span {
+    display: block;
+    margin-top: 6px;
+    font-size: .72rem;
+    opacity: .85;
+}
+
+.tcl-qmeta {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+/* Question stems run long and carry subscripts. Comfortable measure,
+   generous line height, and sub/sup that don't wreck the leading. */
+.tcl-qfull {
+    font-size: .92rem;
+    line-height: 1.65;
+    color: var(--s900);
+    margin-bottom: 16px;
+}
+
+.tcl-qfull sub,
+.tcl-opt-text sub,
+.tcl-qexpl sub {
+    font-size: .7em;
+    vertical-align: sub;
+    line-height: 0;
+}
+
+.tcl-qfull sup,
+.tcl-opt-text sup,
+.tcl-qexpl sup {
+    font-size: .7em;
+    vertical-align: super;
+    line-height: 0;
+}
+
+.tcl-opts {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.tcl-opt {
+    padding: 11px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--s200);
+    background: #fff;
+}
+
+.tcl-opt.right {
+    border-color: #9ed4b4;
+    background: #f2fbf5;
+}
+
+/* The wrong option most of the class picked. It gets the strongest
+   treatment on the screen after the headline, because it is the thing
+   worth teaching to. */
+.tcl-opt.trap {
+    border-color: #e8b4b4;
+    background: #fdf5f5;
+}
+
+.tcl-opt-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.tcl-opt-key {
+    flex: 0 0 24px;
+    height: 24px;
+    border-radius: 7px;
+    background: var(--s100);
+    color: var(--s600);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .74rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tcl-opt.right .tcl-opt-key {
+    background: #2f9e5f;
+    color: #fff;
+}
+
+.tcl-opt.trap .tcl-opt-key {
+    background: var(--red);
+    color: #fff;
+}
+
+.tcl-opt-text {
+    flex: 1;
+    min-width: 0;
+    font-size: .82rem;
+    line-height: 1.5;
+    color: var(--s800);
+}
+
+.tcl-opt-n {
+    flex: 0 0 auto;
+    font-size: .68rem;
+    font-weight: 700;
+    color: var(--s500);
+    white-space: nowrap;
+}
+
+.tcl-opt.right .tcl-opt-n {
+    color: #1c6b3a;
+}
+
+.tcl-opt.trap .tcl-opt-n {
+    color: var(--red);
+}
+
+.tcl-opt-bar {
+    height: 5px;
+    border-radius: 999px;
+    background: var(--s100);
+    overflow: hidden;
+    margin: 8px 0 0 34px;
+}
+
+.tcl-opt-bar div {
+    height: 100%;
+    background: var(--s300);
+}
+
+.tcl-opt.right .tcl-opt-bar div {
+    background: #2f9e5f;
+}
+
+.tcl-opt.trap .tcl-opt-bar div {
+    background: var(--red);
+}
+
+.tcl-opt-who {
+    margin: 7px 0 0 34px;
+    font-size: .66rem;
+    color: var(--s500);
+    line-height: 1.5;
+}
+
+.tcl-opt-why {
+    margin: 8px 0 0 34px;
+    font-size: .72rem;
+    line-height: 1.5;
+    color: var(--s600);
+    padding-left: 10px;
+    border-left: 2px solid var(--s200);
+}
+
+.tcl-qexpl,
+.tcl-qmis,
+.tcl-qquote {
+    font-size: .82rem;
+    line-height: 1.6;
+    color: var(--s700);
+}
+
+.tcl-qmis {
+    padding: 9px 11px;
+    border-radius: 9px;
+    background: #fdf3ec;
+    color: #7c3d13;
+    margin-bottom: 7px;
+    font-size: .76rem;
+}
+
+.tcl-qquote {
+    padding-left: 12px;
+    border-left: 3px solid var(--g200);
+    color: var(--s600);
+    font-style: italic;
+}
+
+
+/* Tap affordance on a missed question. Without it the row looks like a
+   static list item and the breakdown behind it goes undiscovered. */
+.tcl-qtap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: .68rem;
+    font-weight: 600;
+    color: var(--g600);
+}
+
+.tcl-qtap i {
+    font-size: .6rem;
+}
+
+.th-q sub,
+.th-q sup,
+.tcl-lost-q sub,
+.tcl-lost-q sup,
+.th-mis-b sub,
+.th-mis-b sup {
+    font-size: .72em;
+    line-height: 0;
+}
+
+.th-q sub,
+.tcl-lost-q sub,
+.th-mis-b sub {
+    vertical-align: sub;
+}
+
+.th-q sup,
+.tcl-lost-q sup,
+.th-mis-b sup {
+    vertical-align: super;
+}
+
+
+/* A chapter with reading material but no question bank. Muted rather
+   than alarming: it is a content state, not a class problem. */
+.tcl-ch.reading-only {
+    background: #fffdf7;
+}
+
+.tcl-badge {
+    display: inline-block;
+    margin-left: 7px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #fdf3ec;
+    color: #9c4a1a;
+    font-size: .6rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   9d · TWO-TRACK CHAPTER ROW, MODE TOGGLE, SHEET TABS
+   ════════════════════════════════════════════════════════════════ */
+
+/* One bar could not tell the truth about a chapter: reading progress and
+   test performance measure different material. Two tracks, each its own
+   tap target, each opening its own side of the story. */
+.tcl-ch2 {
+    padding: 12px 10px;
+    margin: 0 -10px;
+    border-bottom: 1px solid var(--s100);
+    border-radius: 10px;
+}
+
+.tcl-ch2:last-child {
+    border-bottom: 0;
+}
+
+.tcl-ch2.reading-only {
+    background: #fffdf7;
+}
+
+.tcl-ch2-head {
+    margin-bottom: 8px;
+}
+
+.tcl-ch2 .tcl-row-n {
+    max-width: none;
+    font-size: .82rem;
+}
+
+.tcl-track {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 6px 6px;
+    margin: 0 -6px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    font-family: var(--font-body);
+    cursor: pointer;
+    text-align: left;
+}
+
+.tcl-track:disabled,
+.tcl-track.off {
+    cursor: default;
+    opacity: .55;
+}
+
+.tk-lbl {
+    flex: 0 0 54px;
+    font-size: .68rem;
+    font-weight: 600;
+    color: var(--s500);
+}
+
+.tcl-track .tcl-bar {
+    flex: 1;
+}
+
+.tk-val {
+    flex: 0 0 52px;
+    text-align: right;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .8rem;
+    color: var(--s800);
+}
+
+.tk-val.low {
+    color: var(--red);
+}
+
+.tk-go {
+    flex: 0 0 auto;
+    font-size: .6rem;
+    color: var(--s300);
+}
+
+/* Test scores vs reading progress: same chart, different question. A
+   toggle keeps them side by side without ever mixing the two units on
+   one axis. */
+.tcl-modebar {
+    padding: 0 14px;
+}
+
+.tcl-modes {
+    display: inline-flex;
+    gap: 3px;
+    padding: 3px;
+    background: var(--s100);
+    border-radius: 10px;
+}
+
+.tcl-mode {
+    padding: 7px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: .74rem;
+    color: var(--s500);
+    cursor: pointer;
+}
+
+.tcl-mode.on {
+    background: #fff;
+    color: var(--s900);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .09);
+}
+
+.tcl-sheettabs {
+    display: flex;
+    gap: 3px;
+    margin: 14px 14px 0;
+    padding: 3px;
+    background: var(--s100);
+    border-radius: 10px;
+}
+
+.tcl-sheettabs button {
+    flex: 1;
+    padding: 9px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: .78rem;
+    color: var(--s500);
+    cursor: pointer;
+}
+
+.tcl-sheettabs button.on {
+    background: #fff;
+    color: var(--s900);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .09);
+}
+
+.tcl-chapgrp-h {
+    align-self: center;
+    margin: 0 4px 0 10px;
+    font-size: .64rem;
+    font-weight: 700;
+    color: var(--s400);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   10 · DESKTOP (≥1024px) — the cockpit
+
+   ─────────────────────────────────────────────────────────────────
+   THE OVERRIDE THIS TIER EXISTS TO UNDO
+
+   portal-desktop.css loads AFTER this file and contains:
+
+       body.is-teacher #pt-class-body {
+           display: grid;
+           grid-template-columns: repeat(2, minmax(0, 1fr));
+       }
+
+   That was written for the OLD Class tab, whose children were a flat
+   list of .pt-sec cards that paired up nicely. This page renders a
+   filter row, a tab strip and its own .tcl-grid — all of which become
+   grid ITEMS in that inherited 2-column grid and get squashed into
+   half-width columns in source order. The filter row ends up beside
+   the tab strip; the whole layout collapses to a narrow ribbon.
+
+   Because portal-desktop.css loads later and matches with equal
+   specificity, the only reliable fix is to re-assert a MORE specific
+   selector here. `body.is-teacher #pt-class-body` is (0,1,1,1) — the
+   same. Adding one class raises this to (0,1,2,1) and wins on merit
+   rather than on !important.
+
+   Everything below assumes that reset has happened.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* ── 10.1 · Undo the inherited grid ───────────────────────────
+       Higher specificity than portal-desktop.css's rule, so this wins
+       without !important and without editing that file. */
+    body.is-teacher #pt-class-body.tcl-root,
+    body.is-teacher #pt-home-body.tcl-root {
+        display: block;
+        grid-template-columns: none;
+        gap: 0;
+        padding-top: 0;
+        margin-top: 0;
+    }
+
+    /* Direct children of that container had margin:0 forced on them
+       for the old grid. Restore normal flow spacing. */
+    body.is-teacher #pt-class-body.tcl-root>.pt-sec,
+    body.is-teacher #pt-home-body.tcl-root>.pt-sec {
+        margin: 16px 0 0;
+        grid-column: auto;
+    }
+
+
+    /* ── 10.2 · Page frame ────────────────────────────────────────
+       One shared max-width so the filter row, the tab strip and the
+       content columns all line up on the same left edge. Nothing here
+       is centred independently — misaligned left edges are the single
+       most common way a desktop dashboard looks unfinished. */
+    .tcl-root .tcl-filters,
+    .tcl-root .tcl-vtabs,
+    .tcl-root .tcl-grid,
+    .tcl-root #tcl-chapters,
+    .tcl-root #tcl-dist {
+        max-width: var(--dsk-content);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* ── 10.3 · Filters and tabs share one row ────────────────────
+       On a phone these stack. On a laptop there is room for both, and
+       putting them on one line buys ~70px of vertical space — which
+       is the difference between the first data card being above or
+       below the fold on a 768px-tall laptop screen. */
+    .tcl-root .tcl-toprow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        max-width: var(--dsk-content);
+        margin: 20px auto 0;
+        padding: 0;
+    }
+
+    .tcl-root .tcl-toprow .tcl-filters {
+        flex: 1;
+        min-width: 0;
+        flex-direction: row;
+        align-items: center;
+        gap: 18px;
+        padding: 0;
+        margin: 0;
+    }
+
+    .tcl-root .tcl-toprow .tcl-vtabs {
+        flex: 0 0 auto;
+        margin: 0;
+        max-width: none;
+    }
+
+    /* Filter chips can wrap on a wide screen rather than scroll —
+       a horizontal scroll strip is a touch affordance and reads as
+       broken with a mouse. */
+    .tcl-root .tcl-fgroup {
+        overflow: visible;
+        flex-wrap: wrap;
+    }
+
+
+    /* ── 10.4 · The two-column body ───────────────────────────────
+       6:5 rather than 50:50. The left column carries Studio and Tests
+       — the syllabus story, and the reason she opened the tab. The
+       right carries papers, retakes and engagement, which are
+       reference she consults rather than scans. */
+    .tcl-root .tcl-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+        gap: 20px;
+        align-items: start;
+        margin-top: 4px;
+    }
+
+    .tcl-root .tcl-col {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .tcl-root .tcl-col>.pt-sec {
+        margin: 0 0 20px;
+    }
+
+    .tcl-root .tcl-col>.pt-sec:last-child {
+        margin-bottom: 0;
+    }
+
+    /* The read-vs-tested block sits below both columns at full width:
+       it is a per-chapter table and needs the horizontal room. */
+    .tcl-root .tcl-grid+.pt-sec {
+        max-width: var(--dsk-content);
+        margin: 20px auto 0;
+    }
+
+
+    /* ── 10.5 · Chapters and distribution views ───────────────────
+       Chapter rows get two columns of their own on wide screens.
+       At 1120px a single list of 20 chapters wastes half the width. */
+    .tcl-root #tcl-chapters>.pt-sec,
+    .tcl-root #tcl-dist>.pt-sec {
+        margin: 20px auto 0;
+    }
+
+    .tcl-root .tcl-rows.two-up {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 28px;
+    }
+
+    .tcl-root .tcl-ch,
+    .tcl-root .tcl-concept {
+        transition: background .14s;
+    }
+
+    .tcl-root .tcl-ch:hover,
+    .tcl-root .tcl-concept:hover {
+        background: var(--s50);
+    }
+
+
+    /* ── 10.6 · Sizing up ─────────────────────────────────────────
+       Mobile type is tuned for a 380px column read at arm's length.
+       At 1120px the same sizes look timid, so the headline numbers
+       and the histogram both grow. */
+    .tcl-root .tcl-big {
+        font-size: 2rem;
+    }
+
+    .tcl-root .tcl-hist {
+        height: 230px;
+        gap: 18px;
+    }
+
+    .tcl-root .tcl-hlabel {
+        font-size: .68rem;
+    }
+
+    .tcl-root .tcl-hcount {
+        font-size: .95rem;
+    }
+
+    .tcl-root .tcl-row-n {
+        font-size: .82rem;
+        max-width: 48%;
+    }
+
+    .tcl-root .tcl-metric-l {
+        flex: 0 0 108px;
+        font-size: .74rem;
+    }
+
+    .tcl-root .tcl-eng {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+
+    /* ── 10.7 · Pointer affordances ───────────────────────────────
+       Hover states only exist above this breakpoint. On a touch screen
+       :hover sticks after a tap and leaves a row looking selected when
+       it isn't. */
+    .tcl-root .tcl-chip,
+    .tcl-root .tcl-vtab,
+    .tcl-root .tcl-pickb {
+        transition: background .14s, border-color .14s, color .14s;
+    }
+
+    .tcl-root .tcl-chip:hover:not(.on) {
+        border-color: var(--g400);
+        color: var(--g600);
+    }
+
+    .tcl-root .tcl-vtab:hover:not(.on) {
+        color: var(--s700);
+    }
+
+    .tcl-root .tcl-pickb:hover {
+        border-color: var(--g400);
+    }
+
+    .tcl-root .tcl-hbar:not(.empty):hover .tcl-hfill {
+        opacity: .82;
+    }
+
+    .tcl-root .tcl-pick {
+        flex-direction: row;
+        gap: 14px;
+    }
+
+    .tcl-root .tcl-pickb {
+        flex: 1;
+    }
+
+
+
+    /* Info modal centres on desktop rather than sliding from the bottom. */
+    .tcl-tip {
+        align-items: center;
+    }
+
+    .tcl-chapsel {
+        max-width: var(--dsk-content);
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    .tcl-lvl {
+        padding-left: 14px;
+    }
+
+    .tcl-i:hover {
+        background: var(--g100);
+    }
+
+    .tcl-converge {
+        gap: 22px;
+        padding: 22px;
+    }
+
+    .tcl-conv-big {
+        font-size: 3rem;
+    }
+
+    .tcl-qfull {
+        font-size: 1rem;
+    }
+
+    .tcl-modebar,
+    .tcl-sheettabs {
+        max-width: var(--dsk-content);
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .tcl-track:hover:not(:disabled) {
+        background: var(--s50);
+    }
+
+    .tcl-track:hover:not(:disabled) .tk-go {
+        color: var(--g500);
+    }
+
+    /* ── 10.8 · Drill-down sheet ──────────────────────────────────
+       The sheet is full-screen on a phone. On a laptop it stays full
+       screen but its content respects the same page frame, so opening
+       a chapter doesn't throw the eye to a different left edge. */
+    .th-sheet .pt-sec {
+        max-width: var(--dsk-content);
+        margin: 20px auto 0;
+    }
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   11 · WIDE DESKTOP (≥1440px)
+
+   More room, not more columns. A third column would mean three
+   places to look; the extra width goes into breathing room and a
+   taller histogram instead.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1440px) {
+
+    .tcl-root .tcl-grid {
+        gap: 26px;
+    }
+
+    .tcl-root .tcl-col>.pt-sec {
+        margin-bottom: 26px;
+    }
+
+    .tcl-root .tcl-hist {
+        height: 260px;
+    }
+
+    .tcl-root .tcl-big {
+        font-size: 2.2rem;
+    }
+
+    .tcl-root .tcl-rows.two-up {
+        column-gap: 36px;
+    }
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   12 · MOBILE GUARDS (≤1023px)
+
+   Explicitly single-column. The desktop rules above are all inside a
+   min-width query so they cannot leak down, but portal-desktop.css
+   also carries rules that fire at its own breakpoints — these keep
+   the phone layout stable regardless of what loads after.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1023px) {
+
+    .tcl-root .tcl-grid,
+    .tcl-root .tcl-toprow {
+        display: block;
+    }
+
+    .tcl-root .tcl-rows.two-up {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Undo any inherited grid on the container at tablet widths too. */
+    body.is-teacher #pt-class-body.tcl-root,
+    body.is-teacher #pt-home-body.tcl-root {
+        display: block;
+    }
+}

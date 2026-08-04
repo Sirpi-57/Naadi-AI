@@ -1,0 +1,1962 @@
+/* ════════════════════════════════════════════════════════════════
+   NAADI AI — DESKTOP ADAPTATION LAYER (styles-desktop.css)
+   ─────────────────────────────────────────────────────────────────
+   Loaded AFTER styles-mobile.css + the module sheets. Every rule in
+   this file lives inside @media (min-width: 1024px), so on phones
+   and in the Capacitor build this file is inert. The mobile sheets
+   remain the single source of truth for tokens, components, and
+   behaviour — this layer ONLY re-arranges layout for a pointer +
+   wide-viewport context and adds hover affordances (which phones
+   don't have).
+
+   What it does, per area:
+     1. SHELL      — the bottom tab bar (.m-tabbar) becomes a fixed
+                     left sidebar in the same --s900 navy as the top
+                     bar, using the nav grammar mined from the old
+                     desktop styles.css (.nav-item hover/active).
+                     Zero JS changes: navigate() keeps toggling the
+                     same .active / .hidden classes it always did.
+                     Focused modes (Studio journey, Arena/PYQ/OPD
+                     tests, PDF reader) already hide the shell chrome
+                     via JS → on desktop they go truly full-screen,
+                     like an exam hall. Nothing to add.
+     2. HOME       — the hero band spans the content area; the body
+                     becomes a two-column cockpit (Resume left,
+                     Focus + Stats right) capped at --dsk-content.
+     3. STUDIO     — picker widens to a 2-up subject grid; chapter
+                     lists get a 760px column + hover; the JOURNEY
+                     deliberately KEEPS its 640px reading measure
+                     (that cap is a typographic choice, not a mobile
+                     constraint — ~70ch is the right line length on
+                     any screen). Layers widen slightly to 720px.
+     4. STOPGAP    — views whose desktop pass hasn't happened yet
+                     (OPD, Arena/PYQ/AIR, Library, Profile) are
+                     centred at 880px so nothing stretches to 1920px
+                     in the meantime. Each rule is removed when that
+                     section gets its real desktop treatment.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* ── 0. Desktop tokens ──────────────────────────────────────── */
+    :root {
+        --dsk-sidebar-w: 248px;
+        /* content cap for wide shell screens (Home) */
+        --dsk-content: 1120px;
+        /* browsing surfaces: pickers, lists */
+        --dsk-browse: 880px;
+        /* reading surfaces: chapter lists, layer bodies */
+        --dsk-read: 760px;
+    }
+
+    /* Desktop browsers report env(safe-area-inset-*) = 0, so every
+       calc(...+ var(--safe-*)) in the mobile sheets collapses cleanly.
+       Nothing to override. */
+
+    /* ── 0b. Pointer niceties ───────────────────────────────────── */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--s300);
+        border-radius: 8px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--s400);
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
+
+    ::selection {
+        background: var(--g100);
+        color: var(--s900);
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       1. SHELL — tab bar → sidebar
+       ════════════════════════════════════════════════════════════ */
+
+    /* The same <nav class="m-tabbar"> that hugs the bottom edge on a
+       phone is re-anchored to the left edge and turned vertical. The
+       .hidden class JS applies in focused modes still means
+       display:none, so tests / journey / reader stay full-screen. */
+    .m-tabbar {
+        top: 0;
+        bottom: 0;
+        right: auto;
+        left: 0;
+        width: var(--dsk-sidebar-w);
+        height: auto;
+        flex-direction: column;
+        align-items: stretch;
+        background: var(--s900);
+        border-top: none;
+        border-right: 1px solid rgba(255, 255, 255, .06);
+        padding: 0 0 16px;
+        box-shadow: none;
+    }
+
+    /* Brand block at the top of the sidebar (markup lives in app.html
+       with .dsk-only; the wordmark + pulse reuse the .m-brand-* rules
+       from styles-mobile.css verbatim, so it is pixel-identical to
+       the Home top bar wordmark and login's .lg2-brand). */
+    .dsk-sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 20px 20px 22px;
+        border-bottom: 1px solid rgba(255, 255, 255, .08);
+        margin-bottom: 14px;
+    }
+
+    /* Nav items: icon-over-label columns become icon-beside-label
+       rows — the .nav-item grammar from the old desktop styles.css. */
+    .mnav-item {
+        flex: 0 0 auto;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 13px;
+        margin: 3px 12px;
+        padding: 12px 14px;
+        padding-top: 12px;
+        /* cancel the mobile 6px icon offset */
+        border-radius: 11px;
+        font-size: .9rem;
+        font-weight: 500;
+        color: var(--s400);
+        transition: background .2s, color .2s;
+    }
+
+    .mnav-item i {
+        width: 22px;
+        text-align: center;
+        font-size: 1rem;
+    }
+
+    .mnav-item span {
+        font-size: .9rem;
+    }
+
+    .mnav-item:hover {
+        background: rgba(255, 255, 255, .06);
+        color: #fff;
+    }
+
+    .mnav-item:hover i {
+        color: #fff;
+    }
+
+    .mnav-item.active {
+        background: rgba(93, 146, 207, .2);
+        color: var(--g400);
+        font-weight: 600;
+    }
+
+    .mnav-item.active i {
+        color: var(--g400);
+    }
+
+    .mnav-item:focus-visible {
+        outline: 2px solid var(--g400);
+        outline-offset: -2px;
+    }
+
+    /* Sidebar footer — Profile + Log out, relocated off the top bar so
+       the rail has a purposeful base instead of a tall navy void. Pinned
+       to the bottom edge (margin-top:auto pushes it past the five nav
+       items). Markup is .dsk-only, so phones never see it. Reuses the
+       .mnav-item row grammar above for a consistent hit target. */
+    .dsk-sidebar-foot {
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, .08);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dsk-sidebar-foot .mnav-item {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    /* The two top-bar icon buttons (Profile · Log out) now live in the
+       sidebar footer, so hide them here to keep the desktop top bar clean
+       — just the view title, nothing competing with it. */
+    .m-topbar .btn-icon {
+        display: none;
+    }
+
+    /* ── Top bar: spans to the right of the sidebar ── */
+    .m-topbar {
+        margin-left: var(--dsk-sidebar-w);
+        padding: 12px 28px;
+        min-height: 60px;
+        gap: 14px;
+    }
+
+    /* The brand now lives in the sidebar; the top bar always shows the
+       dynamic title block instead — including on Home, where navigate()
+       hides it on phones. (JS keeps toggling the classes; we just
+       override what they mean at this width.) */
+    .m-topbar-logo {
+        display: none;
+    }
+
+    .m-topbar-brand,
+    .m-topbar-brand.show {
+        display: none;
+    }
+
+    #topbar-titleblock.hidden {
+        display: block;
+    }
+
+    .m-topbar-title {
+        font-size: 1.05rem;
+    }
+
+    .m-topbar-sub {
+        font-size: .72rem;
+    }
+
+    .m-topbar .btn-icon {
+        transition: background .2s, color .2s;
+    }
+
+    .m-topbar .btn-icon:hover {
+        background: rgba(255, 255, 255, .16);
+        color: #fff;
+    }
+
+    /* ── Main scroll area ── */
+    .m-main {
+        margin-left: var(--dsk-sidebar-w);
+        /* no bottom bar to clear any more */
+        padding-bottom: 48px;
+    }
+
+    /* Focused full-screen modes: JS adds .no-tabbar + hides the bars;
+       reclaim the sidebar gutter so the exam/journey truly owns the
+       whole viewport. */
+    .m-main.no-tabbar {
+        margin-left: 0;
+        padding-bottom: 0;
+    }
+
+    /* Toasts: centre over the CONTENT column while the sidebar is
+       visible; fall back to viewport-centre in full-screen modes.
+       (The tab bar precedes the toast container in the DOM, so the
+       sibling combinator can key off its .hidden state.) */
+    .m-tabbar:not(.hidden)~#nd-toast-container {
+        left: calc(50% + var(--dsk-sidebar-w) / 2);
+    }
+
+    /* Coming Soon: don't let the empty state float in a 1600px void. */
+    .m-coming-soon {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 48px 20px;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       2. HOME — the cockpit goes two-column
+       ════════════════════════════════════════════════════════════ */
+
+    /* Hero band: full-bleed across the content area, inner content
+       capped + centred. The ink fusion with body.home-mode .m-topbar
+       carries over unchanged. */
+    .hm-hero {
+        padding: 28px 40px 34px;
+        border-radius: 0 0 26px 26px;
+    }
+
+    .hm-hero-inner {
+        max-width: var(--dsk-content);
+        margin: 0 auto;
+    }
+
+    /* The masked doctor photo was sized for a phone (64% wide). On a
+       wide band, pin it to a sane footprint on the right so the
+       greeting never fights it. */
+    .hm-hero-img {
+        width: 44%;
+        max-width: 620px;
+        opacity: .34;
+    }
+
+    /* Body layout (v2 — cockpit):
+         row 1 :  Resume (left)  |  Focus · 5 areas (right)   ← equal height
+         row 2 :  Stats · all four tiles on ONE line (full width)
+         row 3 :  Quote (full width, reading measure, centred)
+         row 4 :  Refresh stamp (full width, centred) — BELOW the quote
+
+       home.js paints four .hm-in sections into #hm-body, and the quote
+       button is a SIBLING of #hm-body inside .hm-body. To lay all five
+       out in one grid (and to place the refresh BELOW the quote without
+       reordering the DOM — mobile keeps refresh above quote), #hm-body
+       is collapsed with display:contents so its children join .hm-body's
+       grid directly. This is layout-only: :nth-child still resolves
+       against the real DOM parent (#hm-body), so the selectors below are
+       unchanged in meaning. */
+    .hm-body {
+        max-width: var(--dsk-content);
+        margin: 0 auto;
+        padding: 4px 40px 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        column-gap: 28px;
+        row-gap: 22px;
+        align-items: start;
+    }
+
+    #hm-body {
+        display: contents;
+    }
+
+    /* Skeleton state renders label + cards WITHOUT .hm-in wrappers;
+       keep those full-width and stacked so the first frame never splits
+       into columns before real data arrives. */
+    #hm-body>*:not(.hm-in) {
+        grid-column: 1 / -1;
+        min-width: 0;
+    }
+
+    /* ── row 1: Resume | Focus, matched height ── */
+    #hm-body>.hm-in:nth-child(1),
+    #hm-body>.hm-in:nth-child(2) {
+        grid-row: 1;
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    #hm-body>.hm-in:nth-child(1) {
+        grid-column: 1;
+    }
+
+    #hm-body>.hm-in:nth-child(2) {
+        grid-column: 2;
+    }
+
+    /* Let the primary surface in each column fill the shared row height
+       so the two columns end on the same line. */
+    #hm-body>.hm-in:nth-child(1) .hm-resume {
+        flex: 1 1 auto;
+    }
+
+    #hm-body>.hm-in:nth-child(2) .hm-focus {
+        flex: 1 1 auto;
+    }
+
+    /* Focus shows all five areas here — the phone's "show N more" toggle
+       is pointless on a tall desktop column, so reveal the extras and
+       drop the toggle. (No JS change: the rows are already in the DOM,
+       just class-hidden on phones.) The global utility .hidden carries
+       display:none !important, so the reveal must be !important too. */
+    #hm-body .hm-focus-row.extra {
+        display: flex !important;
+    }
+
+    #hm-body .hm-focus-toggle {
+        display: none;
+    }
+
+    /* ── row 2: Stats — all four tiles on one line, full width ── */
+    #hm-body>.hm-in:nth-child(3) {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        min-width: 0;
+    }
+
+    #hm-body>.hm-in:nth-child(3) .hm-stats {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 0;
+    }
+
+    /* ── row 4: Refresh stamp — full width, centred, BELOW the quote ── */
+    #hm-body>.hm-in:nth-child(4) {
+        grid-column: 1 / -1;
+        grid-row: 4;
+        justify-self: center;
+        min-width: 0;
+    }
+
+    /* ── row 3: Quote — full content width, matching the stats row and
+       the resume|focus row above it (was capped at 760px, which read as
+       narrower than everything else). Text stays left-aligned inside. ── */
+    .hm-body>#hm-quote {
+        grid-column: 1 / -1;
+        grid-row: 3;
+        justify-self: stretch;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+    }
+
+    /* Hover affordances — phones only had :active press states. */
+    .hm-press {
+        transition: transform .12s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+
+    .hm-card:hover,
+    .hm-resume-card:hover:not(.empty),
+    .hm-quote:hover {
+        border-color: var(--s300);
+        box-shadow: var(--hm-sh-2, 0 2px 6px rgba(15, 23, 42, .06), 0 16px 34px -14px rgba(15, 39, 71, .3));
+    }
+
+    .hm-resume-card:hover:not(.empty) {
+        transform: translateY(-1px);
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       3. CONCEPT STUDIO
+       ════════════════════════════════════════════════════════════ */
+
+    /* ── Picker: subjects go 2-up in a wider browse column ── */
+    .cs2-picker {
+        max-width: var(--dsk-browse);
+        padding: 32px 32px 56px;
+    }
+
+    .cs2-subjects {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .cs2-subject-card {
+        transition: transform .16s var(--cs-ease, ease), box-shadow .16s, border-color .16s;
+    }
+
+    .cs2-subject-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--g200);
+        box-shadow: var(--cs-shadow-lift);
+    }
+
+    .cs2-resume {
+        transition: transform .16s var(--cs-ease, ease), box-shadow .16s, border-color .16s;
+    }
+
+    .cs2-resume:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--cs-shadow-lift);
+    }
+
+    /* Legacy picker grid (styles-mobile.css §5) — cover it too so the
+       shell view can never regress to phone-width tiles. */
+    #view-quick-revise .subject-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+    }
+
+    /* ── Chapter list: reading-ish column + row hover ── */
+    .cs2-listbody {
+        max-width: var(--dsk-read);
+        padding: 24px 32px 48px;
+    }
+
+    .cs2-chapter-row {
+        transition: border-color .16s, box-shadow .16s, background .16s;
+    }
+
+    .cs2-chapter-row:hover {
+        border-color: var(--g200);
+        box-shadow: var(--cs-shadow);
+    }
+
+    /* ── Journey (full-screen focused mode — sidebar is hidden) ──
+       The journey's 640px column caps are KEPT: that measure is the
+       point. We only give the sticky chrome breathing room and add
+       hover to every tappable that previously only pressed. */
+    .cs2-head {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .cs2-head-btn,
+    .cs2-station,
+    .cs2-opt,
+    .cs2-comp,
+    .cs2-rel,
+    .cs2-map-child,
+    .cs2-figjump,
+    .cs2-source,
+    .cs2-ghost-btn,
+    .cs2-blocknav button,
+    .cs2-done-btn {
+        transition: transform .14s var(--cs-ease, ease), box-shadow .16s, border-color .16s, background .16s, filter .16s;
+    }
+
+    .cs2-station:hover,
+    .cs2-comp:hover,
+    .cs2-rel:hover,
+    .cs2-map-child:hover {
+        border-color: var(--g200);
+        box-shadow: var(--cs-shadow);
+    }
+
+    .cs2-opt:hover:not(:disabled) {
+        border-color: var(--g400);
+    }
+
+    .cs2-blocknav button:hover:not(:disabled) {
+        border-color: var(--g400);
+        color: var(--g600);
+    }
+
+    .cs2-done-btn:hover {
+        filter: brightness(1.07);
+        transform: translateY(-1px);
+    }
+
+    /* ── Layers (definition / recall / figure lightbox) ──
+       They stay full-screen sheets — on desktop that reads as a
+       focused reading mode, which is what they are. Body widens a
+       step; head gets desktop padding. */
+    .cs2-layer-head {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .cs2-layer-body {
+        max-width: 720px;
+        padding: 28px 32px 56px;
+    }
+
+
+    /* ── 4. (stopgap retired) ──
+       Passes 2–3 gave every section its real desktop treatment via
+       its own wrapper (.m-picker-wrap / .pv2-wrap / .pf-wrap), so
+       the interim view-level caps from pass 1 are gone. */
+
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Large desktop refinement — a touch more air, nothing structural.
+   ════════════════════════════════════════════════════════════════ */
+@media (min-width: 1440px) {
+    :root {
+        --dsk-content: 1200px;
+    }
+
+    .hm-hero {
+        padding: 34px 48px 40px;
+    }
+
+    .hm-body {
+        padding: 0 48px;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DESKTOP PASS 2 — OPD · Practice Hub / Test Engine · Library
+   Appended after pass 1 (shell / home / studio). Same contract:
+   inert below 1024px, layout + hover only, zero JS changes.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* ── 5. SHARED SURFACES ─────────────────────────────────────── */
+
+    /* .m-picker-wrap is the standard shell-screen wrapper (OPD hub,
+       chapter files, results, notebooks, study material…). One cap
+       here replaces most of the pass-1 stopgap. */
+    .m-picker-wrap {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 28px 32px 56px;
+    }
+
+    /* Segmented switchers (Arena·PYQ·AIR pill + the Library one)
+       stop stretching wall-to-wall. */
+    .ph-switch {
+        max-width: 440px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .lib-switch-holder {
+        max-width: 880px;
+        margin: 0 auto;
+    }
+
+    .ph-switch-pill {
+        transition: background .16s, color .16s;
+    }
+
+    /* ── Bottom sheet → dialog ──
+       phOpenSheet() serves every modal in the app (hub filters, the
+       submit confirms, library sheets, the OMR palette). On desktop
+       the generic case becomes a centred dialog… */
+    .ph-sheet-overlay {
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+    }
+
+    .ph-sheet {
+        max-width: 560px;
+        max-height: 86vh;
+        border-radius: 22px;
+        padding: 18px 24px 24px;
+        transform: translateY(3%) scale(.98);
+        box-shadow: 0 24px 70px -18px rgba(15, 23, 42, .45);
+    }
+
+    .ph-sheet-overlay.open .ph-sheet {
+        transform: translateY(0) scale(1);
+    }
+
+    /* …EXCEPT when the sheet carries the OMR answer sheet during a
+       test: that docks as a right-hand drawer, so the ruled-paper
+       OMR sits beside the question booklet like the real thing. */
+    .ph-sheet-overlay:has(.omr-m-sheet) {
+        align-items: stretch;
+        justify-content: flex-end;
+        padding: 0;
+    }
+
+    .ph-sheet-overlay:has(.omr-m-sheet) .ph-sheet {
+        width: 460px;
+        max-width: 460px;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 24px 0 0 24px;
+        padding: 16px 22px 28px;
+        transform: translateX(8%);
+    }
+
+    .ph-sheet-overlay.open:has(.omr-m-sheet) .ph-sheet {
+        transform: translateX(0);
+    }
+
+    .ph-sheet-overlay:has(.omr-m-sheet) .te-pal-scroll {
+        max-height: none;
+    }
+
+    /* The grab-pill is a touch affordance; pointers don't drag sheets. */
+    .ph-sheet-handle {
+        display: none;
+    }
+
+
+    /* ── 6. OPD ─────────────────────────────────────────────────── */
+
+    /* Hub browses at the standard 880 (via .m-picker-wrap above);
+       the chapter case-file, results, and analysis are reading
+       surfaces → one step narrower. */
+    #view-opd-chapter .m-picker-wrap,
+    #view-opd-results .m-picker-wrap,
+    #view-opd-analysis .m-picker-wrap {
+        max-width: 760px;
+    }
+
+    /* Subject accordions: signal the closed ones are openable. */
+    .opd-subject-col:not(.open):hover {
+        border-color: var(--g200);
+        box-shadow: 0 4px 16px -10px rgba(23, 63, 111, .25);
+    }
+
+    .opd-subject-head {
+        cursor: pointer;
+    }
+
+    /* Chapter tiles already transition transform/shadow on press —
+       give pointers the same lift on hover. */
+    .opd-tile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -8px rgba(23, 63, 111, .28);
+    }
+
+    .opd-fchip {
+        transition: border-color .16s, background .16s, color .16s;
+    }
+
+    .opd-fchip:hover {
+        border-color: var(--g400);
+    }
+
+    .opd-int-opt {
+        transition: border-color .16s, background .16s;
+    }
+
+    .opd-int-opt:hover {
+        border-color: var(--g400);
+    }
+
+
+    /* ── 7. PRACTICE HUB (Arena · PYQ Vault · AIR) ─────────────── */
+
+    /* Landings self-capped at 640 for phones; widen one step. Paper
+       rows keep a single column — a row card is the right shape for
+       year-grouped papers at this measure. */
+    .pv2-wrap {
+        max-width: 760px;
+        padding: 20px 32px 64px;
+    }
+
+    .pv2-paper {
+        transition: transform .12s, border-color .16s, box-shadow .16s;
+    }
+
+    .pv2-paper:hover {
+        transform: translateY(-1px);
+        border-color: var(--g200);
+        box-shadow: var(--cs-shadow-lift);
+    }
+
+    .pv2-action {
+        transition: border-color .16s, background .16s, box-shadow .16s;
+    }
+
+    .pv2-action:hover {
+        border-color: var(--g200);
+        box-shadow: var(--cs-shadow);
+    }
+
+    .ph-subtab,
+    .ph-fchip {
+        transition: border-color .16s, background .16s, color .16s;
+    }
+
+    .ph-subtab:hover,
+    .ph-fchip:hover {
+        border-color: var(--g400);
+    }
+
+    .ph-start-btn {
+        transition: transform .12s, filter .16s, box-shadow .16s;
+    }
+
+    .ph-start-btn:hover:not(:disabled) {
+        filter: brightness(1.07);
+        transform: translateY(-1px);
+    }
+
+    /* Leaderboards + history: row hover, gently. */
+    .pv2-lb-row {
+        transition: background .14s;
+    }
+
+    .pv2-lb-row:hover {
+        background: var(--s50);
+    }
+
+    /* Results review accordions */
+    .res-rev-head {
+        transition: background .14s;
+    }
+
+    .res-rev-head:hover {
+        background: var(--s50);
+    }
+
+
+    /* ── 8. TEST ENGINE (focused full-screen — no sidebar) ─────── */
+
+    /* The question booklet gets a centred column; the engine's own
+       chrome (navy top bar, progress hairline) stays full-bleed like
+       an exam-hall header. */
+    .te-body {
+        max-width: 860px;
+        margin: 0 auto;
+    }
+
+    /* Four subject pills never overflow at this width → centre them. */
+    .te-subject-tabs {
+        justify-content: center;
+    }
+
+    /* Align the fixed footer's controls with the 860px booklet. */
+    .te-footer {
+        padding-left: max(12px, calc(50% - 430px));
+        padding-right: max(12px, calc(50% - 430px));
+    }
+
+    /* Options: hover affordance, scoped to the live test screen only
+       (.te-option is shared with results review — see practice-v2.css
+       scoping note). */
+    .te-q-card .te-option {
+        transition: border-color .16s, background .16s;
+    }
+
+    .te-q-card .te-option:hover {
+        border-color: var(--g400);
+    }
+
+    .te-nav-btn,
+    .te-icon-btn,
+    .te-mark-answer-btn {
+        transition: background .16s, border-color .16s, color .16s, filter .16s;
+    }
+
+    .te-nav-btn:hover:not(:disabled) {
+        border-color: var(--g400);
+    }
+
+    .te-icon-btn:hover {
+        background: rgba(255, 255, 255, .16);
+    }
+
+    /* OMR bubbles in the docked drawer */
+    .omr-m-bubble {
+        transition: border-color .14s, background .14s, transform .12s;
+    }
+
+    .omr-m-bubble:hover {
+        border-color: var(--g500);
+        transform: scale(1.06);
+    }
+
+
+    /* ── 9. LIBRARY ─────────────────────────────────────────────── */
+
+    /* Study material + chapter lists read best one step narrower
+       than the hub cap. */
+    #view-study-material .m-picker-wrap,
+    #view-study-chapters .m-picker-wrap,
+    #view-notebook-detail .m-picker-wrap {
+        max-width: 760px;
+    }
+
+    .sm-subj-card {
+        transition: border-color .16s, box-shadow .16s, transform .12s;
+    }
+
+    .sm-subj-card:hover:not(.locked) {
+        border-color: var(--g200);
+        box-shadow: var(--cs-shadow-lift);
+        transform: translateY(-1px);
+    }
+
+    .sm-continue:hover {
+        transform: translateY(-1px);
+    }
+
+    /* Notebooks: 2-up phone grid → 3-up shelf. */
+    .nb-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+    }
+
+    .nb-card {
+        transition: border-color .16s, box-shadow .16s, transform .12s;
+    }
+
+    .nb-card:hover:not(.disabled) {
+        border-color: var(--g200);
+        box-shadow: var(--cs-shadow-lift);
+        transform: translateY(-2px);
+    }
+
+    /* ── PDF reader (focused full-screen) ──
+       The stage already centres the canvas; give it desk margins and
+       align the fixed toolbar's controls to a 960px column. The
+       highlights sidebar widens from a phone drawer to a desk panel. */
+    .pdfm-stage {
+        padding: 20px 24px calc(100px + var(--safe-bottom));
+    }
+
+    .pdfm-toolbar {
+        padding-left: max(12px, calc(50% - 480px));
+        padding-right: max(12px, calc(50% - 480px));
+    }
+
+    .pdfm-topbar {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .pdfm-sidebar {
+        width: 400px;
+    }
+
+    .pdfm-sb-row {
+        transition: background .14s;
+    }
+
+    .pdfm-sb-row:hover {
+        background: var(--s50);
+    }
+
+    .pdfm-note-btn {
+        transition: background .16s, border-color .16s, color .16s;
+    }
+
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DESKTOP PASS 3 — Profile · Auth pages · consistency sweep
+   Same contract as passes 1–2: inert below 1024px, layout + hover
+   only, zero JS changes. This file is now linked from app.html AND
+   login.html / signup.html / forgot-password.html (their inline
+   <style> blocks come earlier in the head, so these rules win ties).
+   onboarding.html (.onb-shell self-caps at 520px, centred) and
+   claim.html (.auth-card — the old desktop card, already centred)
+   need no desktop rules and are left untouched.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* ── 10. PROFILE ────────────────────────────────────────────── */
+
+    /* Two purposeful columns instead of a ragged card masonry:
+         LEFT  (.pf-col-main + .pf-col-actions) — every fillable detail,
+                one clean uninterrupted stack, no gaps between cards.
+         RIGHT (.pf-col-side)                   — Review on top, the
+                "Chat with us" query below; a compact engagement rail.
+       The hero spans the full width above both. Column assignment is
+       explicit (not auto-flow), so the left stack can never develop the
+       whitespace holes a masonry grid leaves between tall and short
+       cards. Widened to 1040px so it reads as built-for-laptop. */
+    .pf-wrap {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 30px 32px 150px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+        column-gap: 24px;
+        row-gap: 22px;
+        align-items: start;
+    }
+
+    .pf-wrap>*,
+    .pf-col>* {
+        min-width: 0;
+    }
+
+    /* The .pf-col wrappers (display:contents on phones) become the real
+       column stacks here. */
+    .pf-col {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .pf-col-main {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .pf-col-actions {
+        grid-column: 1;
+        grid-row: 3;
+    }
+
+    .pf-col-side {
+        grid-column: 2;
+        grid-row: 2;
+        /* short rail — let it ride along as the long left column scrolls */
+        position: sticky;
+        top: 84px;
+        align-self: start;
+    }
+
+    /* DOM order in the side rail is Support → Review (to keep mobile
+       untouched); flip it so Review sits on top, the query below. */
+    .pf-col-side>.pf-card:nth-child(1) {
+        order: 2;
+    }
+
+    .pf-col-side>.pf-card:nth-child(2) {
+        order: 1;
+    }
+
+    .pf-wrap .pf-card {
+        margin: 0;
+    }
+
+    /* Hero: full width above the columns, and re-laid-out horizontally —
+       avatar on the left, name / email / plan chips beside it — so it
+       fills the wide band instead of floating a centred stack in it.
+       Rounded now that it's a capped, centred card rather than a phone
+       full-bleed strip. */
+    .pf-hero {
+        grid-column: 1 / -1;
+        margin: 0;
+        border-radius: 22px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: 28px;
+        row-gap: 3px;
+        align-content: center;
+        justify-items: start;
+        text-align: left;
+        padding: 32px 40px;
+    }
+
+    .pf-hero .pf-avatar-btn {
+        grid-column: 1;
+        grid-row: 1 / span 3;
+        align-self: center;
+        margin: 0;
+    }
+
+    .pf-hero-name {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: end;
+        margin-top: 0;
+    }
+
+    .pf-hero-mail {
+        grid-column: 2;
+        grid-row: 2;
+        align-self: center;
+    }
+
+    .pf-hero-chips {
+        grid-column: 2;
+        grid-row: 3;
+        align-self: start;
+        justify-content: flex-start;
+        margin-top: 6px;
+    }
+
+    .pf-upload-bar {
+        grid-column: 2;
+        grid-row: 4;
+        margin-top: 10px;
+    }
+
+    /* Sticky save bar: no tab bar to sit on any more, and the shell
+       sidebar owns the left edge. Controls align to the 880 column. */
+    .pf-savebar {
+        left: var(--dsk-sidebar-w);
+        bottom: 0;
+        /* the bar itself starts at the sidebar edge, so its own 50%
+           is already the content-area centre → symmetric padding
+           aligns the row with the 1040px .pf-wrap column */
+        padding-left: max(14px, calc(50% - 520px));
+        padding-right: max(14px, calc(50% - 520px));
+    }
+
+    /* A full-bleed slab button reads as phone chrome; on desktop the
+       save action is a right-aligned pill sitting over the content
+       column, which is the premium settings convention. */
+    .pf-savebar .pf-btn {
+        width: auto;
+        min-width: 240px;
+        margin-left: auto;
+    }
+
+    /* Password sheet → centred dialog. Also lifts it ABOVE the
+       sidebar (mobile z-index 90 sat below the sidebar's 95, which
+       would have left the nav clickable through the backdrop). */
+    .pf-modal {
+        z-index: 500;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+    }
+
+    .pf-sheet {
+        max-width: 480px;
+        border-radius: 22px;
+        padding: 24px 26px 26px;
+    }
+
+    .pf-btn,
+    .pf-linkrow,
+    .pf-input,
+    .pf-seg {
+        transition: border-color .16s, background .16s, color .16s, filter .16s, box-shadow .16s;
+    }
+
+    .pf-btn:hover:not(:disabled) {
+        filter: brightness(1.05);
+    }
+
+    .pf-linkrow:hover {
+        border-color: var(--g200);
+        background: var(--s50);
+    }
+
+    .pf-input:hover:not(:focus) {
+        border-color: var(--s300);
+    }
+
+
+    /* ── 11. AUTH — LOGIN (split screen) ────────────────────────
+       Phone: hero band stacked over the form sheet. Desktop: the
+       hero becomes a full-height left pane (doctor photo, wordmark,
+       welcome copy) and the form docks as a 560px right rail — the
+       classic clinical-console login. All ink stays #0B1220. */
+    .lg2 {
+        flex-direction: row;
+    }
+
+    .lg2-hero {
+        flex: 1 1 auto;
+        min-height: 100%;
+    }
+
+    .lg2-hero-copy {
+        left: 48px;
+        right: 48px;
+        bottom: 44px;
+        max-width: 560px;
+    }
+
+    .lg2-heading {
+        font-size: 1.9rem;
+    }
+
+    .lg2-panel {
+        flex: 0 0 560px;
+        width: 560px;
+        margin-top: 0;
+        border-radius: 0;
+        border-top: none;
+        border-left: 1px solid rgba(255, 255, 255, .07);
+        box-shadow: none;
+        overflow-y: auto;
+        padding: clamp(32px, 7vh, 72px) 56px 48px;
+    }
+
+
+    /* ── 12. AUTH — SIGNUP + FORGOT (floating card) ─────────────
+       These pages are a compact branded header fused to a form
+       sheet. Desktop keeps that fusion but floats the pair as one
+       600px card on a quiet page gradient. */
+    .su2,
+    .fp2 {
+        align-items: center;
+        padding: 56px 32px;
+        background: radial-gradient(90% 70% at 50% 0%, #10233f 0%, #0B1220 60%);
+    }
+
+    .su2-header,
+    .fp2-header {
+        width: 100%;
+        max-width: 600px;
+        border-radius: 24px 24px 0 0;
+        border: 1px solid rgba(255, 255, 255, .07);
+        border-bottom: none;
+    }
+
+    .su2-panel,
+    .fp2-panel {
+        width: 100%;
+        max-width: 600px;
+        flex: 0 1 auto;
+        border-radius: 22px 22px 24px 24px;
+        border: 1px solid rgba(255, 255, 255, .07);
+        padding-left: 40px;
+        padding-right: 40px;
+        padding-bottom: 34px;
+    }
+
+
+    /* ── 13. CONSISTENCY SWEEP ──────────────────────────────────── */
+
+    /* Chapter list container reserved tab-bar room at the bottom;
+       there is no tab bar here. (Every other var(--tabbar-h)
+       consumer — .m-main, .m-tabbar, .cs2-picker, .pv2-wrap,
+       .pf-savebar — is already overridden in passes 1–3.) */
+    .cs2-listview {
+        padding-bottom: 32px;
+    }
+
+    /* Auth/utility buttons shared across pages: pointer feedback. */
+    .btn {
+        transition: background .16s, border-color .16s, color .16s, filter .16s, transform .12s, box-shadow .16s;
+    }
+
+    .btn:hover:not(:disabled) {
+        filter: brightness(1.04);
+    }
+
+    /* Keyboard focus ring, app-wide: phones rarely tab, desktops do.
+       :focus-visible only — mouse clicks stay clean. Modules that
+       define their own rings (cs2, hm) keep them; this is the floor
+       for everything else. */
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+        outline: 2px solid var(--g400);
+        outline-offset: 2px;
+    }
+
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STUDIO DESKTOP PASS 2 — Concept Studio, page by page
+   ─────────────────────────────────────────────────────────────────
+   Appended after passes 1–3. Same contract as everything above:
+   every rule lives inside @media (min-width: 1024px) or wider, so
+   phones and the Capacitor build never parse a byte of it. Layout,
+   sizing and hover ONLY — zero JS changes, zero DOM changes, zero
+   edits to the mobile sheets.
+
+   Checklist this pass implements:
+     A. Journey chrome — sticky heads optically align to their
+        content column instead of hugging the viewport edge.
+     B. Picker        — desktop type scale + card proportions.
+     C. Chapter list  — filter chips wrap (no hidden h-scroll on a
+        mouse), hover states on chips / search / rows.
+     D. Chapter home  — column widens 640 → 720; statline scale.
+     E. Block page    — 720 column at 1024; at ≥1200 a two-column
+        grid: station spine left, NAADI's recap as a sticky right
+        rail. The fixed "done" slab becomes a centred pill.
+     F. Layers        — reading typography one step up; hover on
+        footers + accordions.
+     G. Flashcards    — card capped to card proportions (not a
+        viewport-tall monolith), optically centred; touch-only
+        swipe copy hidden (buttons + arrow keys already exist).
+     H. PYQ / recall  — hover on options, pager nav, check button.
+     I. Figures / lightbox — figures breathe (240 → 420px), hover
+        on zoom + lightbox controls.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* ── A. JOURNEY CHROME — heads align to their column ─────────
+       Every sticky bar spanned the full viewport with its content
+       flush left, while the page content sat centred — the one
+       giveaway that this was a phone screen stretched wide. The
+       padding trick below centres each head's inner row over the
+       column it belongs to, with a 24px floor near the breakpoint.
+       (Values are derived per surface: listbody is a 760px box with
+       32px side padding → content edges at 50% ± 348px, and so on.) */
+
+    /* chapter list head → the 760px list column */
+    .cs2-listview .cs2-head {
+        padding-left: max(24px, calc(50% - 348px));
+        padding-right: max(24px, calc(50% - 348px));
+    }
+
+    /* chapter home + block overview heads → the 720px journey column */
+    .cs2-home .cs2-head,
+    .cs2-block .cs2-head {
+        padding-left: max(24px, calc(50% - 342px));
+        padding-right: max(24px, calc(50% - 342px));
+    }
+
+    /* section layers (Understand / Apply / Traps / Cards / PYQ /
+       Figures) → the 720px layer body (32px side padding → ±328) */
+    .cs2-layer-head {
+        padding-left: max(24px, calc(50% - 328px));
+        padding-right: max(24px, calc(50% - 328px));
+    }
+
+    .cs2-head-btn:hover {
+        border-color: var(--g200);
+        background: var(--s50);
+        color: var(--g600);
+    }
+
+    /* dark bars (layer heads over section ink / flashcards) — the
+       light hover above would flash white on navy */
+    .cs2-layer:not(.dark) .cs2-layer-head .cs2-head-btn:hover,
+    .cs2-layer.dark .cs2-head-btn:hover,
+    .cs2-head.grad .cs2-head-btn:hover {
+        border-color: transparent;
+        background: rgba(255, 255, 255, .18);
+        color: #fff;
+    }
+
+
+    /* ── B. PICKER — desktop type scale ──────────────────────────── */
+    .cs2-picker h1 {
+        font-size: 1.9rem;
+    }
+
+    .cs2-picker-sub {
+        font-size: .95rem;
+        max-width: 52ch;
+    }
+
+    .cs2-seg {
+        margin: 22px 0 24px;
+    }
+
+    .cs2-seg button {
+        padding: 10px 24px;
+        font-size: .86rem;
+    }
+
+    .cs2-seg button:not(.active):hover {
+        color: var(--s700);
+        background: rgba(15, 23, 42, .05);
+    }
+
+    .cs2-subject-card {
+        padding: 20px;
+        gap: 16px;
+    }
+
+    .cs2-subject-icon {
+        width: 54px;
+        height: 54px;
+        font-size: 1.3rem;
+    }
+
+    .cs2-subject-card .sc-name {
+        font-size: 1.05rem;
+    }
+
+    .cs2-subject-card .sc-meta {
+        font-size: .82rem;
+    }
+
+    .cs2-resume {
+        padding: 16px 18px;
+    }
+
+    .cs2-resume .rs-go {
+        width: 42px;
+        height: 42px;
+    }
+
+
+    /* ── C. CHAPTER LIST ─────────────────────────────────────────
+       The chip strip was a horizontal scroller with the scrollbar
+       hidden — correct for a thumb, invisible dead-end for a mouse.
+       On desktop the chips simply wrap. */
+    .cs2-filter {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        row-gap: 7px;
+    }
+
+    .cs2-filter button:not(.active):hover {
+        border-color: var(--g200);
+        color: var(--s700);
+        background: var(--s50);
+    }
+
+    .cs2-search input {
+        transition: border-color .16s, box-shadow .16s;
+    }
+
+    .cs2-search input:hover:not(:focus) {
+        border-color: var(--s300);
+    }
+
+    .cs2-chapter-row {
+        padding: 16px;
+    }
+
+
+    /* ── D. CHAPTER HOME — 640 → 720 column ─────────────────────── */
+    .cs2-statline,
+    .cs2-spine,
+    .cs2-celebrate {
+        max-width: 720px;
+    }
+
+    .cs2-statline {
+        font-size: .9rem;
+    }
+
+
+    /* ── E. BLOCK OVERVIEW — 720 column (grid takes over ≥1200) ── */
+    .cs2-block-hero,
+    .cs2-recap,
+    .cs2-blocknav {
+        max-width: 720px;
+    }
+
+    /* The fixed full-bleed "Mark block done" / "Continue" slab is
+       phone chrome. Desktop: a centred pill floating over the same
+       soft gradient fade. fit-content keeps long Continue labels
+       ("Continue · Chapter name…") on one tidy line. */
+    .cs2-done-btn {
+        width: fit-content;
+        min-width: 360px;
+        max-width: 640px;
+        padding-left: 44px;
+        padding-right: 44px;
+    }
+
+    .cs2-done-btn:hover:not(:disabled) {
+        filter: brightness(1.06);
+        transform: translateY(-1px);
+    }
+
+
+    /* ── F. LAYERS — reading typography, one step up ─────────────
+       Phone sizes (.87–.93rem) read cramped at a laptop's viewing
+       distance. One conservative step; the 720px measure set in
+       pass 1 keeps line length correct. */
+    .cs2-prose {
+        font-size: .96rem;
+    }
+
+    .cs2-def {
+        font-size: .97rem;
+    }
+
+    .cs2-tick {
+        font-size: .92rem;
+    }
+
+    .cs2-callout {
+        font-size: .92rem;
+    }
+
+    .cs2-trap-plate {
+        font-size: .94rem;
+    }
+
+    .cs2-recall .q {
+        font-size: 1.02rem;
+    }
+
+    .cs2-recall .a {
+        font-size: .9rem;
+    }
+
+    .cs2-q-text {
+        font-size: 1.08rem;
+    }
+
+    .cs2-opt {
+        font-size: .91rem;
+    }
+
+    .cs2-recap .rc-it-title {
+        font-size: .82rem;
+    }
+
+    .cs2-recap .rc-it-body {
+        font-size: .86rem;
+    }
+
+    /* layer footer (Back to sections · Next: …) */
+    .cs2-layer-foot .ghost:hover {
+        border-color: var(--g200);
+        background: var(--s50);
+    }
+
+    .cs2-layer-foot .primary:hover {
+        filter: brightness(1.06);
+        transform: translateY(-1px);
+    }
+
+    .cs2-layer.dark .cs2-layer-foot .ghost:hover {
+        border-color: rgba(255, 255, 255, .24);
+        background: rgba(255, 255, 255, .1);
+    }
+
+    /* accordions (mnemonics, extras) */
+    .cs2-acc .acc-head {
+        transition: background .16s;
+    }
+
+    .cs2-acc .acc-head:hover {
+        background: var(--s50);
+    }
+
+
+    /* ── G. FLASHCARDS — a card, not a monolith ──────────────────
+       The stage was min-height: calc(100vh − 190px): right on a
+       phone, but on a 900px-tall laptop it produced a giant, mostly
+       empty dark slab. Cap the scene to card proportions and centre
+       the deck optically in the layer. Padding (not flex-centering)
+       so short viewports and the layer footer still scroll sanely. */
+    .cs2-fc-stage {
+        min-height: 0;
+    }
+
+    .cs2-fc-scene {
+        height: clamp(400px, 54vh, 560px);
+    }
+
+    .cs2-layer.dark .cs2-layer-body {
+        max-width: 680px;
+        padding-top: max(24px, calc(50vh - 360px));
+    }
+
+    /* Buttons + arrow keys already cover the swipe gestures; the
+       "swipe left / right" copy is touch-only language. */
+    .cs2-fc-swipehint {
+        display: none;
+    }
+
+    .cs2-fc-btn,
+    .cs2-fc-restart {
+        transition: transform .12s, filter .16s, color .16s, border-color .16s, background .16s;
+    }
+
+    .cs2-fc-btn:hover {
+        filter: brightness(1.14);
+        transform: translateY(-1px);
+    }
+
+    .cs2-fc-restart:hover {
+        color: #fff;
+    }
+
+
+    /* ── H. PYQ / RECALL — pointer feedback ─────────────────────── */
+    .cs2-opt:hover:not(:disabled):not(.sel):not(.correct):not(.wrong) {
+        border-color: var(--g400);
+        background: var(--s50);
+    }
+
+    .cs2-pg-nav button:hover:not(:disabled) {
+        border-color: var(--g400);
+        color: var(--g600);
+    }
+
+    .cs2-pg-nav button.primary:hover:not(:disabled) {
+        border-color: transparent;
+        color: #fff;
+        filter: brightness(1.06);
+    }
+
+    .cs2-check-btn:hover:not(:disabled) {
+        filter: brightness(1.06);
+    }
+
+    .cs2-try-btn:hover {
+        border-color: var(--g400);
+        color: var(--g600);
+    }
+
+
+    /* ── I. FIGURES + LIGHTBOX ───────────────────────────────────── */
+    .cs2-fig-img img {
+        max-height: 420px;
+    }
+
+    .cs2-fig-img .fig-zoom {
+        transition: background .16s, color .16s;
+    }
+
+    .cs2-fig-img .fig-zoom:hover {
+        background: var(--s50);
+        color: var(--g600);
+    }
+
+    .cs2-lb-foot button {
+        transition: background .16s, color .16s;
+    }
+
+    .cs2-lb-foot button:hover:not(:disabled) {
+        background: rgba(255, 255, 255, .16);
+        color: #fff;
+    }
+
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   E2. BLOCK OVERVIEW — two-column grid with a sticky recap rail
+   ─────────────────────────────────────────────────────────────────
+   ≥1200px AND the block actually has a recap (:has guard — blocks
+   without a briefing keep the centred 720px column, and so does any
+   browser without :has support, which is exactly the right
+   fallback). Existing DOM order (head → hero → spine → recap →
+   blocknav) is re-slotted by grid alone:
+
+        ┌──────────────── head (full bleed, sticky) ───────────────┐
+        │   ┌───────── hero: tags · title · teaser ────────────┐   │
+        │   ┌── station spine (640) ──┐  ┌─ recap rail (340) ─┐│   │
+        │   │  Understand …           │  │  sticky — rides    ││   │
+        │   │  Apply · Cards · PYQ …  │  │  along the scroll  ││   │
+        │   └── prev / next ──────────┘  └────────────────────┘│   │
+        └──────────────────────────────────────────────────────────┘
+
+   The one layout truth this buys: "what to study" and "what NEET
+   tests here" are visible at the same time — the recap stops being
+   a thing you scroll past and becomes the reference card beside
+   your work.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1200px) {
+
+    .cs2-block:has(.cs2-recap) {
+        display: grid;
+        grid-template-columns:
+            [full-start] 1fr [main-start] minmax(0, 640px) [main-end aside-start] 340px [aside-end] 1fr [full-end];
+        column-gap: 28px;
+        align-items: start;
+    }
+
+    .cs2-block:has(.cs2-recap) .cs2-head {
+        grid-column: full-start / full-end;
+        grid-row: 1;
+        /* align the head row with the main column start (centre of
+           the 640+28+340 unit sits at 50%, so main-start = 50%−504) */
+        padding-left: max(24px, calc(50% - 504px));
+        padding-right: max(24px, calc(50% - 504px));
+    }
+
+    .cs2-block:has(.cs2-recap) .cs2-block-hero {
+        grid-column: main-start / aside-end;
+        grid-row: 2;
+        max-width: none;
+        margin: 0;
+        padding: 26px 0 6px;
+    }
+
+    /* the teaser keeps a sane strip width inside the wide hero */
+    .cs2-block:has(.cs2-recap) .cs2-teaser {
+        max-width: 640px;
+    }
+
+    .cs2-block:has(.cs2-recap) .cs2-spine {
+        grid-column: main-start / main-end;
+        grid-row: 3;
+        max-width: none;
+        margin: 18px 0 0;
+    }
+
+    .cs2-block:has(.cs2-recap) .cs2-recap {
+        grid-column: aside-start / aside-end;
+        grid-row: 3;
+        max-width: none;
+        margin: 18px 0 0;
+        /* ride along as the spine scrolls; own scroll if six items
+           run past the viewport */
+        position: sticky;
+        top: 92px;
+        max-height: calc(100vh - 116px);
+        overflow-y: auto;
+    }
+
+    .cs2-block:has(.cs2-recap) .cs2-blocknav {
+        grid-column: main-start / main-end;
+        grid-row: 4;
+        max-width: none;
+        margin: 22px 0 0;
+    }
+
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   STUDIO DESKTOP PASS 3 — stop centring a phone column in an empty
+   screen; give each surface a real laptop layout
+   ─────────────────────────────────────────────────────────────────
+   Pass 2 fixed the chrome and added the block-overview recap rail,
+   but the reading LAYERS (Understand / Visual / Apply / Traps / PYQ)
+   still rendered as a ~720px column stranded in a 1920px void, and
+   the chapter block list was one tall single-file ladder. This pass:
+
+     J. READING LAYERS — the body widens to 880px. Genuine prose keeps
+        a ~640px measure (line length is a readability constraint, not
+        a mobile one — stretching a paragraph to 1400px is worse, not
+        better), but everything that is really a GRID of small items —
+        the "Watch out for" ticks, the "Spot it by" cues, the key
+        relationships, the answer options — flows into two columns and
+        actually fills the width. Loose full-bleed action buttons stop
+        stretching wall-to-wall.
+
+     K. CHAPTER BLOCK LIST — the 60-block spine becomes a two-column
+        card board at ≥1200px. The mobile timeline rail + dots are a
+        scrolling metaphor; on a laptop a board shows twice the blocks
+        with none of the endless scroll. Done / current / must-know
+        states all survive (they live on each card, not the rail).
+
+     G′. FLASHCARDS — the dark card is capped to card proportions and
+        centred, instead of a viewport-tall monolith or a lonely
+        small rectangle.
+
+   Same contract as passes 1–2: every rule is inside a min-width media
+   query, so phones and the Capacitor build never see any of it. Where
+   this pass revisits a width set in pass 2, the later rule wins by
+   normal cascade — the intent is documented at each site.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* ── J1. Reading-layer body widens 720 → 880 (supersedes the
+       pass-1 cap). Dark flashcard layer is handled separately in G′. */
+    .cs2-layer:not(.dark) .cs2-layer-body {
+        max-width: 880px;
+    }
+
+    /* head chevron + title re-aligned to the 880 body's left text
+       edge (body pad 32 → 50% − 408). Supersedes pass-2's 720 offset. */
+    .cs2-layer:not(.dark) .cs2-layer-head {
+        padding-left: max(24px, calc(50% - 408px));
+        padding-right: max(24px, calc(50% - 408px));
+    }
+
+    /* Prose keeps a reading measure, left-aligned, inside the wide
+       body. These are the blocks that are genuinely sentences. */
+    .cs2-layer:not(.dark) .cs2-def,
+    .cs2-layer:not(.dark) .cs2-prose,
+    .cs2-layer:not(.dark) .cs2-lead,
+    .cs2-layer:not(.dark) .cs2-callout,
+    .cs2-layer:not(.dark) .cs2-trap-plate,
+    .cs2-layer:not(.dark) .cs2-scenario,
+    .cs2-layer:not(.dark) .cs2-ar-plate,
+    .cs2-layer:not(.dark) .cs2-formula {
+        max-width: 660px;
+    }
+
+    /* The checkpoint (say-it-back) card is centred content — keep it
+       centred, just don't let it span the whole 880. */
+    .cs2-layer:not(.dark) .cs2-recall,
+    .cs2-layer:not(.dark) .cs2-divider-slide {
+        max-width: 620px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* ── J2. Griddable content uses the width ──
+       auto-fit keeps long items readable: two columns when there's
+       room (≥ ~660px of body), one when an item needs the space. */
+
+    /* "Watch out for" ticks */
+    .cs2-layer:not(.dark) .cs2-tick-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 10px 22px;
+    }
+
+    /* keep the alternate-forms tick-list (nested inside a callout,
+       which is already measure-capped) as a single column */
+    .cs2-layer:not(.dark) .cs2-callout .cs2-tick-list {
+        display: flex;
+    }
+
+    /* "Spot it by" numbered cues */
+    .cs2-layer:not(.dark) .cs2-cues {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 10px;
+    }
+
+    /* concept-map key relationships */
+    .cs2-layer:not(.dark) .cs2-rels {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 8px;
+    }
+
+    /* answer options — the A–R drill and every PYQ MCQ both render
+       <div role="radiogroup"> around .cs2-opt buttons. Two columns
+       when the options are short enough; one when they're long. */
+    .cs2-layer:not(.dark) [role="radiogroup"] {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 8px;
+    }
+
+    /* .cs2-opt carries margin-bottom for the mobile stack; the grid
+       gap owns spacing now, so drop it to keep rows even. */
+    .cs2-layer:not(.dark) [role="radiogroup"] .cs2-opt {
+        margin-bottom: 0;
+    }
+
+    /* ── J3. Loose action buttons stop stretching wall-to-wall ──
+       Full-bleed slabs read as phone chrome on a wide body. */
+    .cs2-layer:not(.dark) .cs2-check-btn,
+    .cs2-layer:not(.dark) .cs2-try-btn {
+        width: fit-content;
+        min-width: 280px;
+        max-width: 100%;
+    }
+
+    /* the concept map itself: a diagram, so centre it and give it a
+       comfortable frame rather than a full-880 stretch */
+    .cs2-layer:not(.dark) .cs2-map {
+        max-width: 620px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+
+    /* ── G′. FLASHCARDS — a card on a table, not a monolith ──
+       Supersedes pass-2's dark-layer sizing. The stage is capped to
+       card proportions and the deck is centred in the dark body. */
+    .cs2-layer.dark .cs2-layer-body {
+        max-width: 720px;
+        display: flex;
+        flex-direction: column;
+        padding-top: 24px;
+    }
+
+    .cs2-fc-stage {
+        min-height: 0;
+        margin: auto 0;
+        /* pulls the card toward vertical centre without swallowing the
+           pager (top) or the Block / Next footer (bottom) */
+    }
+
+    .cs2-fc-scene {
+        height: clamp(360px, 50vh, 520px);
+        flex: none;
+    }
+
+}
+
+
+@media (min-width: 1200px) {
+
+    /* ── K. CHAPTER BLOCK LIST → two-column card board ──
+       Scope is .cs2-home ONLY: the block-overview section spine
+       (.cs2-block .cs2-spine) and its recap-rail variant are left
+       exactly as pass 2 arranged them. */
+    .cs2-home .cs2-spine {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        max-width: 980px;
+        padding-left: 0;
+        /* the rail line was the single-column metaphor; a board
+           doesn't thread one line through two columns */
+    }
+
+    .cs2-home .cs2-spine::before {
+        display: none;
+    }
+
+    .cs2-home .cs2-station {
+        margin-bottom: 0;
+    }
+
+    /* dots pinned to the (now-absent) rail would float off the left
+       edge of the left column; the card's own state — checkmark,
+       current highlight, must-know wash — carries done/current here. */
+    .cs2-home .cs2-station .dot {
+        display: none;
+    }
+
+    /* align the statline + head with the 980 board */
+    .cs2-home .cs2-statline {
+        max-width: 980px;
+    }
+
+    .cs2-home .cs2-head {
+        padding-left: max(24px, calc(50% - 490px));
+        padding-right: max(24px, calc(50% - 490px));
+    }
+
+    /* Grid items stretch to the tallest card in their row by default,
+       so a two-line block sits level with a one-line neighbour — the
+       station's own align-items:center still centres the icon/title
+       inside that equalised height. Nothing more to add. */
+
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   STUDIO DESKTOP PASS 4 — alignment + recap-rail corrections
+   ─────────────────────────────────────────────────────────────────
+   Fixes three problems visible in laptop testing, two of them caused
+   by pass 3:
+
+     L. UNIFORM COLUMN — pass 3 ran grids to 880px but capped prose to
+        660 and centred the checkpoint / concept-map, so a single
+        Understand or Apply page showed boxes at three different widths
+        plus a centred card: a ragged right edge that read as random.
+        Every box now shares ONE 760px column; the 2-col grids simply
+        split inside it, so every left AND right edge lines up.
+
+     M. RECAP RAIL TO THE TOP — pass 2 let the hero span the full width
+        and started the recap at the stations' row, leaving the whole
+        top-right corner empty (the "gap"). The hero is pulled back to
+        the main column and the recap now starts level with the hero,
+        filling that corner.
+
+     N. NO INNER SCROLLBAR — the recap's max-height + overflow:auto grew
+        its own scrollbar and clipped the last tip. Removed; the rail is
+        its natural height and stays sticky as the stations scroll past.
+
+   Same contract: min-width-gated (mobile inert), later rules win by
+   cascade over the pass-2/3 sites they supersede.
+   ════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+
+    /* ── L. One uniform 760px column for every reading-layer box ──
+       (supersedes pass-3's 880 body + per-box caps + centring) */
+    .cs2-layer:not(.dark) .cs2-layer-body {
+        max-width: 760px;
+    }
+
+    .cs2-layer:not(.dark) .cs2-layer-head {
+        padding-left: max(24px, calc(50% - 348px));
+        padding-right: max(24px, calc(50% - 348px));
+    }
+
+    /* every box spans the column — no measure caps, no centring, so
+       the edges align top to bottom. (Long-line comfort is handled by
+       the column width itself, not by narrowing individual boxes.) */
+    .cs2-layer:not(.dark) .cs2-def,
+    .cs2-layer:not(.dark) .cs2-prose,
+    .cs2-layer:not(.dark) .cs2-lead,
+    .cs2-layer:not(.dark) .cs2-callout,
+    .cs2-layer:not(.dark) .cs2-trap-plate,
+    .cs2-layer:not(.dark) .cs2-scenario,
+    .cs2-layer:not(.dark) .cs2-ar-plate,
+    .cs2-layer:not(.dark) .cs2-formula,
+    .cs2-layer:not(.dark) .cs2-recall,
+    .cs2-layer:not(.dark) .cs2-divider-slide,
+    .cs2-layer:not(.dark) .cs2-map {
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* keep every 2-col grid guaranteed 2-up inside the narrower column,
+       and their outer edges flush with the full-width boxes above/below */
+    .cs2-layer:not(.dark) .cs2-tick-list {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .cs2-layer:not(.dark) .cs2-cues {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .cs2-layer:not(.dark) .cs2-rels {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .cs2-layer:not(.dark) [role="radiogroup"] {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+}
+
+
+@media (min-width: 1200px) {
+
+    /* ── M + N. Recap rail: fill the top corner, drop the inner scroll ──
+       (supersedes pass-2 E2's hero span + recap placement/overflow) */
+
+    /* hero no longer reaches into the aside column, so the top-right
+       corner is the recap's, not empty space */
+    .cs2-block:has(.cs2-recap) .cs2-block-hero {
+        grid-column: main-start / main-end;
+    }
+
+    .cs2-block:has(.cs2-recap) .cs2-recap {
+        /* start level with the hero (row 2) and run the full height,
+           instead of starting at the stations' row (the "gap") */
+        grid-row: 2 / 5;
+        align-self: start;
+        margin-top: 0;
+        /* natural height — no inner scrollbar, no clipped last tip */
+        max-height: none;
+        overflow: visible;
+        /* still rides along as the stations scroll under it */
+        position: sticky;
+        top: 92px;
+    }
+
+}
